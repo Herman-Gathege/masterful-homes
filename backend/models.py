@@ -1,5 +1,8 @@
-from main import db
+
+
+from extensions import db   
 from sqlalchemy.orm import relationship
+
 
 ROLES = ("admin", "manager", "technician", "finance")
 

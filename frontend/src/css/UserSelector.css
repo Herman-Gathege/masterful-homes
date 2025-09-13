@@ -1,0 +1,65 @@
+/* src/components/UserSelector.css */
+
+.user-selector-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-selector-input-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-selector-input {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.user-selector-button {
+  padding: 10px 20px;
+  background-color: #128c7e;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.user-selector-button:hover {
+  background-color: #0d6e63;
+}
+
+.user-selector-results {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.user-selector-item {
+  padding: 10px 14px;
+  background-color: #f9f9f9;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.user-selector-item:hover {
+  background-color: #e8f5e9;
+}
