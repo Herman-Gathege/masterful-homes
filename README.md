@@ -130,3 +130,7 @@ Feel free to use, modify, and distribute with attribution.
 
 👨‍💻 Maintainers
 Herman Gathege (Remington) – Full-stack Developer, Nairobi, Kenya
+
+uv run flask --app main:create_app db init
+uv run flask --app main:create_app db migrate -m "Initial migration"
+uv run flask --app main:create_app db upgrade
