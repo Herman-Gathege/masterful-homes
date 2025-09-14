@@ -6,10 +6,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../css/TechnicianSchedule.css";
 import enUS from "date-fns/locale/en-US";
 
-const locales = {
-  "en-US": enUS,
-};
-
+const locales = { "en-US": enUS };
 
 const localizer = dateFnsLocalizer({
   format,
@@ -21,19 +18,34 @@ const localizer = dateFnsLocalizer({
 
 function TechnicianSchedule() {
   const [events, setEvents] = useState([]);
+  const [resources, setResources] = useState([]);
+  const [date, setDate] = useState(new Date());   // 👈 track current view date
+  const [view, setView] = useState("month");      // 👈 track current view (month/week/day/agenda)
 
   const loadInstallations = async () => {
     try {
       const res = await axiosInstance.get("/installations");
+
+      // Extract technicians (unique list for resources)
+      const techs = Array.from(
+        new Set(res.data.map((i) => i.technician_name || "Unassigned"))
+      ).map((name) => ({
+        id: name,
+        title: name,
+      }));
+      setResources(techs);
+
+      // Map installations into events
       const mapped = res.data
-        .filter((i) => i.scheduled_date) // only those with a date
+        .filter((i) => i.scheduled_date)
         .map((i) => ({
           id: i.id,
           title: `${i.customer_name} (${i.package_type})`,
           start: new Date(i.scheduled_date),
           end: i.end_date ? new Date(i.end_date) : new Date(i.scheduled_date),
-          resource: i.technician_name || "Unassigned",
+          resourceId: i.technician_name || "Unassigned",
         }));
+
       setEvents(mapped);
     } catch (err) {
       console.error("Failed to fetch installations", err);
@@ -44,18 +56,13 @@ function TechnicianSchedule() {
     loadInstallations();
   }, []);
 
-  // Handle rescheduling
   const moveEvent = async ({ event, start, end }) => {
     try {
       await axiosInstance.put(`/installations/${event.id}`, {
         scheduled_date: start.toISOString(),
         end_date: end.toISOString(),
       });
-      setEvents(
-        events.map((e) =>
-          e.id === event.id ? { ...e, start, end } : e
-        )
-      );
+      setEvents(events.map((e) => (e.id === event.id ? { ...e, start, end } : e)));
     } catch (err) {
       console.error("Failed to update schedule", err);
     }
@@ -67,6 +74,9 @@ function TechnicianSchedule() {
       <Calendar
         localizer={localizer}
         events={events}
+        resources={resources}
+        resourceIdAccessor="id"
+        resourceTitleAccessor="title"
         startAccessor="start"
         endAccessor="end"
         style={{ height: 600 }}
@@ -74,9 +84,15 @@ function TechnicianSchedule() {
         draggableAccessor={() => true}
         onEventDrop={moveEvent}
         onEventResize={moveEvent}
+        date={date}                     // 👈 controlled date
+        view={view}                     // 👈 controlled view
+        onNavigate={(newDate) => setDate(newDate)}   // 👈 handle prev/next/today
+        onView={(newView) => setView(newView)}       // 👈 handle view switch
+        defaultView="month"
+        views={["month", "week", "day", "agenda"]}
+        toolbar={true}
       />
     </div>
   );
 }
-
 export default TechnicianSchedule;

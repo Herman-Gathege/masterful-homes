@@ -124,14 +124,17 @@ def parse_iso_datetime(dt_str):
     except Exception:
         return None
 
-# 🎯 GET all installations
+# 🎯 GET all installations (with technician filtering)
 @manager_bp.route("/installations", methods=["GET"])
 @token_required
 def get_installations(current_user):
-    if current_user.role not in ["admin", "manager"]:
+    if current_user.role in ["admin", "manager"]:
+        installations = Installation.query.all()
+    elif current_user.role == "technician":
+        installations = Installation.query.filter_by(technician_id=current_user.id).all()
+    else:
         return jsonify({"message": "Access forbidden"}), 403
 
-    installations = Installation.query.all()
     data = [
         {
             "id": i.id,
@@ -146,6 +149,7 @@ def get_installations(current_user):
         for i in installations
     ]
     return jsonify(data), 200
+
 
 
 # ➕ CREATE installation
@@ -185,28 +189,39 @@ def create_installation(current_user):
 @manager_bp.route("/installations/<int:installation_id>", methods=["PUT"])
 @token_required
 def update_installation(current_user, installation_id):
-    if current_user.role not in ["admin", "manager"]:
-        return jsonify({"message": "Access forbidden"}), 403
-
     installation = Installation.query.get(installation_id)
     if not installation:
         return jsonify({"message": "Installation not found"}), 404
 
     data = request.get_json()
-    installation.customer_name = data.get("customer_name", installation.customer_name)
-    installation.package_type = data.get("package_type", installation.package_type)
-    installation.status = data.get("status", installation.status)
-    installation.technician_id = data.get("technician_id", installation.technician_id)
 
-    scheduled_date = data.get("scheduled_date")
-    end_date = data.get("end_date")
-    if scheduled_date:
-        installation.scheduled_date = parse_iso_datetime(scheduled_date)
-    if end_date:
-        installation.end_date = parse_iso_datetime(end_date)
+    # Admin/Manager: can update everything
+    if current_user.role in ["admin", "manager"]:
+        installation.customer_name = data.get("customer_name", installation.customer_name)
+        installation.package_type = data.get("package_type", installation.package_type)
+        installation.status = data.get("status", installation.status)
+        installation.technician_id = data.get("technician_id", installation.technician_id)
+
+        scheduled_date = data.get("scheduled_date")
+        end_date = data.get("end_date")
+        if scheduled_date:
+            installation.scheduled_date = parse_iso_datetime(scheduled_date)
+        if end_date:
+            installation.end_date = parse_iso_datetime(end_date)
+
+    # Technician: can only update their own job's status
+    elif current_user.role == "technician":
+        if installation.technician_id != current_user.id:
+            return jsonify({"message": "Access forbidden: not your job"}), 403
+        if "status" in data:
+            installation.status = data["status"]
+
+    else:
+        return jsonify({"message": "Access forbidden"}), 403
 
     db.session.commit()
     return jsonify({"message": "Installation updated"}), 200
+
 
 
 # ❌ DELETE installation
