@@ -44,7 +44,7 @@ const Navbar = () => {
     <nav
       style={{
         backgroundColor: "#1b263b",
-        padding: "10px 20px",
+        padding: "5px 10px",
         color: "#fff",
         position: "relative",
         zIndex: 1000,
@@ -72,7 +72,7 @@ const Navbar = () => {
           <img
             src={logo}
             alt="Masterful Homes"
-            style={{ height: "40px", marginRight: "10px" }}
+            style={{ height: "20px", marginRight: "10px" }}
           />
           <span style={{ fontWeight: "bold", fontSize: "18px" }}>
             Masterful Homes

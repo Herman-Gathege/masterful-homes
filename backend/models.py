@@ -1,6 +1,7 @@
-
+# backend/models.py
 
 from extensions import db   
+from datetime import datetime
 from sqlalchemy.orm import relationship
 
 
@@ -29,10 +30,13 @@ class Installation(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     customer_name = db.Column(db.String(120), nullable=False)
-    package_type = db.Column(db.String(50), nullable=False)  # QuickStart/Core/Total
-    status = db.Column(db.String(50), nullable=False)  # Lead, Scheduled, In Progress, Completed
+    package_type = db.Column(db.String(50), nullable=False)
+    status = db.Column(db.String(50), nullable=False)
     technician_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     technician = relationship("User", back_populates="installations")
+
+    scheduled_date = db.Column(db.DateTime, nullable=True)  # new
+    end_date = db.Column(db.DateTime, nullable=True)        # new
 
 class Ticket(db.Model):
     __tablename__ = "tickets"
