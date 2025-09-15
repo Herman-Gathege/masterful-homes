@@ -1,10 +1,6 @@
-
-
-
-// context/AuthContext.jsx
-import { createContext, useState, useEffect } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import jwt_decode from "jwt-decode"; // Vite-compatible
 
 export const AuthContext = createContext();
 
@@ -14,45 +10,54 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  // Load auth data from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedRefresh = localStorage.getItem("refresh_token");
     const savedRole = localStorage.getItem("role");
 
     if (savedToken && savedRefresh && savedRole) {
-      applyAuth(savedToken, savedRefresh, savedRole);
+      setToken(savedToken);
+      setRefreshToken(savedRefresh);
+      setRole(savedRole);
+
+      try {
+        const decoded = jwt_decode(savedToken);
+        setUser({
+          id: decoded.user_id,
+          username: decoded.username,
+          role: decoded.role,
+        });
+      } catch (err) {
+        console.error("Failed to decode saved token", err);
+      }
     }
   }, []);
 
-  // Apply token + decode user
-  const applyAuth = (accessToken, refreshTokenValue, userRole) => {
-    setToken(accessToken);
-    setRefreshToken(refreshTokenValue);
-    setRole(userRole);
-
+  const login = (accessToken, newRefreshToken, newRole) => {
     localStorage.setItem("token", accessToken);
-    localStorage.setItem("refresh_token", refreshTokenValue);
-    localStorage.setItem("role", userRole);
+    localStorage.setItem("refresh_token", newRefreshToken);
+    localStorage.setItem("role", newRole);
+
+    setToken(accessToken);
+    setRefreshToken(newRefreshToken);
+    setRole(newRole);
 
     try {
-      const decoded = jwtDecode(accessToken);
+      const decoded = jwt_decode(accessToken);
       setUser({
-        id: decoded.id,
+        id: decoded.user_id,
         username: decoded.username,
         role: decoded.role,
       });
     } catch (err) {
-      console.error("Failed to decode token", err);
+      console.error("Failed to decode login token", err);
     }
   };
 
-  const login = (accessToken, refreshTokenValue, userRole) => {
-    applyAuth(accessToken, refreshTokenValue, userRole);
-  };
-
   const logout = () => {
-    localStorage.clear();
+    localStorage.removeItem("token");
+    localStorage.removeItem("refresh_token");
+    localStorage.removeItem("role");
     setToken(null);
     setRefreshToken(null);
     setRole(null);
@@ -60,19 +65,46 @@ export const AuthProvider = ({ children }) => {
   };
 
   const refreshAccessToken = async () => {
+    if (!refreshToken) {
+      logout();
+      return null;
+    }
+
     try {
-      const res = await axios.post("http://localhost:5000/api/refresh", {
+      const response = await axios.post("http://localhost:5000/api/refresh", {
         refresh_token: refreshToken,
       });
 
-      const { access_token, refresh_token } = res.data;
-      applyAuth(access_token, refresh_token, role);
+      const { access_token, refresh_token: newRefresh } = response.data;
+
+      if (!access_token || !newRefresh) throw new Error("Invalid refresh response");
+
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("refresh_token", newRefresh);
+
+      setToken(access_token);
+      setRefreshToken(newRefresh);
+
+      try {
+        const decoded = jwt_decode(access_token);
+        setUser({
+          id: decoded.user_id,
+          username: decoded.username,
+          role: decoded.role,
+        });
+      } catch (err) {
+        console.error("Failed to decode refreshed token", err);
+      }
+
       return access_token;
     } catch (err) {
       console.error("Token refresh failed", err);
       logout();
+      return null;
     }
   };
+
+  const authenticated = !!token;
 
   return (
     <AuthContext.Provider
@@ -81,7 +113,7 @@ export const AuthProvider = ({ children }) => {
         refreshToken,
         role,
         user,
-        authenticated: !!token,
+        authenticated,
         login,
         logout,
         refreshAccessToken,

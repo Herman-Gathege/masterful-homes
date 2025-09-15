@@ -1,11 +1,9 @@
-
-
-import API from "../api/api";
+import axiosInstance from "../context/axiosInstance";
 
 // Register (default role = technician unless provided)
 export const registerUser = async (userData) => {
   try {
-    const res = await API.post("/register", userData);
+    const res = await axiosInstance.post("/register", userData);
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || "Something went wrong during registration.";
@@ -15,7 +13,7 @@ export const registerUser = async (userData) => {
 // Login
 export const loginUser = async (credentials) => {
   try {
-    const res = await API.post("/login", credentials);
+    const res = await axiosInstance.post("/login", credentials);
     const { access_token, refresh_token, role } = res.data;
 
     // Save in localStorage

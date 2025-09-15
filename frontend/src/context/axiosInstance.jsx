@@ -1,4 +1,4 @@
-// context/axiosInstance.jsx
+// frontend/src/context/axiosInstance.jsx
 import axios from "axios";
 
 let store = {
@@ -17,33 +17,19 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// ✅ Utility: check if token looks like a short-lived access token
-const isAccessToken = (token) => {
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    const exp = payload.exp * 1000; // convert to ms
-    const now = Date.now();
-
-    // Access tokens are short-lived (15m in backend config)
-    // Refresh tokens last days (7d), so we filter those out
-    return exp > now && (exp - now) <= 60 * 60 * 1000; // less than 1h lifetime
-  } catch {
-    return false;
-  }
-};
-
-// 🔐 Request interceptor → attach ONLY access tokens
+// Request interceptor → attach access token only
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (store.token && isAccessToken(store.token)) {
+    if (store.token) {
       config.headers.Authorization = `Bearer ${store.token}`;
     }
+    // NEVER send refresh token in headers
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// 🔄 Response interceptor → handle token refresh
+// Response interceptor → attempt refresh on 401 and retry once
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -54,14 +40,15 @@ axiosInstance.interceptors.response.use(
 
       try {
         const newAccessToken = await store.refreshAccessToken();
-        if (newAccessToken && isAccessToken(newAccessToken)) {
-          store.token = newAccessToken; // update memory
+        if (newAccessToken) {
+          // update header and retry
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);
         }
       } catch (err) {
         console.error("Auto refresh failed:", err);
-        store.logout();
+        if (store.logout) store.logout();
+        return Promise.reject(err);
       }
     }
 
