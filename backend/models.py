@@ -35,8 +35,11 @@ class Installation(db.Model):
     technician_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     technician = relationship("User", back_populates="installations")
 
-    scheduled_date = db.Column(db.DateTime, nullable=True)  # new
-    end_date = db.Column(db.DateTime, nullable=True)        # new
+    scheduled_date = db.Column(db.DateTime, nullable=True)  
+    end_date = db.Column(db.DateTime, nullable=True)  
+        
+    price = db.Column(db.Float, nullable=True)
+    invoice_id = db.Column(db.Integer, db.ForeignKey("invoices.id"), nullable=True)
 
 class Ticket(db.Model):
     __tablename__ = "tickets"

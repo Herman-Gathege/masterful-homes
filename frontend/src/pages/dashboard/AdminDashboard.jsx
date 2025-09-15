@@ -8,6 +8,7 @@ import InstallationForm from "../../components/InstallationForm";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
 import Modal from "../../components/Modal";
 import "../../css/Admindashboard.css";
+import DashboardOverview from "../../components/DashboardOverview";
 
 function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -65,9 +66,8 @@ function AdminDashboard() {
       <div className="content">
         <h2>Admin Dashboard</h2>
 
-        {activeSection === "dashboard" && (
-          <p>Welcome, Admin! Select a section from the sidebar.</p>
-        )}
+        {activeSection === "dashboard" && <DashboardOverview />}
+
 
         {/* User Management */}
         {activeSection === "user-management" && (

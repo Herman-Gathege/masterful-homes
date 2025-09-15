@@ -69,12 +69,13 @@ def login():
 
 
 # REFRESH token
+# backend/routes/auth_routes.py
 @auth_bp.route("/refresh", methods=["POST"])
 def refresh_token():
     data = request.get_json()
     refresh_token = data.get("refresh_token")
 
-    decoded = decode_token(refresh_token, Config.JWT_REFRESH_SECRET)
+    decoded = decode_token(refresh_token)  # 👈 no need for separate secret anymore
 
     if not decoded:
         return jsonify({"error": "Invalid or expired refresh token"}), 401
@@ -88,6 +89,8 @@ def refresh_token():
         "access_token": new_access_token,
         "refresh_token": new_refresh_token
     }), 200
+
+
 
 
 # LOGOUT (client-side only in JWT)

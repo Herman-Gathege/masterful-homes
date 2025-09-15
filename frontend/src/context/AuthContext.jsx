@@ -1,4 +1,7 @@
-// AuthContext.jsx
+
+
+
+// context/AuthContext.jsx
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
@@ -11,53 +14,43 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  // 🔄 Load saved auth data from localStorage
+  // Load auth data from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedRefresh = localStorage.getItem("refresh_token");
     const savedRole = localStorage.getItem("role");
 
     if (savedToken && savedRefresh && savedRole) {
-      setToken(savedToken);
-      setRefreshToken(savedRefresh);
-      setRole(savedRole);
-
-      try {
-        const decoded = jwtDecode(savedToken);
-        setUser({
-          id: decoded.id,
-          username: decoded.username,
-          role: decoded.role,
-        });
-      } catch (err) {
-        console.error("Failed to decode saved token", err);
-      }
+      applyAuth(savedToken, savedRefresh, savedRole);
     }
   }, []);
 
-  // 🟢 Login and save user info
-  const login = (newToken, newRefreshToken, newRole) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("refresh_token", newRefreshToken);
-    localStorage.setItem("role", newRole);
+  // Apply token + decode user
+  const applyAuth = (accessToken, refreshTokenValue, userRole) => {
+    setToken(accessToken);
+    setRefreshToken(refreshTokenValue);
+    setRole(userRole);
 
-    setToken(newToken);
-    setRefreshToken(newRefreshToken);
-    setRole(newRole);
+    localStorage.setItem("token", accessToken);
+    localStorage.setItem("refresh_token", refreshTokenValue);
+    localStorage.setItem("role", userRole);
 
     try {
-      const decoded = jwtDecode(newToken);
+      const decoded = jwtDecode(accessToken);
       setUser({
         id: decoded.id,
         username: decoded.username,
         role: decoded.role,
       });
     } catch (err) {
-      console.error("Failed to decode login token", err);
+      console.error("Failed to decode token", err);
     }
   };
 
-  // 🔴 Logout clears everything
+  const login = (accessToken, refreshTokenValue, userRole) => {
+    applyAuth(accessToken, refreshTokenValue, userRole);
+  };
+
   const logout = () => {
     localStorage.clear();
     setToken(null);
@@ -66,40 +59,20 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // 🔁 Refresh access token
   const refreshAccessToken = async () => {
     try {
-      const response = await axios.post("http://localhost:5000/api/refresh", {
+      const res = await axios.post("http://localhost:5000/api/refresh", {
         refresh_token: refreshToken,
       });
 
-      const { access_token, refresh_token } = response.data;
-
-      localStorage.setItem("token", access_token);
-      localStorage.setItem("refresh_token", refresh_token);
-
-      setToken(access_token);
-      setRefreshToken(refresh_token);
-
-      try {
-        const decoded = jwtDecode(access_token);
-        setUser({
-          id: decoded.id,
-          username: decoded.username,
-          role: decoded.role,
-        });
-      } catch (err) {
-        console.error("Failed to decode refreshed token", err);
-      }
-
+      const { access_token, refresh_token } = res.data;
+      applyAuth(access_token, refresh_token, role);
       return access_token;
     } catch (err) {
-      console.error("Refresh token failed", err);
+      console.error("Token refresh failed", err);
       logout();
     }
   };
-
-  const authenticated = !!token;
 
   return (
     <AuthContext.Provider
@@ -107,8 +80,8 @@ export const AuthProvider = ({ children }) => {
         token,
         refreshToken,
         role,
-        user,              // 👈 now exposed
-        authenticated,
+        user,
+        authenticated: !!token,
         login,
         logout,
         refreshAccessToken,
@@ -118,4 +91,3 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

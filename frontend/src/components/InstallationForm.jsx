@@ -10,6 +10,7 @@ function InstallationForm({ onSuccess }) {
     technician_id: "",
     scheduled_date: "",
     end_date: "",
+    price: "",
   });
   const [message, setMessage] = useState("");
 
@@ -29,6 +30,8 @@ function InstallationForm({ onSuccess }) {
         end_date: formData.end_date
           ? new Date(formData.end_date).toISOString()
           : null,
+        price: formData.price ? parseFloat(formData.price) : null, // ensure number
+
       };
 
       await axiosInstance.post("/installations", payload);
@@ -40,6 +43,7 @@ function InstallationForm({ onSuccess }) {
         technician_id: "",
         scheduled_date: "",
         end_date: "",
+        price: "",
       });
       if (onSuccess) onSuccess(); // refresh parent table
     } catch (err) {
@@ -90,6 +94,17 @@ function InstallationForm({ onSuccess }) {
           name="technician_id"
           value={formData.technician_id}
           onChange={handleChange}
+        />
+
+        <label>Price (USD):</label>
+        <input
+          type="number"
+          name="price"
+          value={formData.price}
+          onChange={handleChange}
+          min="0"
+          step="0.01"
+          required
         />
 
         <label>Scheduled Date & Time:</label>

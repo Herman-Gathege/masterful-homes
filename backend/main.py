@@ -21,6 +21,9 @@ def create_app():
     from routes.auth_routes import auth_bp
     from routes.admin_routes import admin_bp
     from routes.manager_routes import manager_bp
+    from routes.finance_routes import finance_bp
+
+    app.register_blueprint(finance_bp, url_prefix="/api")
     app.register_blueprint(manager_bp, url_prefix="/api")
     app.register_blueprint(auth_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api")

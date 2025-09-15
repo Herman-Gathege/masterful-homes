@@ -66,7 +66,8 @@ function InstallationsTable() {
   };
 
   const deleteInstallation = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this installation?")) return;
+    if (!window.confirm("Are you sure you want to delete this installation?"))
+      return;
     try {
       await axiosInstance.delete(`/installations/${id}`);
       loadInstallations();
@@ -91,6 +92,7 @@ function InstallationsTable() {
               <th>Technician</th>
               <th>Scheduled Date</th>
               <th>End Date</th>
+              <th>Price</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -160,10 +162,10 @@ function InstallationsTable() {
                       value={editedData.scheduled_date || ""}
                       onChange={handleChange}
                     />
+                  ) : i.scheduled_date ? (
+                    new Date(i.scheduled_date).toLocaleString()
                   ) : (
-                    i.scheduled_date
-                      ? new Date(i.scheduled_date).toLocaleString()
-                      : "Not Scheduled"
+                    "Not Scheduled"
                   )}
                 </td>
                 <td>
@@ -174,10 +176,26 @@ function InstallationsTable() {
                       value={editedData.end_date || ""}
                       onChange={handleChange}
                     />
+                  ) : i.end_date ? (
+                    new Date(i.end_date).toLocaleString()
                   ) : (
-                    i.end_date
-                      ? new Date(i.end_date).toLocaleString()
-                      : "Not Set"
+                    "Not Set"
+                  )}
+                </td>
+                <td>
+                  {editingId === i.id ? (
+                    <input
+                      type="number"
+                      name="price"
+                      value={editedData.price || ""}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.01"
+                    />
+                  ) : i.price ? (
+                    `$${i.price.toFixed(2)}`
+                  ) : (
+                    "-"
                   )}
                 </td>
                 <td>
