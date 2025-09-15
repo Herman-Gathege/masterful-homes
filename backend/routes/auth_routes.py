@@ -1,3 +1,4 @@
+# backend/routes/auth_routes.py
 from flask import Blueprint, request, jsonify
 from models import db, User
 from flask_bcrypt import Bcrypt
@@ -57,7 +58,8 @@ def login():
     if not user or not bcrypt.check_password_hash(user.password_hash, password):
         return jsonify({"message": "Invalid credentials"}), 401
 
-    access_token, refresh_token = generate_tokens(user.id, user.role)
+    # pass username into token generator so frontend can decode username
+    access_token, refresh_token = generate_tokens(user.id, user.role, user.username)
 
     return jsonify({
         "message": "Login successful",
@@ -72,21 +74,28 @@ def login():
 def refresh_token():
     data = request.get_json()
     refresh_token = data.get("refresh_token")
+    if not refresh_token:
+        return jsonify({"error": "Missing refresh_token"}), 400
 
-    decoded = decode_token(refresh_token, Config.JWT_REFRESH_SECRET)
+    # decode with same secret (we use single secret for both tokens now)
+    decoded = decode_token(refresh_token, Config.JWT_SECRET)
 
     if not decoded:
         return jsonify({"error": "Invalid or expired refresh token"}), 401
 
-    user_id = decoded["user_id"]
-    role = decoded["role"]
+    user_id = decoded.get("user_id")
+    role = decoded.get("role")
+    username = decoded.get("username")
 
-    new_access_token, new_refresh_token = generate_tokens(user_id, role)
+    # re-issue tokens (still include username)
+    new_access_token, new_refresh_token = generate_tokens(user_id, role, username)
 
     return jsonify({
         "access_token": new_access_token,
         "refresh_token": new_refresh_token
     }), 200
+
+
 
 
 # LOGOUT (client-side only in JWT)

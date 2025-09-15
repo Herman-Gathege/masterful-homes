@@ -1,0 +1,31 @@
+.schedule-container {
+  padding: 20px;
+  background-color: #f5f8fa;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.rbc-calendar {
+  background: white;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.rbc-event {
+  background-color: #1b263b !important;
+  color: white !important;
+  border-radius: 4px;
+  padding: 4px;
+}
+
+.rbc-toolbar button {
+  background: #455a70;
+  color: white;
+  border-radius: 4px;
+  padding: 6px 12px;
+  border: none;
+}
+
+.rbc-toolbar button:hover {
+  background: #34495e;
+}

@@ -1,15 +1,14 @@
+// frontend/src/context/axiosInstance.jsx
 import axios from "axios";
 
 let store = {
   token: null,
-  refreshToken: null,
   refreshAccessToken: null,
   logout: null,
 };
 
 export const setAuthStore = (authContext) => {
   store.token = authContext.token;
-  store.refreshToken = authContext.refreshToken;
   store.refreshAccessToken = authContext.refreshAccessToken;
   store.logout = authContext.logout;
 };
@@ -18,18 +17,19 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// Request interceptor to attach token
+// Request interceptor → attach access token only
 axiosInstance.interceptors.request.use(
-  async (config) => {
+  (config) => {
     if (store.token) {
       config.headers.Authorization = `Bearer ${store.token}`;
     }
+    // NEVER send refresh token in headers
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor to handle token refresh
+// Response interceptor → attempt refresh on 401 and retry once
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -38,36 +38,18 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      // try {
-      //   const newAccessToken = await store.refreshAccessToken();
-      //   if (newAccessToken) {
-      //     axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-      //     originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-      //     return axiosInstance(originalRequest);
-      //   }
-      // } catch (err) {
-      //   console.log("Auto refresh failed:", err);
-      //   store.logout();
-      //   return Promise.reject(err);
-      // }
       try {
-        const response = await axios.post("http://localhost:5000/api/refresh", {
-          refresh_token: store.refreshToken,
-        });
-        const newAccessToken = response.data.access_token;
-      
+        const newAccessToken = await store.refreshAccessToken();
         if (newAccessToken) {
-          store.token = newAccessToken; // Update the token in the store
-          axios.defaults.headers.common["Authorization"] = `Bearer ${newAccessToken}`;
-          originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          // update header and retry
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);
         }
       } catch (err) {
-        console.log("Auto refresh failed:", err);
-        store.logout();
+        console.error("Auto refresh failed:", err);
+        if (store.logout) store.logout();
         return Promise.reject(err);
       }
-      
     }
 
     return Promise.reject(error);

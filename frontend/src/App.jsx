@@ -1,3 +1,4 @@
+// App.jsx
 import { useContext, useEffect } from "react";
 import {
   BrowserRouter as Router,

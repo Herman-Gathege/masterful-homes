@@ -1,20 +1,22 @@
-// src/pages/dashboard/AdminDashboard.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import UserRegistrationForm from "../../components/UserRegistrationForm";
 import UserTable from "../../components/UserTable";
+import InstallationsTable from "../../components/InstallationsTable";
+import InstallationForm from "../../components/InstallationForm";
+import TechnicianSchedule from "../../components/TechnicianSchedule";
+import Modal from "../../components/Modal";
 import "../../css/Admindashboard.css";
+import DashboardOverview from "../../components/DashboardOverview";
 
 function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
-  const [showModal, setShowModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
+  const [showInstallModal, setShowInstallModal] = useState(false);
 
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  const handleOpenModal = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
 
   const handleSidebarClick = (section) => {
     if (section === "logout") {
@@ -23,9 +25,8 @@ function AdminDashboard() {
       return;
     }
     setActiveSection(section);
-    if (section !== "user-management") {
-      setShowModal(false);
-    }
+    if (section !== "user-management") setShowUserModal(false);
+    if (section !== "installations") setShowInstallModal(false);
   };
 
   return (
@@ -45,6 +46,18 @@ function AdminDashboard() {
           >
             User Management
           </li>
+          <li
+            onClick={() => handleSidebarClick("installations")}
+            className={activeSection === "installations" ? "active" : ""}
+          >
+            Installations & Pipeline
+          </li>
+          <li
+            onClick={() => handleSidebarClick("scheduling")}
+            className={activeSection === "scheduling" ? "active" : ""}
+          >
+            Technician Scheduling
+          </li>
           <li onClick={() => handleSidebarClick("logout")}>Logout</li>
         </ul>
       </div>
@@ -53,23 +66,41 @@ function AdminDashboard() {
       <div className="content">
         <h2>Admin Dashboard</h2>
 
-        {activeSection === "dashboard" && (
-          <p>Welcome, Admin! Select a section from the sidebar.</p>
-        )}
+        {activeSection === "dashboard" && <DashboardOverview />}
 
+
+        {/* User Management */}
         {activeSection === "user-management" && (
           <>
-            <button className="open-modal-btn" onClick={handleOpenModal}>
+            <button className="open-modal-btn" onClick={() => setShowUserModal(true)}>
               Register New User
             </button>
 
-            {showModal && (
-              <UserRegistrationForm handleCloseModal={handleCloseModal} />
-            )}
+            <Modal isOpen={showUserModal} onClose={() => setShowUserModal(false)}>
+              <UserRegistrationForm handleCloseModal={() => setShowUserModal(false)} />
+            </Modal>
 
             <UserTable />
           </>
         )}
+
+        {/* Installations & Pipeline */}
+        {activeSection === "installations" && (
+          <>
+            <button className="open-modal-btn" onClick={() => setShowInstallModal(true)}>
+              New Installation
+            </button>
+
+            <Modal isOpen={showInstallModal} onClose={() => setShowInstallModal(false)}>
+              <InstallationForm onSuccess={() => window.location.reload()} />
+            </Modal>
+
+            <InstallationsTable />
+          </>
+        )}
+
+        {/* Technician Scheduling */}
+        {activeSection === "scheduling" && <TechnicianSchedule />}
       </div>
     </div>
   );
