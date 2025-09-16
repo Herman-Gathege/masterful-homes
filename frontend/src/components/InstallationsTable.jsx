@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../context/axiosInstance";
+import Customer360Modal from "./Customer360Modal";
 import "../css/InstallationsTable.css";
 
 function InstallationsTable() {
   const [installations, setInstallations] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editedData, setEditedData] = useState({});
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const loadInstallations = async () => {
@@ -94,6 +96,7 @@ function InstallationsTable() {
               <th>End Date</th>
               <th>Price</th>
               <th>Actions</th>
+              <th>View Customer</th>
             </tr>
           </thead>
           <tbody>
@@ -213,11 +216,24 @@ function InstallationsTable() {
                     </>
                   )}
                 </td>
+                <td>
+                  <button
+                    className="link-button"
+                    onClick={() => setSelectedCustomer(i.customer_id)}
+                  >
+                    View
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
+      <Customer360Modal
+        customerId={selectedCustomer}
+        isOpen={!!selectedCustomer}
+        onClose={() => setSelectedCustomer(null)}
+      />
     </div>
   );
 }

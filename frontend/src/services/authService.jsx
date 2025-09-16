@@ -1,3 +1,5 @@
+// frontend/src/services/authService.jsx
+
 import axiosInstance from "../context/axiosInstance";
 
 // Register (default role = technician unless provided)

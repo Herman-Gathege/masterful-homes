@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Installation, User
+from models import db, Installation, User, Customer  # ✅ import Customer
 from utils.auth_middleware import token_required
 from datetime import datetime
 
@@ -31,6 +31,7 @@ def get_installations(current_user):
     data = [
         {
             "id": i.id,
+            "customer_id": i.customer_id,
             "customer_name": i.customer_name,
             "package_type": i.package_type,
             "status": i.status,
@@ -45,7 +46,50 @@ def get_installations(current_user):
     return jsonify(data), 200
 
 
-# ➕ CREATE installation
+# # ➕ CREATE installation
+# @manager_bp.route("/installations", methods=["POST"])
+# @token_required
+# def create_installation(current_user):
+#     if current_user.role not in ["admin", "manager"]:
+#         return jsonify({"message": "Access forbidden"}), 403
+
+#     data = request.get_json()
+#     customer_name = data.get("customer_name")
+#     package_type = data.get("package_type")
+#     status = data.get("status", "Lead")
+#     technician_id = data.get("technician_id")
+#     scheduled_date = data.get("scheduled_date")
+#     end_date = data.get("end_date")
+
+#     if not customer_name or not package_type:
+#         return jsonify({"message": "Missing required fields"}), 400
+
+#     # ✅ validate price
+#     price = data.get("price")
+#     if price is not None:
+#         try:
+#             price = float(price)
+#             if price < 0:
+#                 return jsonify({"message": "Price cannot be negative"}), 400
+#         except ValueError:
+#             return jsonify({"message": "Invalid price format"}), 400
+
+#     new_installation = Installation(
+#         customer_name=customer_name,
+#         package_type=package_type,
+#         status=status,
+#         technician_id=technician_id,
+#         scheduled_date=parse_iso_datetime(scheduled_date),
+#         end_date=parse_iso_datetime(end_date),
+#         price=price,
+#     )
+
+#     db.session.add(new_installation)
+#     db.session.commit()
+
+#     return jsonify({"message": "Installation created", "id": new_installation.id}), 201
+
+
 @manager_bp.route("/installations", methods=["POST"])
 @token_required
 def create_installation(current_user):
@@ -54,16 +98,18 @@ def create_installation(current_user):
 
     data = request.get_json()
     customer_name = data.get("customer_name")
+    customer_email = data.get("customer_email")  # 👈 new
+    customer_phone = data.get("customer_phone")  # 👈 optional
     package_type = data.get("package_type")
     status = data.get("status", "Lead")
     technician_id = data.get("technician_id")
     scheduled_date = data.get("scheduled_date")
     end_date = data.get("end_date")
 
-    if not customer_name or not package_type:
+    if not customer_name or not customer_email or not package_type:
         return jsonify({"message": "Missing required fields"}), 400
 
-    # ✅ validate price
+    # ✅ ensure price is valid
     price = data.get("price")
     if price is not None:
         try:
@@ -73,8 +119,21 @@ def create_installation(current_user):
         except ValueError:
             return jsonify({"message": "Invalid price format"}), 400
 
+    # 🔹 Step 1: Find or Create Customer
+    customer = Customer.query.filter_by(email=customer_email).first()
+    if not customer:
+        customer = Customer(
+            name=customer_name,
+            email=customer_email,
+            phone=customer_phone
+        )
+        db.session.add(customer)
+        db.session.flush()  # assigns an ID before commit
+
+    # 🔹 Step 2: Create Installation with linked customer_id
     new_installation = Installation(
-        customer_name=customer_name,
+        customer_id=customer.id,
+        customer_name=customer.name,  # redundant, but useful for quick access
         package_type=package_type,
         status=status,
         technician_id=technician_id,
@@ -86,7 +145,12 @@ def create_installation(current_user):
     db.session.add(new_installation)
     db.session.commit()
 
-    return jsonify({"message": "Installation created", "id": new_installation.id}), 201
+    return jsonify({
+        "message": "Installation created",
+        "id": new_installation.id,
+        "customer_id": customer.id
+    }), 201
+
 
 
 # ✏️ UPDATE installation (assign technician, update status, reschedule, price)

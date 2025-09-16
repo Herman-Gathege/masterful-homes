@@ -17,17 +17,30 @@ const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
 });
 
-// Request interceptor → attach access token only
+// // Request interceptor → attach access token only
+// axiosInstance.interceptors.request.use(
+//   (config) => {
+//     if (store.token) {
+//       config.headers.Authorization = `Bearer ${store.token}`;
+//     }
+//     // NEVER send refresh token in headers
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+// Request interceptor → attach access token from localStorage
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (store.token) {
-      config.headers.Authorization = `Bearer ${store.token}`;
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    // NEVER send refresh token in headers
     return config;
   },
   (error) => Promise.reject(error)
 );
+
 
 // Response interceptor → attempt refresh on 401 and retry once
 axiosInstance.interceptors.response.use(
