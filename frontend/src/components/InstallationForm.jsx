@@ -5,6 +5,8 @@ import "../css/InstallationForm.css";
 function InstallationForm({ onSuccess }) {
   const [formData, setFormData] = useState({
     customer_name: "",
+    customer_email: "",
+    customer_phone: "",
     package_type: "QuickStart",
     status: "Lead",
     technician_id: "",
@@ -38,6 +40,8 @@ function InstallationForm({ onSuccess }) {
       setMessage("✅ Installation created successfully!");
       setFormData({
         customer_name: "",
+        customer_email: "",
+        customer_phone: "",
         package_type: "QuickStart",
         status: "Lead",
         technician_id: "",
@@ -65,6 +69,23 @@ function InstallationForm({ onSuccess }) {
           required
         />
 
+        <label>Customer Email:</label>
+        <input
+          type="email"
+          name="customer_email"
+          value={formData.customer_email}
+          onChange={handleChange}
+          required
+        />
+
+        <label>Customer Phone (optional):</label>
+        <input
+          type="text"
+          name="customer_phone"
+          value={formData.customer_phone}
+          onChange={handleChange}
+        />
+
         <label>Package Type:</label>
         <select
           name="package_type"
@@ -77,11 +98,7 @@ function InstallationForm({ onSuccess }) {
         </select>
 
         <label>Status:</label>
-        <select
-          name="status"
-          value={formData.status}
-          onChange={handleChange}
-        >
+        <select name="status" value={formData.status} onChange={handleChange}>
           <option value="Lead">Lead</option>
           <option value="Scheduled">Scheduled</option>
           <option value="In Progress">In Progress</option>
@@ -104,7 +121,6 @@ function InstallationForm({ onSuccess }) {
           onChange={handleChange}
           min="0"
           step="0.01"
-          required
         />
 
         <label>Scheduled Date & Time:</label>

@@ -1,3 +1,4 @@
+// frontend/src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import jwt_decode from "jwt-decode"; // Vite-compatible

@@ -25,21 +25,43 @@ class User(db.Model):
         return f"<User {self.username}, role={self.role}>"
 
 
+class Customer(db.Model):
+    __tablename__ = "customers"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(120), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    phone = db.Column(db.String(50), nullable=True)
+
+    # Relationships
+    installations = relationship("Installation", back_populates="customer")
+    invoices = relationship("Invoice", back_populates="customer")
+
+    def __repr__(self):
+        return f"<Customer {self.name}>"
+
+
+
 class Installation(db.Model):
     __tablename__ = "installations"
 
     id = db.Column(db.Integer, primary_key=True)
-    customer_name = db.Column(db.String(120), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
+    customer = relationship("Customer", back_populates="installations")
+
+    customer_name = db.Column(db.String(120), nullable=False)  # optional: keep for quick display
     package_type = db.Column(db.String(50), nullable=False)
     status = db.Column(db.String(50), nullable=False)
+
     technician_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     technician = relationship("User", back_populates="installations")
 
     scheduled_date = db.Column(db.DateTime, nullable=True)  
     end_date = db.Column(db.DateTime, nullable=True)  
-        
+
     price = db.Column(db.Float, nullable=True)
     invoice_id = db.Column(db.Integer, db.ForeignKey("invoices.id"), nullable=True)
+
 
 class Ticket(db.Model):
     __tablename__ = "tickets"
@@ -55,6 +77,11 @@ class Invoice(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(50), default="pending")  # pending/paid/overdue
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    status = db.Column(db.String(50), default="pending")
+
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))  # finance owner
     owner = relationship("User", back_populates="invoices")
+
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
+    customer = relationship("Customer", back_populates="invoices")
+
