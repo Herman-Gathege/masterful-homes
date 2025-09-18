@@ -4,6 +4,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import DashboardOverview from "../../components/DashboardOverview";
+import SearchBar from "../../components/SearchBar";
 import "../../css/FinanceDashboard.css";
 
 function FinanceDashboard() {
@@ -62,6 +63,8 @@ function FinanceDashboard() {
       {/* Content */}
       <div className="content">
         <h2>Finance Dashboard</h2>
+
+        <SearchBar />
 
         {activeSection === "overview" && <DashboardOverview />}
 

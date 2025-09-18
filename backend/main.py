@@ -23,7 +23,9 @@ def create_app():
     from routes.manager_routes import manager_bp
     from routes.finance_routes import finance_bp
     from routes.customer_routes import customer_bp
+    from routes.search_routes import search_bp
     
+    app.register_blueprint(search_bp, url_prefix="/api")    
     app.register_blueprint(customer_bp, url_prefix="/api")
     app.register_blueprint(finance_bp, url_prefix="/api")
     app.register_blueprint(manager_bp, url_prefix="/api")
