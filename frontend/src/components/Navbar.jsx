@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom"; // use NavLink
 import { AuthContext } from "../context/AuthContext";
+import NotificationsBell from "./NotificationsBell";
 import logo from "../assets/logo.jpeg";
 
 const Navbar = () => {
@@ -79,28 +80,34 @@ const Navbar = () => {
           </span>
         </NavLink>
 
-        {/* hamburger toggle */}
-        <button
-          onClick={toggleMenu}
-          className="menu-toggle"
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#fff",
-            fontSize: "26px",
-            cursor: "pointer",
-            padding: "6px",
-            lineHeight: 1,
-          }}
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
+        {/* right actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <NotificationsBell /> {/* ✅ bell next to hamburger */}
+          <button
+            onClick={toggleMenu}
+            className="menu-toggle"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#fff",
+              fontSize: "26px",
+              cursor: "pointer",
+              padding: "6px",
+              lineHeight: 1,
+            }}
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
+        </div>
       </div>
 
       {/* links */}
-      <ul className={`menu-links ${menuOpen ? "open" : ""}`} style={ulBaseStyle}>
+      <ul
+        className={`menu-links ${menuOpen ? "open" : ""}`}
+        style={ulBaseStyle}
+      >
         <li>
           <NavLink to="/about-us" style={navLinkStyle} onClick={closeMenu}>
             Our Story
@@ -212,7 +219,6 @@ const navLinkStyle = ({ isActive }) => ({
   borderBottom: isActive ? "2px solid #f4d03f" : "2px solid transparent", // reserve space
   transition: "color 0.3s, border-color 0.3s", // smooth highlight
 });
-
 
 const logoutButtonStyle = {
   backgroundColor: "#274c77",

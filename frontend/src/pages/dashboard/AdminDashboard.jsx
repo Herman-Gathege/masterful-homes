@@ -10,6 +10,8 @@ import TechnicianSchedule from "../../components/TechnicianSchedule";
 import Modal from "../../components/Modal";
 import "../../css/Admindashboard.css";
 import DashboardOverview from "../../components/DashboardOverview";
+import "../../components/SearchBar";
+import SearchBar from "../../components/SearchBar";
 
 function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -66,8 +68,9 @@ function AdminDashboard() {
       {/* Content */}
       <div className="content">
         <h2>Admin Dashboard</h2>
+        <SearchBar />
 
-        {activeSection === "dashboard" && <DashboardOverview />}
+        {activeSection === "dashboard" && <DashboardOverview /> }
 
 
         {/* User Management */}

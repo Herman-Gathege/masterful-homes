@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from models import db, Installation, User, Customer  # ✅ import Customer
+from utils.notifications import create_notifications_for_users
 from utils.auth_middleware import token_required
 from datetime import datetime
 
@@ -145,6 +146,19 @@ def create_installation(current_user):
     db.session.add(new_installation)
     db.session.commit()
 
+    to_notify = []
+    roles = ["admin", "manager", "finance"]
+    users = User.query.filter(User.role.in_(roles)).all()
+    to_notify.extend([u.id for u in users])
+
+    if technician_id:
+        to_notify.append(technician_id)
+
+    msg = f"New Installation #{new_installation.id} — {new_installation.package_type} for {customer_name}"
+    create_notifications_for_users(to_notify, msg, object_type="installation", object_id=new_installation.id)
+
+    
+
     return jsonify({
         "message": "Installation created",
         "id": new_installation.id,
@@ -152,6 +166,53 @@ def create_installation(current_user):
     }), 201
 
 
+
+# # ✏️ UPDATE installation (assign technician, update status, reschedule, price)
+# @manager_bp.route("/installations/<int:installation_id>", methods=["PUT"])
+# @token_required
+# def update_installation(current_user, installation_id):
+#     installation = Installation.query.get(installation_id)
+#     if not installation:
+#         return jsonify({"message": "Installation not found"}), 404
+
+#     data = request.get_json()
+
+#     # Admin/Manager: can update everything
+#     if current_user.role in ["admin", "manager"]:
+#         installation.customer_name = data.get("customer_name", installation.customer_name)
+#         installation.package_type = data.get("package_type", installation.package_type)
+#         installation.status = data.get("status", installation.status)
+#         installation.technician_id = data.get("technician_id", installation.technician_id)
+
+#         scheduled_date = data.get("scheduled_date")
+#         end_date = data.get("end_date")
+#         if scheduled_date:
+#             installation.scheduled_date = parse_iso_datetime(scheduled_date)
+#         if end_date:
+#             installation.end_date = parse_iso_datetime(end_date)
+
+#         # ✅ validate and update price
+#         if "price" in data:
+#             try:
+#                 price = float(data["price"])
+#                 if price < 0:
+#                     return jsonify({"message": "Price cannot be negative"}), 400
+#                 installation.price = price
+#             except ValueError:
+#                 return jsonify({"message": "Invalid price format"}), 400
+
+#     # Technician: can only update their own job's status
+#     elif current_user.role == "technician":
+#         if installation.technician_id != current_user.id:
+#             return jsonify({"message": "Access forbidden: not your job"}), 403
+#         if "status" in data:
+#             installation.status = data["status"]
+
+#     else:
+#         return jsonify({"message": "Access forbidden"}), 403
+
+#     db.session.commit()
+#     return jsonify({"message": "Installation updated"}), 200
 
 # ✏️ UPDATE installation (assign technician, update status, reschedule, price)
 @manager_bp.route("/installations/<int:installation_id>", methods=["PUT"])
@@ -162,6 +223,10 @@ def update_installation(current_user, installation_id):
         return jsonify({"message": "Installation not found"}), 404
 
     data = request.get_json()
+
+    # Keep old values for comparison
+    old_status = installation.status
+    old_tech = installation.technician_id
 
     # Admin/Manager: can update everything
     if current_user.role in ["admin", "manager"]:
@@ -198,7 +263,34 @@ def update_installation(current_user, installation_id):
         return jsonify({"message": "Access forbidden"}), 403
 
     db.session.commit()
+
+    # 🔔 Notifications
+    to_notify = []
+
+    # Case 1: Technician starts job
+    if current_user.role == "technician" and old_status != "In Progress" and installation.status == "In Progress":
+        roles = ["admin", "manager", "finance"]
+        users = User.query.filter(User.role.in_(roles)).all()
+        to_notify = [u.id for u in users]
+        msg = f"Installation #{installation.id} started by Technician {current_user.username}"
+        create_notifications_for_users(to_notify, msg, object_type="installation", object_id=installation.id)
+
+    # Case 2: Admin/Manager assigns/reassigns technician
+    if current_user.role in ["admin", "manager"] and old_tech != installation.technician_id:
+        if installation.technician_id:
+            msg = f"You have been assigned Installation #{installation.id}"
+            create_notifications_for_users([installation.technician_id], msg, object_type="installation", object_id=installation.id)
+
+    # Case 3: Completed installation
+    if old_status != "Completed" and installation.status == "Completed":
+        roles = ["admin", "manager", "finance"]
+        users = User.query.filter(User.role.in_(roles)).all()
+        to_notify = [u.id for u in users]
+        msg = f"Installation #{installation.id} has been marked Completed"
+        create_notifications_for_users(to_notify, msg, object_type="installation", object_id=installation.id)
+
     return jsonify({"message": "Installation updated"}), 200
+
 
 
 # ❌ DELETE installation
