@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from "react-router-dom"; // use NavLink
 import { AuthContext } from "../context/AuthContext";
 import NotificationsBell from "./NotificationsBell";
 import logo from "../assets/logo.jpeg";
+import UserAvatar from "./UserAvatar";
 
 const Navbar = () => {
   const { authenticated, logout, role } = useContext(AuthContext);
@@ -82,7 +83,8 @@ const Navbar = () => {
 
         {/* right actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <NotificationsBell /> {/* ✅ bell next to hamburger */}
+          {authenticated && <NotificationsBell />} 
+          {authenticated && <UserAvatar onLogout={handleLogout} />}
           <button
             onClick={toggleMenu}
             className="menu-toggle"

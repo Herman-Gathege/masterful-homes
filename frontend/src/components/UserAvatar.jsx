@@ -1,0 +1,105 @@
+// src/components/UserAvatar.jsx
+import React, { useState, useRef, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+
+const UserAvatar = ({ onLogout }) => {
+  const { user } = useContext(AuthContext); // assuming user info is in AuthContext
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  const toggleDropdown = () => setOpen((prev) => !prev);
+
+  const handleClickOutside = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const avatarLetter = user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?";
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+      <div
+        onClick={toggleDropdown}
+        style={{
+          width: "36px",
+          height: "36px",
+          borderRadius: "50%",
+          backgroundColor: "#f4d03f",
+          color: "#1b263b",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+      >
+        {user?.photoUrl ? (
+          <img
+            src={user.photoUrl}
+            alt="avatar"
+            style={{
+              width: "100%",
+              height: "100%",
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          avatarLetter
+        )}
+      </div>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "45px",
+            right: 0,
+            background: "#fff",
+            color: "#000",
+            borderRadius: "8px",
+            boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
+            width: "160px",
+            zIndex: 2000,
+          }}
+        >
+          <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
+            <li
+              style={menuItemStyle}
+              onClick={() => alert("Go to Profile")}
+            >
+              Profile
+            </li>
+            <li
+              style={menuItemStyle}
+              onClick={() => alert("Go to Settings")}
+            >
+              Settings
+            </li>
+            <li
+              style={menuItemStyle}
+              onClick={onLogout}
+            >
+              Logout
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const menuItemStyle = {
+  padding: "10px 15px",
+  cursor: "pointer",
+  transition: "background 0.2s",
+};
+
+export default UserAvatar;
