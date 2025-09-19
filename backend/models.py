@@ -85,3 +85,20 @@ class Invoice(db.Model):
     customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
     customer = relationship("Customer", back_populates="invoices")
 
+
+class Notification(db.Model):
+    __tablename__ = "notifications"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    user = relationship("User", backref="notifications")
+
+    message = db.Column(db.String(255), nullable=False)
+    object_type = db.Column(db.String(50), nullable=True)   # e.g. "installation"
+    object_id = db.Column(db.Integer, nullable=True)        # e.g. installation id
+    extra = db.Column(db.String(1024), nullable=True)    # JSON string (optional)
+
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+

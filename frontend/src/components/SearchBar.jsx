@@ -4,6 +4,17 @@ import axiosInstance from "../context/axiosInstance";
 import Customer360Modal from "./Customer360Modal";
 import Modal from "./Modal"; 
 import "../css/SearchBar.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSearch,
+  faTimes,
+  faUser,
+  faUserTie,
+  faHouse,
+  faFileInvoiceDollar,
+  faTicketAlt,
+} from "@fortawesome/free-solid-svg-icons";
+
 
 function SearchBar() {
   const [query, setQuery] = useState("");
@@ -70,16 +81,17 @@ function SearchBar() {
   return (
     <div className="search-bar-container" ref={containerRef}>
       <div className="search-input-wrapper">
+        <FontAwesomeIcon icon={faSearch} className="search-icon" />
         <input
           type="text"
-          placeholder="🔍 Search customers, users, installations..."
+          placeholder="Search customers, users, installations..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="search-input"
         />
         {query && (
           <button className="clear-btn" onClick={() => { setQuery(""); setResults(null); }}>
-            ✖
+            <FontAwesomeIcon icon={faTimes} />
           </button>
         )}
       </div>
@@ -95,7 +107,7 @@ function SearchBar() {
               <ul>
                 {results.customers.map((c) => (
                   <li key={`customer-${c.id}`} onClick={() => setSelectedCustomer(c.id)}>
-                    👤 {c.name} ({c.email})
+                    <FontAwesomeIcon icon={faUser} /> {c.name} ({c.email})
                   </li>
                 ))}
               </ul>
@@ -109,7 +121,7 @@ function SearchBar() {
               <ul>
                 {results.users.map((u) => (
                   <li key={`user-${u.id}`} onClick={() => setSelectedUser(u)}>
-                    👨‍💻 {u.username} — {u.role}
+                    <FontAwesomeIcon icon={faUserTie} /> {u.username} — {u.role}
                   </li>
                 ))}
               </ul>
@@ -123,7 +135,7 @@ function SearchBar() {
               <ul>
                 {results.installations.map((i) => (
                   <li key={`install-${i.id}`} onClick={() => setSelectedInstallation(i)}>
-                    🏠 {i.package_type} — {i.status} — {i.customer_name}
+                    <FontAwesomeIcon icon={faHouse} /> {i.package_type} — {i.status} — {i.customer_name}
                   </li>
                 ))}
               </ul>
@@ -137,7 +149,7 @@ function SearchBar() {
               <ul>
                 {results.invoices.map((inv) => (
                   <li key={`inv-${inv.id}`} onClick={() => setSelectedInvoice(inv)}>
-                    💵 #{inv.id} — ${inv.amount} — {inv.status}
+                    <FontAwesomeIcon icon={faFileInvoiceDollar} /> #{inv.id} — ${inv.amount} — {inv.status}
                   </li>
                 ))}
               </ul>
@@ -151,7 +163,7 @@ function SearchBar() {
               <ul>
                 {results.tickets.map((t) => (
                   <li key={`ticket-${t.id}`} onClick={() => setSelectedTicket(t)}>
-                    🎫 {t.issue} — {t.status}
+                    <FontAwesomeIcon icon={faTicketAlt} /> {t.issue} — {t.status}
                   </li>
                 ))}
               </ul>

@@ -1,0 +1,107 @@
+.notifications-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Bell icon inside dark navbar */
+.bell-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  position: relative;
+  color: #fff; /* white on dark navbar */
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar-light .bell-btn {
+  color: #333; /* dark icon on light navbar */
+}
+
+.bell-btn svg {
+  font-size: 22px;
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+/* Dropdown styling */
+.dropdown {
+  position: absolute;
+  right: 0;
+  top: 35px;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  border-radius: 6px;
+  z-index: 10;
+  color: #333; /* make text visible */
+}
+
+.dropdown-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  font-weight: bold;
+  border-bottom: 1px solid #eee;
+  background: #fafafa;
+  color: #333; /* readable */
+}
+
+.dropdown-header .mark-all {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.dropdown-header .mark-all:hover {
+  text-decoration: underline;
+}
+
+.notif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.notif-item {
+  padding: 10px;
+  cursor: pointer;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s ease;
+  color: #333; /* readable text */
+}
+
+.notif-item.unread {
+  background: #f9f9ff;
+  font-weight: bold;
+}
+
+.notif-item:hover {
+  background: #f1f1f1;
+}
+
+.empty {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
