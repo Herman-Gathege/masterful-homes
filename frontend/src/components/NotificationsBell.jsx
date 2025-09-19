@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   getNotifications,
   markAsRead,
@@ -13,6 +13,7 @@ function NotificationsBell() {
   const { unread, refreshUnread } = useNotifications();
   const [open, setOpen] = useState(false);
   const [items, setItems] = useState([]);
+  const containerRef = useRef(null); // 👈 ref for outside click
 
   const loadNotifications = async () => {
     try {
@@ -40,8 +41,24 @@ function NotificationsBell() {
     loadNotifications();
   };
 
+  // 👇 Effect to handle outside clicks
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (event) => {
+      if (containerRef.current && !containerRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
   return (
-    <div className="notifications-container">
+    <div className="notifications-container" ref={containerRef}>
       <button className="bell-btn" onClick={handleOpen}>
         <FontAwesomeIcon icon={faBell} size="lg" />
         {unread > 0 && <span className="badge">{unread}</span>}
