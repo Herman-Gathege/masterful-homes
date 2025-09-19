@@ -48,7 +48,11 @@ const Navbar = () => {
         backgroundColor: "#1b263b",
         padding: "5px 10px",
         color: "#fff",
-        position: "relative",
+        position: "fixed", // 👈 stays at top
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "100px",
         zIndex: 1000,
       }}
     >
@@ -83,7 +87,7 @@ const Navbar = () => {
 
         {/* right actions */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {authenticated && <NotificationsBell />} 
+          {authenticated && <NotificationsBell />}
           {authenticated && <UserAvatar onLogout={handleLogout} />}
           <button
             onClick={toggleMenu}

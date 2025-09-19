@@ -8,21 +8,33 @@ h2 {
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  height: 100vh;
   background-color: #ecf0f1;
   overflow: hidden;
+  padding-top: 60px; /* match navbar height */
 }
 
 /* Sidebar */
 .sidebar {
+  margin-top: 40px; /* match navbar height */
   width: 250px;
-  min-width: 250px; /* ← prevent shrinking */
+  min-width: 250px;
   background-color: #455a70;
   color: white;
   padding: 1rem;
   display: flex;
   flex-direction: column;
-  flex-shrink: 0; /* ← prevent sidebar from shrinking */
+  flex-shrink: 0;
+  overflow-y: auto;
+  height: calc(100vh - 60px); /* subtract navbar height */
+  position: fixed;
+  top: 60px; /* start below navbar */
+  left: 0;
+  transition: width 0.3s ease;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+  min-width: 70px;
 }
 
 /* Sidebar List */
@@ -36,6 +48,9 @@ h2 {
   padding: 1rem;
   cursor: pointer;
   border-bottom: 1px solid #34495e;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   transition: background-color 0.3s ease;
 }
 
@@ -47,12 +62,31 @@ h2 {
   background-color: #3b6481;
 }
 
-/* Main Content Area */
+.sidebar .icon {
+  font-size: 18px;
+}
+
+/* Collapse button */
+.collapse-btn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  align-self: flex-end;
+}
+
+/* Content */
 .content {
   flex: 1;
   padding: 2rem;
-  overflow-y: auto; /* ← scroll if content too long */
-  background-color: #f5f8fa;
+  overflow-y: auto;
+  margin-left: 260px; /* sidebar width */
+  transition: margin-left 0.3s ease;
+}
+
+.sidebar.collapsed ~ .content {
+  margin-left: 80px;
 }
 
 .content h2 {
@@ -68,7 +102,7 @@ h2 {
   cursor: pointer;
   border-radius: 8px;
   margin-bottom: 1.5rem;
-  margin-left: 0; /* remove margin-left to align button with page */
+  margin-left: 0;
   transition: background-color 0.3s ease;
 }
 
@@ -85,11 +119,11 @@ h2 {
   border-radius: 50%;
 }
 
-
-/* Optional for Responsive (mobile/tablet view) */
+/* Responsive (mobile/tablet) */
 @media (max-width: 768px) {
   .dashboard-container {
     flex-direction: column;
+    padding-top: 60px; /* keep navbar spacing */
   }
 
   .sidebar {
@@ -97,6 +131,9 @@ h2 {
     min-width: 100%;
     flex-direction: row;
     overflow-x: auto;
+    height: auto; /* let it fit naturally */
+    position: relative; /* no fixed on mobile */
+    top: 0;
   }
 
   .sidebar ul {
@@ -113,5 +150,8 @@ h2 {
   .sidebar ul li:last-child {
     border-right: none;
   }
-}
 
+  .content {
+    margin-left: 0; /* sidebar above content */
+  }
+}
