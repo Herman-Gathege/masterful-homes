@@ -1,61 +1,37 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  getNotifications,
-  markAsRead,
-  markAllAsRead,
-} from "../services/notificationsService";
-import { useNotifications } from "../context/NotificationContext";
+import useNotificationStore from "../store/notificationStore";
 import "../css/NotificationsBell.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBell } from "@fortawesome/free-solid-svg-icons";
 
 function NotificationsBell() {
-  const { unread, refreshUnread } = useNotifications();
+  const { unread, items, refreshUnread, loadNotifications, markAsRead, markAllAsRead } = useNotificationStore();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([]);
-  const containerRef = useRef(null); // 👈 ref for outside click
-
-  const loadNotifications = async () => {
-    try {
-      const data = await getNotifications();
-      setItems(data.items);
-    } catch (err) {
-      console.error("❌ Failed to load notifications", err);
-    }
-  };
+  const containerRef = useRef(null);
 
   const handleOpen = () => {
     setOpen(!open);
     if (!open) loadNotifications();
   };
 
-  const handleMarkAsRead = async (id) => {
-    await markAsRead(id);
-    refreshUnread();
-    loadNotifications();
-  };
-
-  const handleMarkAllAsRead = async () => {
-    await markAllAsRead();
-    refreshUnread();
-    loadNotifications();
-  };
-
-  // 👇 Effect to handle outside clicks
+  // Close on outside click
   useEffect(() => {
     if (!open) return;
-
-    const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [open]);
+
+  // Auto refresh unread every 30s
+  useEffect(() => {
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 30000);
+    return () => clearInterval(interval);
+  }, [refreshUnread]);
 
   return (
     <div className="notifications-container" ref={containerRef}>
@@ -69,7 +45,7 @@ function NotificationsBell() {
           <div className="dropdown-header">
             <span>Notifications</span>
             {unread > 0 && (
-              <button className="mark-all" onClick={handleMarkAllAsRead}>
+              <button className="mark-all" onClick={markAllAsRead}>
                 Mark all as read
               </button>
             )}
@@ -81,7 +57,7 @@ function NotificationsBell() {
                 <li
                   key={n.id}
                   className={`notif-item ${n.is_read ? "read" : "unread"}`}
-                  onClick={() => handleMarkAsRead(n.id)}
+                  onClick={() => markAsRead(n.id)}
                 >
                   <p>{n.message}</p>
                   <small>{new Date(n.created_at).toLocaleString()}</small>

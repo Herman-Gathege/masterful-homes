@@ -209,7 +209,7 @@ function InstallationsTable() {
                     </>
                   ) : (
                     <>
-                      <button onClick={() => startEditing(i)}>Edit</button>
+                      <button onClick={() => startEditing(i)}>Edit</button> 
                       <button onClick={() => deleteInstallation(i.id)}>
                         Delete
                       </button>

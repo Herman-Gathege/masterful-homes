@@ -1,3 +1,4 @@
+// frontend/src/components/Customer360Modal.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../context/axiosInstance";
 import Modal from "./Modal"; // use your helper

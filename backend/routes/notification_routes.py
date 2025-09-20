@@ -62,7 +62,7 @@
 #     db.session.commit()
 #     return jsonify({"message": "All notifications marked as read"}), 200
 
-
+#backend/routes/notification_routes.py
 from flask import Blueprint, jsonify, request
 from utils.auth_middleware import token_required
 from models import db, Notification

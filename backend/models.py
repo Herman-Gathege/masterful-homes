@@ -1,6 +1,5 @@
 # backend/models.py
-
-from extensions import db   
+from extensions import db
 from datetime import datetime
 from sqlalchemy.orm import relationship
 
@@ -35,11 +34,10 @@ class Customer(db.Model):
 
     # Relationships
     installations = relationship("Installation", back_populates="customer")
-    invoices = relationship("Invoice", back_populates="customer")
+    # 🔴 Removed `invoices` relationship → invoices come through installations
 
     def __repr__(self):
         return f"<Customer {self.name}>"
-
 
 
 class Installation(db.Model):
@@ -56,11 +54,13 @@ class Installation(db.Model):
     technician_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     technician = relationship("User", back_populates="installations")
 
-    scheduled_date = db.Column(db.DateTime, nullable=True)  
-    end_date = db.Column(db.DateTime, nullable=True)  
+    scheduled_date = db.Column(db.DateTime, nullable=True)
+    end_date = db.Column(db.DateTime, nullable=True)
 
     price = db.Column(db.Float, nullable=True)
-    invoice_id = db.Column(db.Integer, db.ForeignKey("invoices.id"), nullable=True)
+
+    # Relationship to invoice (1:1)
+    invoice = relationship("Invoice", back_populates="installation", uselist=False)
 
 
 class Ticket(db.Model):
@@ -72,18 +72,23 @@ class Ticket(db.Model):
     assigned_to_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     assigned_to = relationship("User", back_populates="tickets")
 
+
 class Invoice(db.Model):
     __tablename__ = "invoices"
 
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
-    status = db.Column(db.String(50), default="pending")
-
-    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))  # finance owner
+    status = db.Column(db.String(50), default="pending")  # pending/paid/overdue
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     owner = relationship("User", back_populates="invoices")
 
-    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
-    customer = relationship("Customer", back_populates="invoices")
+    installation_id = db.Column(db.Integer, db.ForeignKey("installations.id"), nullable=False)
+    installation = relationship("Installation", back_populates="invoice")
+
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+    def __repr__(self):
+        return f"<Invoice {self.id}, status={self.status}, amount={self.amount}>"
 
 
 class Notification(db.Model):
@@ -96,9 +101,8 @@ class Notification(db.Model):
     message = db.Column(db.String(255), nullable=False)
     object_type = db.Column(db.String(50), nullable=True)   # e.g. "installation"
     object_id = db.Column(db.Integer, nullable=True)        # e.g. installation id
-    extra = db.Column(db.String(1024), nullable=True)    # JSON string (optional)
+    extra = db.Column(db.String(1024), nullable=True)       # JSON string (optional)
 
     is_read = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-
 

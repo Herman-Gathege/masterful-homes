@@ -134,3 +134,10 @@ Herman Gathege (Remington) – Full-stack Developer, Nairobi, Kenya
 uv run flask --app main:create_app db init
 uv run flask --app main:create_app db migrate -m "Initial migration"
 uv run flask --app main:create_app db upgrade
+
+# Drop and recreate the DB tables
+uv run flask --app main:create_app db downgrade base
+uv run flask --app main:create_app db upgrade
+
+# Then reseed
+uv run python seed.py

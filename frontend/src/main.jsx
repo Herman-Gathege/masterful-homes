@@ -1,12 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
-import { NotificationProvider } from "./context/NotificationContext"; // ✅ import provider
+import { SidebarProvider } from "./context/SidebarContext";
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <NotificationProvider>
+  <SidebarProvider>
+    <StrictMode>
       <App />
-    </NotificationProvider>
-  </StrictMode>
+    </StrictMode>
+  </SidebarProvider>
 );

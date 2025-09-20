@@ -4,12 +4,14 @@ h2 {
   font-weight: bold;
 }
 
+/* Dashboard Container */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
   height: 100vh;
   background-color: #ecf0f1;
   overflow: hidden;
+  
 }
 
 /* Sidebar */
@@ -24,6 +26,7 @@ h2 {
   flex-shrink: 0;
 }
 
+/* Sidebar List */
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -45,7 +48,7 @@ h2 {
   background-color: #3b6481;
 }
 
-/* Main Content */
+/* Main Content Area */
 .content {
   flex: 1;
   padding: 2rem;
@@ -54,79 +57,60 @@ h2 {
 }
 
 .content h2 {
-  margin-bottom: 1.5rem;
-}
-
-/* KPI Cards */
-.kpi-cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
   margin-bottom: 2rem;
 }
 
-.kpi-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+/* Jobs Table */
+.jobs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #f0f4f8;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.jobs-table thead {
+  background-color: #1b263b;
+  color: white;
+}
+
+.jobs-table th,
+.jobs-table td {
+  padding: 12px 15px;
   text-align: center;
 }
 
-.kpi-card h4 {
-  font-size: 1rem;
-  color: #34495e;
-  margin-bottom: 0.5rem;
+.jobs-table tbody tr:nth-child(odd) {
+  background-color: #455a70;
+  color: white;
 }
 
-.kpi-card p {
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: #1b263b;
+.jobs-table tbody tr:nth-child(even) {
+  background-color: #cbdaec;
 }
 
-/* Breakdown Tables */
-.breakdowns {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  margin-top: 2rem;
+.jobs-table tbody tr:hover {
+  background-color: #778da9;
+  cursor: pointer;
 }
 
-.breakdown-table {
-  flex: 1;
-  min-width: 300px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  padding: 1rem;
+/* Buttons */
+button {
+  background-color: #1b263b;
+  color: white;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 4px;
+  margin: 0 3px;
+  cursor: pointer;
 }
 
-.breakdown-table h4 {
-  margin-bottom: 1rem;
-  font-size: 1.1rem;
-  color: #34495e;
+button:hover {
+  background-color: #415a77;
 }
 
-.breakdown-table table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.breakdown-table th,
-.breakdown-table td {
-  padding: 0.6rem;
-  border-bottom: 1px solid #ddd;
-  text-align: left;
-}
-
-.breakdown-table th {
-  background: #f0f3f5;
-  font-weight: bold;
-  color: #1b263b;
-}
-
-/* Responsive */
+/* Responsive (mobile/tablet view) */
 @media (max-width: 768px) {
   .dashboard-container {
     flex-direction: column;
@@ -154,7 +138,7 @@ h2 {
     border-right: none;
   }
 
-  .breakdowns {
-    flex-direction: column;
+  .jobs-table {
+    font-size: 0.85rem;
   }
 }
