@@ -90,7 +90,7 @@ def finance_summary(current_user):
         "total_revenue": float(total_revenue or 0),
         "jobs_completed": jobs_completed,
         "outstanding_jobs": outstanding_jobs,
-        "average_price": float(average_price or 0),
+        "average_price": round(float(average_price or 0), 2),  # 👈 round here
         "monthly_revenue": monthly_data,
     })
 
