@@ -135,7 +135,6 @@ import InstallationForm from "../../components/InstallationForm";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
 import Modal from "../../components/Modal";
 import DashboardOverview from "../../components/DashboardOverview";
-import SearchBar from "../../components/SearchBar";
 
 import {
   FaHome,
@@ -227,7 +226,6 @@ function AdminDashboard() {
       {/* Main Content */}
       <div className="content">
         <h2>Admin Dashboard</h2>
-        <SearchBar />
 
         {activeSection === "dashboard" && <DashboardOverview />}
 

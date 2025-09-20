@@ -90,7 +90,6 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import DashboardOverview from "../../components/DashboardOverview";
-import SearchBar from "../../components/SearchBar";
 import InvoiceTable from "../../components/InvoiceTable";
 
 import {
@@ -175,7 +174,6 @@ function FinanceDashboard() {
       {/* Content */}
       <div className="content">
         <h2>Finance Dashboard</h2>
-        <SearchBar />
 
         {activeSection === "overview" && <DashboardOverview />}
         {activeSection === "invoices" && <InvoiceTable />}
