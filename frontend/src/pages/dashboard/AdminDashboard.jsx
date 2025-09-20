@@ -146,6 +146,7 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaFileInvoiceDollar,
+  FaUserCog
 } from "react-icons/fa";
 
 import "../../css/Admindashboard.css";
@@ -218,6 +219,13 @@ function AdminDashboard() {
             <FaFileInvoiceDollar className="icon" />
             {!collapsed && "Invoices"}
           </li>
+          <li
+            onClick={() => handleSidebarClick("customers")}
+            className={activeSection === "customers" ? "active" : ""}
+          >
+            <FaUserCog className="icon" />
+            {!collapsed && "Customers"}
+          </li>
           <li onClick={() => handleSidebarClick("logout")}>
             <FaSignOutAlt className="icon" />
             {!collapsed && "Logout"}
@@ -280,6 +288,9 @@ function AdminDashboard() {
 
         {/* Invoice */}
         {activeSection === "invoices" && <InvoiceTable />}
+
+        {/* Invoice */}
+        {activeSection === "customers" && (<p>Customers section coming soon...</p>)}
       </div>
     </div>
   );

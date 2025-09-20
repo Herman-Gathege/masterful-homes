@@ -1,25 +1,46 @@
-/* Headings */
+/* =========================
+   Color Palette Variables
+   ========================= */
+:root {
+  --primary-dark: #1b263b;   /* headings, primary buttons, table headers */
+  --primary: #3b6481;        /* active sidebar item */
+  --primary-light: #455a70;  /* sidebar bg, odd rows */
+  --secondary-dark: #34495e; /* hover, borders */
+  --secondary-light: #778da9;/* hover highlights */
+  --accent: #cbdaec;         /* even rows */
+  --background: #ecf0f1;     /* main background */
+  --text-light: #ffffff;     /* white text */
+  --danger: #e63946;         /* notifications, errors */
+}
+
+/* =========================
+   Headings
+   ========================= */
 h2 {
-  color: #1b263b;
+  color: var(--primary-dark);
   font-weight: bold;
 }
 
-/* Dashboard Container */
+/* =========================
+   Dashboard Container
+   ========================= */
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background-color: #ecf0f1;
+  background-color: var(--background);
   overflow: hidden;
   padding-top: 80px; /* match navbar height */
 }
 
-/* Sidebar */
+/* =========================
+   Sidebar
+   ========================= */
 .sidebar {
   margin-top: 50px; /* match navbar height */
   width: 250px;
   min-width: 250px;
-  background-color: #455a70;
-  color: white;
+  background-color: var(--primary-light);
+  color: var(--text-light);
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -47,7 +68,7 @@ h2 {
 .sidebar ul li {
   padding: 1rem;
   cursor: pointer;
-  border-bottom: 1px solid #34495e;
+  border-bottom: 1px solid var(--secondary-dark);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -55,11 +76,11 @@ h2 {
 }
 
 .sidebar ul li:hover {
-  background-color: #34495e;
+  background-color: var(--secondary-dark);
 }
 
 .sidebar ul li.active {
-  background-color: #3b6481;
+  background-color: var(--primary);
 }
 
 .sidebar .icon {
@@ -70,13 +91,15 @@ h2 {
 .collapse-btn {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-light);
   cursor: pointer;
   margin-bottom: 1rem;
   align-self: flex-end;
 }
 
-/* Content */
+/* =========================
+   Content
+   ========================= */
 .content {
   flex: 1;
   padding: 2rem;
@@ -93,10 +116,12 @@ h2 {
   margin-bottom: 2rem;
 }
 
-/* Open Modal Button */
+/* =========================
+   Buttons
+   ========================= */
 .open-modal-btn {
-  background-color: #1b263b;
-  color: white;
+  background-color: var(--primary-dark);
+  color: var(--text-light);
   padding: 0.7rem 1.5rem;
   font-size: 1rem;
   cursor: pointer;
@@ -107,19 +132,24 @@ h2 {
 }
 
 .open-modal-btn:hover {
-  background-color: #2c3e50;
+  background-color: var(--secondary-dark);
 }
 
+/* =========================
+   Notification Dot
+   ========================= */
 .notif-dot {
   display: inline-block;
   margin-left: 8px;
   width: 10px;
   height: 10px;
-  background-color: red;
+  background-color: var(--danger);
   border-radius: 50%;
 }
 
-/* Jobs Table */
+/* =========================
+   Jobs Table
+   ========================= */
 .jobs-table {
   width: 100%;
   border-collapse: collapse;
@@ -130,8 +160,8 @@ h2 {
 }
 
 .jobs-table thead {
-  background-color: #1b263b;
-  color: white;
+  background-color: var(--primary-dark);
+  color: var(--text-light);
 }
 
 .jobs-table th,
@@ -141,20 +171,22 @@ h2 {
 }
 
 .jobs-table tbody tr:nth-child(odd) {
-  background-color: #455a70;
-  color: white;
+  background-color: var(--primary-light);
+  color: var(--text-light);
 }
 
 .jobs-table tbody tr:nth-child(even) {
-  background-color: #cbdaec;
+  background-color: var(--accent);
 }
 
 .jobs-table tbody tr:hover {
-  background-color: #778da9;
+  background-color: var(--secondary-light);
   cursor: pointer;
 }
 
-/* Responsive (mobile/tablet) */
+/* =========================
+   Responsive (mobile/tablet)
+   ========================= */
 @media (max-width: 768px) {
   .dashboard-container {
     flex-direction: column;
@@ -179,7 +211,7 @@ h2 {
     flex: 1;
     text-align: center;
     border-bottom: none;
-    border-right: 1px solid #34495e;
+    border-right: 1px solid var(--secondary-dark);
   }
 
   .sidebar ul li:last-child {
