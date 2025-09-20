@@ -91,6 +91,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import DashboardOverview from "../../components/DashboardOverview";
 import InvoiceTable from "../../components/InvoiceTable";
+import { SidebarContext } from "../../context/SidebarContext";
 
 import {
   FaHome,
@@ -104,7 +105,8 @@ import "../../css/Admindashboard.css";
 
 function FinanceDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useContext(SidebarContext);
+
 
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();

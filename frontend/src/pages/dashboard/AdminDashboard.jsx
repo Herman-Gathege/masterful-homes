@@ -135,6 +135,7 @@ import InstallationForm from "../../components/InstallationForm";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
 import Modal from "../../components/Modal";
 import DashboardOverview from "../../components/DashboardOverview";
+import { SidebarContext } from "../../context/SidebarContext";
 
 import {
   FaHome,
@@ -154,7 +155,8 @@ function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [showUserModal, setShowUserModal] = useState(false);
   const [showInstallModal, setShowInstallModal] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useContext(SidebarContext);
+
 
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();

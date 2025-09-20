@@ -240,6 +240,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import axiosInstance from "../../context/axiosInstance";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
+import { SidebarContext } from "../../context/SidebarContext";
 
 import {
   FaHome,
@@ -255,7 +256,8 @@ function TechnicianDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [myInstallations, setMyInstallations] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useContext(SidebarContext);
+
 
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();

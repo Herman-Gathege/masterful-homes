@@ -97,6 +97,7 @@ import InstallationsTable from "../../components/InstallationsTable";
 import Modal from "../../components/Modal";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
 import InstallationForm from "../../components/InstallationForm";
+import { SidebarContext } from "../../context/SidebarContext";
 
 import { FaHome, FaTools, FaCalendarAlt, FaSignOutAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
@@ -105,7 +106,8 @@ import "../../css/Admindashboard.css";
 function ManagerDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [showModal, setShowModal] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const { collapsed, setCollapsed } = useContext(SidebarContext);
+
 
   const { logout } = useContext(AuthContext);
   const navigate = useNavigate();
