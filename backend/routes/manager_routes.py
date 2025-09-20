@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import db, Installation, User, Customer  # ✅ import Customer
+from models import db, Installation, User, Customer, Invoice  # ✅ import Customer
 from utils.notifications import create_notifications_for_users
 from utils.auth_middleware import token_required
 from datetime import datetime
@@ -261,6 +261,17 @@ def update_installation(current_user, installation_id):
 
     else:
         return jsonify({"message": "Access forbidden"}), 403
+
+    # 🔹 If job just got marked as Completed, auto-generate invoice
+    if old_status != "Completed" and installation.status == "Completed":
+        if not installation.invoice:  # avoid duplicates
+            invoice = Invoice(
+                amount=installation.price or 0,
+                status="pending",
+                installation_id=installation.id,
+                owner_id=None  # leave null, finance/admin can take ownership later
+            )
+            db.session.add(invoice)
 
     db.session.commit()
 

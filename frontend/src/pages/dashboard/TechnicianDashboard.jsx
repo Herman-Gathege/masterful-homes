@@ -111,15 +111,15 @@
 //     setActiveSection(section);
 //   };
 
-//   const updateJobStatus = async (id, newStatus) => {
-//     try {
-//       await axiosInstance.put(`/installations/${id}`, { status: newStatus });
-//       // optimistic refresh
-//       await loadMyInstallations();
-//     } catch (err) {
-//       console.error("Failed to update job status", err);
-//     }
-//   };
+  // const updateJobStatus = async (id, newStatus) => {
+  //   try {
+  //     await axiosInstance.put(`/installations/${id}`, { status: newStatus });
+  //     // optimistic refresh
+  //     await loadMyInstallations();
+  //   } catch (err) {
+  //     console.error("Failed to update job status", err);
+  //   }
+  // };
 
 //   // Guard: user must exist (prevents crash on first render)
 //   if (!user) {
@@ -200,22 +200,22 @@
 //                           ? new Date(job.scheduled_date).toLocaleString()
 //                           : "Not Scheduled"}
 //                       </td>
-//                       <td>
-//                         {job.status !== "Completed" && (
-//                           <>
-//                             {job.status !== "In Progress" && (
-//                               <button
-//                                 onClick={() => updateJobStatus(job.id, "In Progress")}
-//                               >
-//                                 Start
-//                               </button>
-//                             )}
-//                             <button onClick={() => updateJobStatus(job.id, "Completed")}>
-//                               Complete
-//                             </button>
-//                           </>
-//                         )}
-//                       </td>
+                      // <td>
+                      //   {job.status !== "Completed" && (
+                      //     <>
+                      //       {job.status !== "In Progress" && (
+                      //         <button
+                      //           onClick={() => updateJobStatus(job.id, "In Progress")}
+                      //         >
+                      //           Start
+                      //         </button>
+                      //       )}
+                      //       <button onClick={() => updateJobStatus(job.id, "Completed")}>
+                      //         Complete
+                      //       </button>
+                      //     </>
+                      //   )}
+                      // </td>
 //                     </tr>
 //                   ))}
 //                 </tbody>
@@ -249,7 +249,7 @@ import {
   FaChevronLeft, FaChevronRight
 } from "react-icons/fa";
 
-import "../../css/TechnicianDashboard.css";
+import "../../css/Admindashboard.css";
 
 function TechnicianDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -278,6 +278,16 @@ function TechnicianDashboard() {
       setMyInstallations([]);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const updateJobStatus = async (id, newStatus) => {
+    try {
+      await axiosInstance.put(`/installations/${id}`, { status: newStatus });
+      // optimistic refresh
+      await loadMyInstallations();
+    } catch (err) {
+      console.error("Failed to update job status", err);
     }
   };
 
@@ -368,6 +378,7 @@ function TechnicianDashboard() {
                     <th>Package</th>
                     <th>Status</th>
                     <th>Scheduled</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -381,6 +392,22 @@ function TechnicianDashboard() {
                         {job.scheduled_date
                           ? new Date(job.scheduled_date).toLocaleString()
                           : "Not Scheduled"}
+                      </td>
+                      <td>
+                        {job.status !== "Completed" && (
+                          <>
+                            {job.status !== "In Progress" && (
+                              <button
+                                onClick={() => updateJobStatus(job.id, "In Progress")}
+                              >
+                                Start
+                              </button>
+                            )}
+                            <button onClick={() => updateJobStatus(job.id, "Completed")}>
+                              Complete
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}

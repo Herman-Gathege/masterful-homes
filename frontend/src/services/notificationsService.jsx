@@ -1,3 +1,4 @@
+// frontend/src/services/notificationsService.jsx
 import axiosInstance from "../context/axiosInstance";
 
 export const getNotifications = async (page = 1, per_page = 10) => {

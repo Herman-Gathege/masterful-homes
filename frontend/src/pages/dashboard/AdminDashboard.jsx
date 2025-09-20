@@ -81,7 +81,6 @@
 
 //         {activeSection === "dashboard" && <DashboardOverview /> }
 
-
 //         {/* User Management */}
 //         {activeSection === "user-management" && (
 //           <>
@@ -121,7 +120,6 @@
 
 // export default AdminDashboard;
 
-
 // frontend/src/pages/dashboard/AdminDashboard.jsx
 
 // frontend/src/pages/dashboard/AdminDashboard.jsx
@@ -145,10 +143,13 @@ import {
   FaTools,
   FaCalendarAlt,
   FaSignOutAlt,
-  FaChevronLeft, FaChevronRight
+  FaChevronLeft,
+  FaChevronRight,
+  FaFileInvoiceDollar,
 } from "react-icons/fa";
 
 import "../../css/Admindashboard.css";
+import InvoiceTable from "../../components/InvoiceTable";
 
 function AdminDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -208,6 +209,13 @@ function AdminDashboard() {
           >
             <FaCalendarAlt className="icon" />
             {!collapsed && "Scheduling"}
+          </li>
+          <li
+            onClick={() => handleSidebarClick("invoices")}
+            className={activeSection === "invoices" ? "active" : ""}
+          >
+            <FaFileInvoiceDollar className="icon" />
+            {!collapsed && "Invoices"}
           </li>
           <li onClick={() => handleSidebarClick("logout")}>
             <FaSignOutAlt className="icon" />
@@ -269,6 +277,9 @@ function AdminDashboard() {
 
         {/* Scheduling */}
         {activeSection === "scheduling" && <TechnicianSchedule />}
+
+        {/* Invoice */}
+        {activeSection === "invoices" && <InvoiceTable />}
       </div>
     </div>
   );

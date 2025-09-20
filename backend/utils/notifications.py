@@ -1,3 +1,4 @@
+# backend/utils/notifications.py
 from models import Notification, db
 from datetime import datetime
 import json

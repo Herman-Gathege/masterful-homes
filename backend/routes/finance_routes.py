@@ -1,3 +1,4 @@
+#backend/routes/finance_routes.py
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func
 from models import db, Invoice, Installation, User
@@ -41,16 +42,17 @@ def update_invoice(current_user, invoice_id):
     return jsonify({"message": "Invoice updated"}), 200
 
 
-# 🔹 NEW: Finance Summary
+# 🔹 NEW: Finance Summary 
 @finance_bp.route("/finance/summary", methods=["GET"])
 @token_required
 def finance_summary(current_user):
     if current_user.role not in ["finance", "admin", "manager"]:
         return jsonify({"message": "Access forbidden"}), 403
 
+    # ✅ Only sum PAID invoices for revenue
     total_revenue = (
-        db.session.query(func.coalesce(func.sum(Installation.price), 0))
-        .filter(Installation.status == "Completed")
+        db.session.query(func.coalesce(func.sum(Invoice.amount), 0))
+        .filter(Invoice.status == "paid")
         .scalar()
     )
 
@@ -67,16 +69,18 @@ def finance_summary(current_user):
     )
 
     average_price = (
-        db.session.query(func.coalesce(func.avg(Installation.price), 0))
+        db.session.query(func.coalesce(func.avg(Invoice.amount), 0))
+        .filter(Invoice.status == "paid")  # ✅ use only paid invoices
         .scalar()
     )
 
+    # ✅ Monthly revenue from paid invoices only
     monthly_revenue = (
         db.session.query(
-            func.strftime("%Y-%m", Installation.scheduled_date).label("month"),
-            func.sum(Installation.price).label("revenue"),
+            func.strftime("%Y-%m", Invoice.created_at).label("month"),
+            func.sum(Invoice.amount).label("revenue"),
         )
-        .filter(Installation.status == "Completed")
+        .filter(Invoice.status == "paid")
         .group_by("month")
         .all()
     )
@@ -91,31 +95,36 @@ def finance_summary(current_user):
     })
 
 
-# 🔹 NEW: Finance Breakdown
+
+# 🔹 NEW: Finance Breakdown 
 @finance_bp.route("/finance/breakdown", methods=["GET"])
 @token_required
 def finance_breakdown(current_user):
     if current_user.role not in ["finance", "admin", "manager"]:
         return jsonify({"message": "Access forbidden"}), 403
 
+    # ✅ Revenue by package from PAID invoices
     by_package = (
         db.session.query(
             Installation.package_type,
-            func.sum(Installation.price).label("revenue")
+            func.sum(Invoice.amount).label("revenue")
         )
-        .filter(Installation.status == "Completed")
+        .join(Invoice, Invoice.installation_id == Installation.id)
+        .filter(Invoice.status == "paid")
         .group_by(Installation.package_type)
         .all()
     )
     package_data = [{"package_type": row[0], "revenue": float(row[1])} for row in by_package]
 
+    # ✅ Revenue by technician from PAID invoices
     by_technician = (
         db.session.query(
             User.username,
-            func.sum(Installation.price).label("revenue")
+            func.sum(Invoice.amount).label("revenue")
         )
-        .join(User, User.id == Installation.technician_id)
-        .filter(Installation.status == "Completed")
+        .join(Installation, User.id == Installation.technician_id)
+        .join(Invoice, Invoice.installation_id == Installation.id)
+        .filter(Invoice.status == "paid")
         .group_by(User.username)
         .all()
     )
@@ -125,5 +134,6 @@ def finance_breakdown(current_user):
         "packages": package_data,
         "technicians": tech_data,
     })
+
 
 

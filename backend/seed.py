@@ -7,10 +7,6 @@ app = create_app()
 bcrypt = Bcrypt()
 
 with app.app_context():
-    # Drop & recreate schema if you want a clean slate each time
-    # db.drop_all()
-    # db.create_all()
-
     # --- USERS ---
     if not User.query.filter_by(role="admin").first():
         admin = User(
@@ -22,7 +18,6 @@ with app.app_context():
         db.session.add(admin)
         print("✅ Admin user created")
 
-    # Manager
     if not User.query.filter_by(role="manager").first():
         manager = User(
             username="manager1",
@@ -33,7 +28,6 @@ with app.app_context():
         db.session.add(manager)
         print("✅ Manager created")
 
-    # Finance
     if not User.query.filter_by(role="finance").first():
         finance = User(
             username="finance1",
@@ -44,7 +38,6 @@ with app.app_context():
         db.session.add(finance)
         print("✅ Finance created")
 
-    # Technician
     if not User.query.filter_by(role="technician").first():
         tech = User(
             username="tech1",
@@ -75,17 +68,19 @@ with app.app_context():
             customer_id=alice.id,
             customer_name=alice.name,
             package_type="QuickStart",
-            status="Scheduled",
+            status="Completed",
             technician_id=tech.id,
-            scheduled_date=datetime.utcnow() + timedelta(days=1),
+            scheduled_date=datetime.utcnow() - timedelta(days=3),
+            end_date=datetime.utcnow() - timedelta(days=1),
             price=500.0,
         )
         inst2 = Installation(
             customer_id=bob.id,
             customer_name=bob.name,
             package_type="Core",
-            status="Lead",
-            technician_id=None,
+            status="In Progress",
+            technician_id=tech.id,
+            scheduled_date=datetime.utcnow() + timedelta(days=2),
             price=1000.0,
         )
         db.session.add_all([inst1, inst2])
@@ -94,13 +89,19 @@ with app.app_context():
 
     # --- INVOICES ---
     if not Invoice.query.first():
-        alice = Customer.query.filter_by(email="alice@example.com").first()
         finance = User.query.filter_by(role="finance").first()
+        inst1 = Installation.query.filter_by(status="Completed").first()
 
-        inv1 = Invoice(amount=500.0, status="pending", owner_id=finance.id, customer_id=alice.id)
-        db.session.add(inv1)
-        db.session.commit()
-        print("✅ Invoices added")
+        if inst1:
+            inv1 = Invoice(
+                amount=inst1.price,
+                status="pending",
+                owner_id=finance.id,
+                installation_id=inst1.id
+            )
+            db.session.add(inv1)
+            db.session.commit()
+            print("✅ Invoices added")
 
     # --- TICKETS ---
     if not Ticket.query.first():

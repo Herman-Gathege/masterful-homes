@@ -1,0 +1,89 @@
+/* Container */
+.invoice-table-container {
+  padding: 20px;
+  background: #f9fafb;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin: 20px auto;
+  max-width: 1000px;
+}
+
+.invoice-table-container h3 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1b263b;
+}
+
+/* Table Styling */
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.95rem;
+}
+
+.invoice-table th {
+  background: #1b263b;
+  color: #fff;
+  font-weight: 600;
+}
+
+.invoice-table tr:nth-child(even) {
+  background: #f3f4f6;
+}
+
+.invoice-table tr:hover {
+  background: #eef2ff;
+  transition: 0.2s;
+}
+
+/* Editable Inputs */
+.invoice-table input,
+.invoice-table select {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  width: 100%;
+}
+
+/* Buttons */
+.invoice-table button {
+  margin-right: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+/* Primary Action */
+.invoice-table button:first-of-type {
+  background: #2563eb;
+  color: #fff;
+}
+
+.invoice-table button:first-of-type:hover {
+  background: #1d4ed8;
+}
+
+/* Secondary Action */
+.invoice-table button:last-of-type {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.invoice-table button:last-of-type:hover {
+  background: #e5e7eb;
+}

@@ -101,7 +101,7 @@ import SearchBar from "../../components/SearchBar";
 
 import { FaHome, FaTools, FaCalendarAlt, FaSignOutAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
-import "../../css/ManagerDashboard.css";
+import "../../css/Admindashboard.css";
 
 function ManagerDashboard() {
   const [activeSection, setActiveSection] = useState("dashboard");

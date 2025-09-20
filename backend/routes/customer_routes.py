@@ -1,3 +1,4 @@
+# backend/routes/customer_routes.py
 from flask import Blueprint, jsonify
 from models import db, Customer, Installation, Invoice
 from utils.auth_middleware import token_required
@@ -24,11 +25,16 @@ def customer_360(current_user, customer_id):
         for i in customer.installations
     ]
 
-    # Invoices for this customer
-    invoice_data = [
-        {"id": inv.id, "amount": inv.amount, "status": inv.status}
-        for inv in customer.invoices
-    ]
+    # Invoices: collect from all installations
+    invoice_data = []
+    for inst in customer.installations:
+        if inst.invoice:  # 1:1 relationship, may be None
+            invoice_data.append({
+                "id": inst.invoice.id,
+                "amount": inst.invoice.amount,
+                "status": inst.invoice.status,
+                "created_at": inst.invoice.created_at.isoformat() if inst.invoice.created_at else None,
+            })
 
     # Tickets placeholder
     tickets_data = []

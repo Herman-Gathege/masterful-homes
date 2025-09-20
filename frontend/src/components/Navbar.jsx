@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { NavLink, useNavigate } from "react-router-dom"; // use NavLink
+import { NavLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import NotificationsBell from "./NotificationsBell";
 import logo from "../assets/logo.jpeg";
@@ -11,27 +11,22 @@ const Navbar = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth > 768 && menuOpen) setMenuOpen(false);
-    };
+    const handleResize = () =>
+      window.innerWidth > 768 && menuOpen && setMenuOpen(false);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [menuOpen]);
 
-  const getDashboardLabel = () => {
-    switch (role) {
-      case "admin":
-        return "Admin Panel";
-      case "manager":
-        return "Manager Hub";
-      case "technician":
-        return "Tech Center";
-      case "finance":
-        return "Finance Portal";
-      default:
-        return "Dashboard";
-    }
-  };
+  const getDashboardLabel = () =>
+    role === "admin"
+      ? "Admin Panel"
+      : role === "manager"
+      ? "Manager Hub"
+      : role === "technician"
+      ? "Tech Center"
+      : role === "finance"
+      ? "Finance Portal"
+      : "Dashboard";
 
   const handleLogout = () => {
     logout();
@@ -39,35 +34,33 @@ const Navbar = () => {
     setMenuOpen(false);
   };
 
-  const toggleMenu = () => setMenuOpen((s) => !s);
-  const closeMenu = () => setMenuOpen(false);
-
   return (
     <nav
       style={{
         backgroundColor: "#1b263b",
-        padding: "5px 10px",
+        padding: "8px 16px",
         color: "#fff",
-        position: "fixed", // 👈 stays at top
+        position: "fixed",
         top: 0,
         left: 0,
         right: 0,
-        height: "100px",
+        height: "60px", // Reduced height to save space
         zIndex: 1000,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
       }}
     >
-      {/* top row */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
           alignItems: "center",
-          gap: "1rem",
+          gap: "12px",
         }}
       >
         <NavLink
           to="/"
-          onClick={closeMenu}
+          onClick={() => setMenuOpen(false)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -78,61 +71,96 @@ const Navbar = () => {
           <img
             src={logo}
             alt="Masterful Homes"
-            style={{ height: "20px", marginRight: "10px" }}
+            style={{ height: "24px", marginRight: "8px" }}
           />
-          <span style={{ fontWeight: "bold", fontSize: "18px" }}>
+          <span style={{ fontWeight: "bold", fontSize: "16px" }}>
             Masterful Homes
           </span>
         </NavLink>
-
-        {/* right actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          {authenticated && <NotificationsBell />}
-          {authenticated && <UserAvatar onLogout={handleLogout} />}
-          <button
-            onClick={toggleMenu}
-            className="menu-toggle"
-            aria-expanded={menuOpen}
-            aria-label={menuOpen ? "Close menu" : "Open menu"}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#fff",
-              fontSize: "26px",
-              cursor: "pointer",
-              padding: "6px",
-              lineHeight: 1,
-            }}
-          >
-            {menuOpen ? "✕" : "☰"}
-          </button>
-        </div>
       </div>
 
-      {/* links */}
       <ul
         className={`menu-links ${menuOpen ? "open" : ""}`}
-        style={ulBaseStyle}
+        style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "flex",
+          alignItems: "center",
+          gap: "16px",
+        }}
       >
         <li>
-          <NavLink to="/about-us" style={navLinkStyle} onClick={closeMenu}>
+          <NavLink
+            to="/about-us"
+            onClick={() => setMenuOpen(false)}
+            style={({ isActive }) => ({
+              color: isActive ? "#f4d03f" : "#fff",
+              textDecoration: "none",
+              padding: "6px 8px",
+              fontWeight: 500,
+              borderBottom: isActive
+                ? "2px solid #f4d03f"
+                : "2px solid transparent",
+              transition: "color 0.3s, border-color 0.3s",
+            })}
+          >
             Our Story
           </NavLink>
         </li>
         <li>
-          <NavLink to="/services" style={navLinkStyle} onClick={closeMenu}>
+          <NavLink
+            to="/services"
+            onClick={() => setMenuOpen(false)}
+            style={({ isActive }) => ({
+              color: isActive ? "#f4d03f" : "#fff",
+              textDecoration: "none",
+              padding: "6px 8px",
+              fontWeight: 500,
+              borderBottom: isActive
+                ? "2px solid #f4d03f"
+                : "2px solid transparent",
+              transition: "color 0.3s, border-color 0.3s",
+            })}
+          >
             What we offer
           </NavLink>
         </li>
         <li>
-          <NavLink to="/contact-us" style={navLinkStyle} onClick={closeMenu}>
+          <NavLink
+            to="/contact-us"
+            onClick={() => setMenuOpen(false)}
+            style={({ isActive }) => ({
+              color: isActive ? "#f4d03f" : "#fff",
+              textDecoration: "none",
+              padding: "6px 8px",
+              fontWeight: 500,
+              borderBottom: isActive
+                ? "2px solid #f4d03f"
+                : "2px solid transparent",
+              transition: "color 0.3s, border-color 0.3s",
+            })}
+          >
             Talk to Us
           </NavLink>
         </li>
 
         {!authenticated ? (
           <li>
-            <NavLink to="/login" style={navLinkStyle} onClick={closeMenu}>
+            <NavLink
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              style={({ isActive }) => ({
+                color: isActive ? "#f4d03f" : "#fff",
+                textDecoration: "none",
+                padding: "6px 8px",
+                fontWeight: 500,
+                borderBottom: isActive
+                  ? "2px solid #f4d03f"
+                  : "2px solid transparent",
+                transition: "color 0.3s, border-color 0.3s",
+              })}
+            >
               Login
             </NavLink>
           </li>
@@ -141,14 +169,33 @@ const Navbar = () => {
             <li>
               <NavLink
                 to={`/dashboard/${role}`}
-                style={navLinkStyle}
-                onClick={closeMenu}
+                onClick={() => setMenuOpen(false)}
+                style={({ isActive }) => ({
+                  color: isActive ? "#f4d03f" : "#fff",
+                  textDecoration: "none",
+                  padding: "6px 8px",
+                  fontWeight: 500,
+                  borderBottom: isActive
+                    ? "2px solid #f4d03f"
+                    : "2px solid transparent",
+                  transition: "color 0.3s, border-color 0.3s",
+                })}
               >
                 {getDashboardLabel()}
               </NavLink>
             </li>
             <li>
-              <button onClick={handleLogout} style={logoutButtonStyle}>
+              <button
+                onClick={handleLogout}
+                style={{
+                  backgroundColor: "#274c77",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                  padding: "6px 10px",
+                }}
+              >
                 Logout
               </button>
             </li>
@@ -156,48 +203,55 @@ const Navbar = () => {
         )}
       </ul>
 
-      {/* styles */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        {authenticated && <NotificationsBell />}
+        {authenticated && <UserAvatar onLogout={handleLogout} />}
+        <button
+          onClick={() => setMenuOpen((s) => !s)}
+          className="menu-toggle"
+          aria-expanded={menuOpen}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          style={{
+            background: "none",
+            border: "none",
+            color: "#fff",
+            fontSize: "24px",
+            cursor: "pointer",
+            padding: "6px",
+            lineHeight: 1,
+            display: "none", // Hidden by default, shown on mobile
+          }}
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+      </div>
+
       <style>{`
-        .menu-toggle { display: none; }
-
-        .menu-links {
-          display: flex;
-          flex-direction: row;
-          gap: 20px;
-          list-style: none;
-          padding: 0;
-          margin-top: 10px;
-          justify-content: center;
-          align-items: center;
-        }
-
         .menu-links li { margin: 0; }
-
-        /* Active link highlight */
-        .menu-links a.active {
-          border-bottom: 2px solid #f4d03f;
-          color: #f4d03f;
-        }
-
+        .menu-links a.active { border-bottom: 2px solid #f4d03f; color: #f4d03f; }
         @media (max-width: 768px) {
           .menu-toggle { display: block; }
-
           .menu-links {
-            display: none;
+            display: ${menuOpen ? "flex" : "none"};
             flex-direction: column;
             gap: 12px;
-            padding: 12px 0;
-            margin-top: 8px;
-            width: 100%;
+            padding: 12px;
+            position: absolute;
+            top: 60px;
+            left: 0;
+            right: 0;
+            background-color: #1b263b;
+            z-index: 999;
           }
-
-          .menu-links.open {
-            display: flex;
-          }
-
           .menu-links li { width: 100%; }
           .menu-links li a, .menu-links li button {
-            display: inline-block;
+            display: block;
             width: 100%;
             padding: 8px 12px;
             box-sizing: border-box;
@@ -206,33 +260,6 @@ const Navbar = () => {
       `}</style>
     </nav>
   );
-};
-
-/* Base styles */
-const ulBaseStyle = {
-  listStyle: "none",
-  padding: 0,
-  marginTop: "10px",
-};
-
-/* Active + base nav link style */
-const navLinkStyle = ({ isActive }) => ({
-  color: isActive ? "#f4d03f" : "#fff",
-  textDecoration: "none",
-  display: "inline-block",
-  padding: "6px 8px",
-  fontWeight: 500, // keep consistent weight
-  borderBottom: isActive ? "2px solid #f4d03f" : "2px solid transparent", // reserve space
-  transition: "color 0.3s, border-color 0.3s", // smooth highlight
-});
-
-const logoutButtonStyle = {
-  backgroundColor: "#274c77",
-  color: "#fff",
-  border: "none",
-  borderRadius: "5px",
-  cursor: "pointer",
-  padding: "6px 10px",
 };
 
 export default Navbar;

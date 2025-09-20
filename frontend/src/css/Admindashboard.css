@@ -10,12 +10,12 @@ h2 {
   min-height: 100vh;
   background-color: #ecf0f1;
   overflow: hidden;
-  padding-top: 60px; /* match navbar height */
+  padding-top: 80px; /* match navbar height */
 }
 
 /* Sidebar */
 .sidebar {
-  margin-top: 40px; /* match navbar height */
+  margin-top: 50px; /* match navbar height */
   width: 250px;
   min-width: 250px;
   background-color: #455a70;
@@ -27,7 +27,7 @@ h2 {
   overflow-y: auto;
   height: calc(100vh - 60px); /* subtract navbar height */
   position: fixed;
-  top: 60px; /* start below navbar */
+  top: 20px; /* start below navbar */
   left: 0;
   transition: width 0.3s ease;
 }

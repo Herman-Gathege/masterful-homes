@@ -25,7 +25,9 @@ def create_app():
     from routes.customer_routes import customer_bp
     from routes.search_routes import search_bp
     from routes.notification_routes import notification_bp
+    from routes.invoice_routes import invoice_bp
     
+    app.register_blueprint(invoice_bp, url_prefix="/api")
     app.register_blueprint(notification_bp, url_prefix="/api")
     app.register_blueprint(search_bp, url_prefix="/api")    
     app.register_blueprint(customer_bp, url_prefix="/api")

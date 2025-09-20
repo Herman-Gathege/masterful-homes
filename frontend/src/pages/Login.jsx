@@ -256,8 +256,9 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    background: "#eaf4f4",
+    background: "#ffffff",
     padding: "2rem",
+    marginTop: "10rem",
   },
   formCard: {
     backgroundColor: "#ffffff",

@@ -91,6 +91,7 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/AuthContext";
 import DashboardOverview from "../../components/DashboardOverview";
 import SearchBar from "../../components/SearchBar";
+import InvoiceTable from "../../components/InvoiceTable";
 
 import {
   FaHome,
@@ -100,7 +101,7 @@ import {
   FaChevronLeft, FaChevronRight
 } from "react-icons/fa";
 
-import "../../css/FinanceDashboard.css";
+import "../../css/Admindashboard.css";
 
 function FinanceDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
@@ -150,19 +151,20 @@ function FinanceDashboard() {
             {!collapsed && "Overview"}
           </li>
           <li
-            onClick={() => handleSidebarClick("reports")}
-            className={activeSection === "reports" ? "active" : ""}
-          >
-            <FaChartBar className="icon" />
-            {!collapsed && "Reports"}
-          </li>
-          <li
             onClick={() => handleSidebarClick("invoices")}
             className={activeSection === "invoices" ? "active" : ""}
           >
             <FaFileInvoiceDollar className="icon" />
             {!collapsed && "Invoices"}
           </li>
+          <li
+            onClick={() => handleSidebarClick("reports")}
+            className={activeSection === "reports" ? "active" : ""}
+          >
+            <FaChartBar className="icon" />
+            {!collapsed && "Reports"}
+          </li>
+          
           <li onClick={() => handleSidebarClick("logout")}>
             <FaSignOutAlt className="icon" />
             {!collapsed && "Logout"}
@@ -176,8 +178,8 @@ function FinanceDashboard() {
         <SearchBar />
 
         {activeSection === "overview" && <DashboardOverview />}
+        {activeSection === "invoices" && <InvoiceTable />}
         {activeSection === "reports" && <p>📊 Reports section coming soon...</p>}
-        {activeSection === "invoices" && <p>💰 Invoice management coming soon...</p>}
       </div>
     </div>
   );
