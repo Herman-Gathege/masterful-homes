@@ -92,13 +92,16 @@ import { AuthContext } from "../../context/AuthContext";
 import DashboardOverview from "../../components/DashboardOverview";
 import InvoiceTable from "../../components/InvoiceTable";
 import { SidebarContext } from "../../context/SidebarContext";
+import CustomerList from "../../components/CustomerList";
 
 import {
   FaHome,
   FaChartBar,
   FaFileInvoiceDollar,
   FaSignOutAlt,
-  FaChevronLeft, FaChevronRight
+  FaChevronLeft,
+  FaChevronRight,
+  FaUserCog
 } from "react-icons/fa";
 
 import "../../css/Admindashboard.css";
@@ -106,7 +109,6 @@ import "../../css/Admindashboard.css";
 function FinanceDashboard() {
   const [activeSection, setActiveSection] = useState("overview");
   const { collapsed, setCollapsed } = useContext(SidebarContext);
-
 
   const { logout, user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -141,7 +143,6 @@ function FinanceDashboard() {
           onClick={() => setCollapsed(!collapsed)}
         >
           {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
-          
         </button>
         <ul>
           <li
@@ -165,7 +166,14 @@ function FinanceDashboard() {
             <FaChartBar className="icon" />
             {!collapsed && "Reports"}
           </li>
-          
+          <li
+            onClick={() => handleSidebarClick("customers")}
+            className={activeSection === "customers" ? "active" : ""}
+          >
+            <FaUserCog className="icon" />
+            {!collapsed && "Customers"}
+          </li>
+
           <li onClick={() => handleSidebarClick("logout")}>
             <FaSignOutAlt className="icon" />
             {!collapsed && "Logout"}
@@ -179,7 +187,10 @@ function FinanceDashboard() {
 
         {activeSection === "overview" && <DashboardOverview />}
         {activeSection === "invoices" && <InvoiceTable />}
-        {activeSection === "reports" && <p>📊 Reports section coming soon...</p>}
+        {activeSection === "customers" && <CustomerList />}
+        {activeSection === "reports" && (
+          <p>📊 Reports section coming soon...</p>
+        )}
       </div>
     </div>
   );

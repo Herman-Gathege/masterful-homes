@@ -24,6 +24,21 @@ class User(db.Model):
         return f"<User {self.username}, role={self.role}>"
 
 
+# class Customer(db.Model):
+#     __tablename__ = "customers"
+
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(120), nullable=False)
+#     email = db.Column(db.String(120), unique=True, nullable=False)
+#     phone = db.Column(db.String(50), nullable=True)
+
+#     # Relationships
+#     installations = relationship("Installation", back_populates="customer")
+#     # 🔴 Removed `invoices` relationship → invoices come through installations
+
+#     def __repr__(self):
+#         return f"<Customer {self.name}>"
+
 class Customer(db.Model):
     __tablename__ = "customers"
 
@@ -31,13 +46,17 @@ class Customer(db.Model):
     name = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(50), nullable=True)
+    status = db.Column(db.String(20), default="lead", nullable=False) 
+     
+    # "lead" or "active"
 
     # Relationships
     installations = relationship("Installation", back_populates="customer")
-    # 🔴 Removed `invoices` relationship → invoices come through installations
+    invoices = relationship("Invoice", back_populates="customer")
 
     def __repr__(self):
-        return f"<Customer {self.name}>"
+        return f"<Customer {self.name}, status={self.status}>"
+
 
 
 class Installation(db.Model):
@@ -79,16 +98,24 @@ class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     amount = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50), default="pending")  # pending/paid/overdue
+    
+    # Finance owner
     owner_id = db.Column(db.Integer, db.ForeignKey("users.id"))
     owner = relationship("User", back_populates="invoices")
 
+    # Link to Installation (1:1)
     installation_id = db.Column(db.Integer, db.ForeignKey("installations.id"), nullable=False)
     installation = relationship("Installation", back_populates="invoice")
+
+    # 👇 Add this to fix the error
+    customer_id = db.Column(db.Integer, db.ForeignKey("customers.id"), nullable=False)
+    customer = relationship("Customer", back_populates="invoices")
 
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     def __repr__(self):
         return f"<Invoice {self.id}, status={self.status}, amount={self.amount}>"
+
 
 
 class Notification(db.Model):

@@ -282,7 +282,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import NotificationsBell from "./NotificationsBell";
 import SearchBar from "./SearchBar";
-import logo from "../assets/logo.jpeg";
+import logo from "../assets/logo-icon.jpeg";
 import UserAvatar from "./UserAvatar";
 
 const Navbar = () => {

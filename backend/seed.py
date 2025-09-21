@@ -90,14 +90,16 @@ with app.app_context():
 
         statuses = ["paid", "pending"]
 
-        for inst in installations:
+        for inst in installations:            
             inv = Invoice(
                 amount=inst.price,
                 status=random.choice(statuses),
                 owner_id=finance.id,
                 installation_id=inst.id,
-                created_at=inst.scheduled_date,  # 👈 key fix: align invoice date with installation
+                customer_id=inst.customer_id,  # 👈 this links invoice to customer
+                created_at=inst.scheduled_date,
             )
+
             db.session.add(inv)
 
         db.session.commit()
