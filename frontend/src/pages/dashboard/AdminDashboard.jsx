@@ -133,6 +133,7 @@ import UserTable from "../../components/UserTable";
 import InstallationsTable from "../../components/InstallationsTable";
 import InstallationForm from "../../components/InstallationForm";
 import TechnicianSchedule from "../../components/TechnicianSchedule";
+import CustomerList from "../../components/CustomerList";
 import Modal from "../../components/Modal";
 import DashboardOverview from "../../components/DashboardOverview";
 import { SidebarContext } from "../../context/SidebarContext";
@@ -289,8 +290,8 @@ function AdminDashboard() {
         {/* Invoice */}
         {activeSection === "invoices" && <InvoiceTable />}
 
-        {/* Invoice */}
-        {activeSection === "customers" && (<p>Customers section coming soon...</p>)}
+        {/* Customers */}
+        {activeSection === "customers" && <CustomerList />}
       </div>
     </div>
   );

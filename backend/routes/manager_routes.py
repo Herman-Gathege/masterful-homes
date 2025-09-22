@@ -84,10 +84,18 @@ def create_installation(current_user):
         customer = Customer(
             name=customer_name,
             email=customer_email,
-            phone=customer_phone
+            phone=customer_phone,
+            status="lead"
         )
         db.session.add(customer)
         db.session.flush()  # assigns an ID before commit
+
+    # inside create_installation, before creating Installation
+    if technician_id:
+        tech = User.query.get(technician_id)
+        if not tech or tech.role != "technician":
+            return jsonify({"message": "Invalid technician ID"}), 400
+
 
     # 🔹 Step 2: Create Installation with linked customer_id
     new_installation = Installation(
@@ -125,6 +133,7 @@ def create_installation(current_user):
 
 
 
+
 # ✏️ UPDATE installation (assign technician, update status, reschedule, price)
 @manager_bp.route("/installations/<int:installation_id>", methods=["PUT"])
 @token_required
@@ -139,13 +148,21 @@ def update_installation(current_user, installation_id):
     old_status = installation.status
     old_tech = installation.technician_id
 
-    # Admin/Manager: can update everything
+    # --- Admin/Manager updates ---
     if current_user.role in ["admin", "manager"]:
         installation.customer_name = data.get("customer_name", installation.customer_name)
         installation.package_type = data.get("package_type", installation.package_type)
         installation.status = data.get("status", installation.status)
-        installation.technician_id = data.get("technician_id", installation.technician_id)
 
+        # ✅ Technician reassignment with validation (only once)
+        new_tech_id = data.get("technician_id", installation.technician_id)
+        if new_tech_id:
+            tech = User.query.get(new_tech_id)
+            if not tech or tech.role != "technician":
+                return jsonify({"message": "Invalid technician ID"}), 400
+            installation.technician_id = new_tech_id
+
+        # Dates
         scheduled_date = data.get("scheduled_date")
         end_date = data.get("end_date")
         if scheduled_date:
@@ -153,7 +170,7 @@ def update_installation(current_user, installation_id):
         if end_date:
             installation.end_date = parse_iso_datetime(end_date)
 
-        # ✅ validate and update price
+        # Price validation
         if "price" in data:
             try:
                 price = float(data["price"])
@@ -163,7 +180,7 @@ def update_installation(current_user, installation_id):
             except ValueError:
                 return jsonify({"message": "Invalid price format"}), 400
 
-    # Technician: can only update their own job's status
+    # --- Technician updates ---
     elif current_user.role == "technician":
         if installation.technician_id != current_user.id:
             return jsonify({"message": "Access forbidden: not your job"}), 403
@@ -173,20 +190,26 @@ def update_installation(current_user, installation_id):
     else:
         return jsonify({"message": "Access forbidden"}), 403
 
-    # 🔹 If job just got marked as Completed, auto-generate invoice
+    # --- Auto actions when marked Completed ---
     if old_status != "Completed" and installation.status == "Completed":
-        if not installation.invoice:  # avoid duplicates
+        # 1. Generate invoice (only if not exists)
+        if not installation.invoice:
             invoice = Invoice(
                 amount=installation.price or 0,
                 status="pending",
                 installation_id=installation.id,
-                owner_id=None  # leave null, finance/admin can take ownership later
+                customer_id=installation.customer_id,
+                owner_id=None
             )
             db.session.add(invoice)
 
+        # 2. Promote customer (lead → active)
+        if installation.customer and installation.customer.status.lower() == "lead":
+            installation.customer.status = "active"
+
     db.session.commit()
 
-    # 🔔 Notifications
+    # --- Notifications ---
     to_notify = []
 
     # Case 1: Technician starts job
@@ -215,6 +238,8 @@ def update_installation(current_user, installation_id):
 
 
 
+
+
 # ❌ DELETE installation
 @manager_bp.route("/installations/<int:installation_id>", methods=["DELETE"])
 @token_required
@@ -229,3 +254,17 @@ def delete_installation(current_user, installation_id):
     db.session.delete(installation)
     db.session.commit()
     return jsonify({"message": "Installation deleted"}), 200
+
+
+# ✅ GET all technicians (for assignment dropdown)
+@manager_bp.route("/technicians", methods=["GET"])
+@token_required
+def get_technicians(current_user):
+    if current_user.role not in ["admin", "manager"]:
+        return jsonify({"message": "Access forbidden"}), 403
+
+    technicians = User.query.filter_by(role="technician").all()
+    return jsonify([
+        {"id": t.id, "username": t.username, "email": t.email}
+        for t in technicians
+    ]), 200
