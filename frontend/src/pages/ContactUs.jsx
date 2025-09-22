@@ -23,7 +23,7 @@ const ContactUs = () => {
   };
 
   return (
-    <div style={{ backgroundColor: "#f5f7fa", fontFamily: "sans-serif" }}>
+    <div style={{ backgroundColor: "#f5f7fa", fontFamily: "sans-serif", marginTop: "120px" }}>
       <h1 style={{ textAlign: "center", color: "#1b263b" }}>Contact Us</h1>
       <p style={{ textAlign: "center", color: "#1b263b", maxWidth: "600px", margin: "0 auto" }}>
         Got questions, feedback, or just want to say hello? Fill out the form below and we'll get back to you as soon as we can.

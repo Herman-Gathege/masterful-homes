@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axiosInstance from "../context/axiosInstance";
 import "../css/InstallationForm.css";
 
@@ -9,12 +9,26 @@ function InstallationForm({ onSuccess }) {
     customer_phone: "",
     package_type: "QuickStart",
     status: "Lead",
-    technician_id: "",
+    technician_id: "",   // ✅ use id instead of name
     scheduled_date: "",
     end_date: "",
     price: "",
   });
+  const [technicians, setTechnicians] = useState([]); // ✅ store technicians
   const [message, setMessage] = useState("");
+
+  // ✅ Fetch technicians on load
+  useEffect(() => {
+    const fetchTechnicians = async () => {
+      try {
+        const res = await axiosInstance.get("/technicians");
+        setTechnicians(res.data);
+      } catch (err) {
+        console.error("Failed to fetch technicians", err);
+      }
+    };
+    fetchTechnicians();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,17 +37,16 @@ function InstallationForm({ onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Convert to ISO datetime if values exist
       const payload = {
         ...formData,
+        technician_id: formData.technician_id || null, // ensure correct key
         scheduled_date: formData.scheduled_date
           ? new Date(formData.scheduled_date).toISOString()
           : null,
         end_date: formData.end_date
           ? new Date(formData.end_date).toISOString()
           : null,
-        price: formData.price ? parseFloat(formData.price) : null, // ensure number
-
+        price: formData.price ? parseFloat(formData.price) : null,
       };
 
       await axiosInstance.post("/installations", payload);
@@ -49,7 +62,7 @@ function InstallationForm({ onSuccess }) {
         end_date: "",
         price: "",
       });
-      if (onSuccess) onSuccess(); // refresh parent table
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Error creating installation", err);
       setMessage("❌ Failed to create installation.");
@@ -105,13 +118,19 @@ function InstallationForm({ onSuccess }) {
           <option value="Completed">Completed</option>
         </select>
 
-        <label>Technician ID (optional):</label>
-        <input
-          type="number"
+        <label>Assign Technician (optional):</label>
+        <select
           name="technician_id"
           value={formData.technician_id}
           onChange={handleChange}
-        />
+        >
+          <option value="">-- Select Technician --</option>
+          {technicians.map((tech) => (
+            <option key={tech.id} value={tech.id}>
+              {tech.username} ({tech.email})
+            </option>
+          ))}
+        </select>
 
         <label>Price (USD):</label>
         <input
