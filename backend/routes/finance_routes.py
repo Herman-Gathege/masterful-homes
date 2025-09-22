@@ -77,13 +77,15 @@ def finance_summary(current_user):
     # ✅ Monthly revenue from paid invoices only
     monthly_revenue = (
         db.session.query(
-            func.strftime("%Y-%m", Invoice.created_at).label("month"),
+            func.to_char(Invoice.created_at, 'YYYY-MM').label("month"),
             func.sum(Invoice.amount).label("revenue"),
         )
         .filter(Invoice.status == "paid")
         .group_by("month")
+        .order_by("month")  # 👈 ensures results are chronological
         .all()
     )
+
     monthly_data = [{"month": row[0], "revenue": float(row[1])} for row in monthly_revenue]
 
     return jsonify({
