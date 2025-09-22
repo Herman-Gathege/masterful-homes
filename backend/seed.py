@@ -34,11 +34,11 @@ with app.app_context():
     # --- CUSTOMERS ---
     if not Customer.query.first():
         customers = [
-            Customer(name="Alice Johnson", email="alice@example.com", phone="555-1111"),
-            Customer(name="Bob Smith", email="bob@example.com", phone="555-2222"),
-            Customer(name="Charlie Green", email="charlie@example.com", phone="555-3333"),
-            Customer(name="Diana Prince", email="diana@example.com", phone="555-4444"),
-            Customer(name="Ethan Brown", email="ethan@example.com", phone="555-5555"),
+            Customer(name="Alice Johnson", email="alice@example.com", phone="555-1111", status="lead"),
+            Customer(name="Bob Smith", email="bob@example.com", phone="555-2222", status="active"),
+            Customer(name="Charlie Green", email="charlie@example.com", phone="555-3333", status="lead"),
+            Customer(name="Diana Prince", email="diana@example.com", phone="555-4444", status="active"),
+            Customer(name="Ethan Brown", email="ethan@example.com", phone="555-5555", status="lead"),
         ]
         db.session.add_all(customers)
         db.session.commit()
@@ -67,12 +67,13 @@ with app.app_context():
 
                 day = random.randint(1, last_day)
                 scheduled = datetime(year, month, day)
+                status = random.choice(["Lead", "Scheduled", "In Progress", "Completed"])
 
                 inst = Installation(
                     customer_id=cust.id,
                     customer_name=cust.name,
                     package_type=package,
-                    status="Completed",
+                    status=status,
                     technician_id=tech.id,
                     scheduled_date=scheduled,
                     end_date=scheduled + timedelta(days=2),
@@ -82,6 +83,7 @@ with app.app_context():
 
         db.session.commit()
         print("✅ 12 months of Installations added")
+
 
     # --- INVOICES ---
     if not Invoice.query.first():
