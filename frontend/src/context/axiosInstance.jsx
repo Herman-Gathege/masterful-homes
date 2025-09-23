@@ -14,7 +14,8 @@ export const setAuthStore = (authContext) => {
 };
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://masterful-homes.onrender.com/api",
+  withCredentials: true,
 });
 
 // // Request interceptor → attach access token only

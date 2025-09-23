@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/refresh", {
+      const response = await axios.post("https://masterful-homes.onrender.com/api/refresh", {
         refresh_token: refreshToken,
       });
 
