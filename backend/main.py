@@ -15,7 +15,12 @@ def create_app():
     bcrypt.init_app(app)
     jwt.init_app(app)
     migrate.init_app(app, db)
-    CORS(app, resources={r"/api/*": {"origins": "http://localhost:5173"}})
+   
+    CORS(app, resources={r"/api/*": {"origins": [
+    "http://localhost:5173",
+    "https://your-frontend.vercel.app"
+        ]}})
+
 
     # Import and register blueprints
     from routes.auth_routes import auth_bp
@@ -39,6 +44,11 @@ def create_app():
     @app.route("/")
     def index():
         return {"message": "Welcome to Masterful Homes Backend!"}, 200
+    
+    @app.route("/api/health")
+    def health():
+        return {"status": "ok"}, 200
+
 
     return app
 

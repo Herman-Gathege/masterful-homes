@@ -13,6 +13,7 @@ Flask-WTF==1.2.2
 SQLAlchemy==2.0.34
 alembic==1.13.2
 psycopg2-binary==2.9.10
+gunicorn
 
 bcrypt==3.2.0
 python-dotenv==1.0.1

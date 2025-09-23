@@ -1,3 +1,4 @@
+# backend/config.py
 import os
 from dotenv import load_dotenv
 
@@ -15,7 +16,14 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT configuration
-    JWT_SECRET = os.getenv("JWT_SECRET", "your-access-secret-key")
-    JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET", "your-refresh-secret-key")
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    JWT_REFRESH_SECRET = os.getenv("JWT_REFRESH_SECRET")
+
+
+
+
+
+
+
 
 

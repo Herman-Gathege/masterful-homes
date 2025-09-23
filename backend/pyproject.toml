@@ -10,4 +10,5 @@ dependencies = [
     "flask-cors>=6.0.1",
     "flask-jwt-extended>=4.7.1",
     "flask-migrate>=4.1.0",
+    "gunicorn>=23.0.0",
 ]
