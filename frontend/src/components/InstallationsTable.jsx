@@ -3,6 +3,7 @@ import axiosInstance from "../context/axiosInstance";
 import Customer360Modal from "./Customer360Modal";
 import "../css/InstallationsTable.css";
 
+
 function InstallationsTable() {
   const [installations, setInstallations] = useState([]);
   const [editingId, setEditingId] = useState(null);
