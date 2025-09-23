@@ -16,10 +16,12 @@ def create_app():
     jwt.init_app(app)
     migrate.init_app(app, db)
    
+    
+    
     CORS(app, resources={r"/api/*": {"origins": [
     "http://localhost:5173",
     "https://masterful-homes.vercel.app"
-        ]}})
+    ]}}, supports_credentials=True)
 
 
     # Import and register blueprints
