@@ -18,7 +18,7 @@ def create_app():
    
     CORS(app, resources={r"/api/*": {"origins": [
     "http://localhost:5173",
-    "https://your-frontend.vercel.app"
+    "https://masterful-homes.vercel.app"
         ]}})
 
 
