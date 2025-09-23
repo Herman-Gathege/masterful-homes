@@ -47,7 +47,8 @@ Masterful-Homes/
 │ │ ├── assets/ # Images and static assets
 │ │ ├── components/ # Navbar, Footer, etc.
 │ │ ├── context/ # AuthContext
-│ │ ├── pages/ # AboutUs, Services, Contact, Dashboards
+│ │ ├── services/ # services functions
+│ │ ├── pages/ # AboutUs, Services, Contact, Dashboards/
 │ │ ├── App.jsx # Main app router
 │ │ └── main.jsx # Entry point
 │ └── package.json
@@ -56,6 +57,8 @@ Masterful-Homes/
 │ ├── app.py # Main entry point
 │ ├── models.py # Database models
 │ ├── config.py # Configurations
+│ ├── routes/ # API routes
+│ ├── utils/ # Utility functions
 │ ├── seed.py # Sample data seeding
 │ └── requirements.txt # Python dependencies
 │
