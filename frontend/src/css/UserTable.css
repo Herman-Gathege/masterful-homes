@@ -25,16 +25,16 @@
 }
 
 .user-table tbody tr:nth-child(odd) {
-  background-color: #455a70;
-  color: white;
+  background-color: #fafafa;
+  color: rgb(17, 17, 17);
 }
 
 .user-table tbody tr:nth-child(even) {
-  background-color: #cbdaec;
+  background-color: #d7dbdf2a;
 }
 
 .user-table tbody tr:hover {
-  background-color: #778da9;
+  background-color: #e1e2e47a;
   cursor: pointer;
 }
 
