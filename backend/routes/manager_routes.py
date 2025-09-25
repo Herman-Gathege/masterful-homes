@@ -1,6 +1,6 @@
 # backend/routes/manager_routes.py
 from flask import Blueprint, request, jsonify
-from models import db, Installation, User, Customer, Invoice  # ✅ import Customer
+from legacy_models import db, LegacyInstallation, LegacyUser, LegacyCustomer, LegacyInvoice  # ✅ import Customer
 from utils.notifications import create_notifications_for_users
 from utils.auth_middleware import token_required
 from datetime import datetime
@@ -24,9 +24,9 @@ def parse_iso_datetime(dt_str):
 @token_required
 def get_installations(current_user):
     if current_user.role in ["admin", "manager"]:
-        installations = Installation.query.all()
+        installations = LegacyInstallation.query.all()
     elif current_user.role == "technician":
-        installations = Installation.query.filter_by(technician_id=current_user.id).all()
+        installations = LegacyInstallation.query.filter_by(technician_id=current_user.id).all()
     else:
         return jsonify({"message": "Access forbidden"}), 403
 
@@ -79,9 +79,9 @@ def create_installation(current_user):
             return jsonify({"message": "Invalid price format"}), 400
 
     # 🔹 Step 1: Find or Create Customer
-    customer = Customer.query.filter_by(email=customer_email).first()
+    customer = LegacyCustomer.query.filter_by(email=customer_email).first()
     if not customer:
-        customer = Customer(
+        customer = LegacyCustomer(
             name=customer_name,
             email=customer_email,
             phone=customer_phone,
@@ -92,13 +92,13 @@ def create_installation(current_user):
 
     # inside create_installation, before creating Installation
     if technician_id:
-        tech = User.query.get(technician_id)
+        tech = LegacyUser.query.get(technician_id)
         if not tech or tech.role != "technician":
             return jsonify({"message": "Invalid technician ID"}), 400
 
 
     # 🔹 Step 2: Create Installation with linked customer_id
-    new_installation = Installation(
+    new_installation = LegacyInstallation(
         customer_id=customer.id,
         customer_name=customer.name,  # redundant, but useful for quick access
         package_type=package_type,
@@ -114,7 +114,7 @@ def create_installation(current_user):
 
     to_notify = []
     roles = ["admin", "manager", "finance"]
-    users = User.query.filter(User.role.in_(roles)).all()
+    users = LegacyUser.query.filter(LegacyUser.role.in_(roles)).all()
     to_notify.extend([u.id for u in users])
 
     if technician_id:
@@ -138,7 +138,7 @@ def create_installation(current_user):
 @manager_bp.route("/installations/<int:installation_id>", methods=["PUT"])
 @token_required
 def update_installation(current_user, installation_id):
-    installation = Installation.query.get(installation_id)
+    installation = LegacyInstallation.query.get(installation_id)
     if not installation:
         return jsonify({"message": "Installation not found"}), 404
 
@@ -157,7 +157,7 @@ def update_installation(current_user, installation_id):
         # ✅ Technician reassignment with validation (only once)
         new_tech_id = data.get("technician_id", installation.technician_id)
         if new_tech_id:
-            tech = User.query.get(new_tech_id)
+            tech = LegacyUser.query.get(new_tech_id)
             if not tech or tech.role != "technician":
                 return jsonify({"message": "Invalid technician ID"}), 400
             installation.technician_id = new_tech_id
@@ -194,7 +194,7 @@ def update_installation(current_user, installation_id):
     if old_status != "Completed" and installation.status == "Completed":
         # 1. Generate invoice (only if not exists)
         if not installation.invoice:
-            invoice = Invoice(
+            invoice = LegacyInvoice(
                 amount=installation.price or 0,
                 status="pending",
                 installation_id=installation.id,
@@ -215,7 +215,7 @@ def update_installation(current_user, installation_id):
     # Case 1: Technician starts job
     if current_user.role == "technician" and old_status != "In Progress" and installation.status == "In Progress":
         roles = ["admin", "manager", "finance"]
-        users = User.query.filter(User.role.in_(roles)).all()
+        users = LegacyUser.query.filter(LegacyUser.role.in_(roles)).all()
         to_notify = [u.id for u in users]
         msg = f"Installation #{installation.id} started by Technician {current_user.username}"
         create_notifications_for_users(to_notify, msg, object_type="installation", object_id=installation.id)
@@ -229,7 +229,7 @@ def update_installation(current_user, installation_id):
     # Case 3: Completed installation
     if old_status != "Completed" and installation.status == "Completed":
         roles = ["admin", "manager", "finance"]
-        users = User.query.filter(User.role.in_(roles)).all()
+        users = LegacyUser.query.filter(LegacyUser.role.in_(roles)).all()
         to_notify = [u.id for u in users]
         msg = f"Installation #{installation.id} has been marked Completed"
         create_notifications_for_users(to_notify, msg, object_type="installation", object_id=installation.id)
@@ -247,7 +247,7 @@ def delete_installation(current_user, installation_id):
     if current_user.role != "admin":  # Only Admins can delete
         return jsonify({"message": "Access forbidden"}), 403
 
-    installation = Installation.query.get(installation_id)
+    installation = LegacyInstallation.query.get(installation_id)
     if not installation:
         return jsonify({"message": "Installation not found"}), 404
 
@@ -263,7 +263,7 @@ def get_technicians(current_user):
     if current_user.role not in ["admin", "manager"]:
         return jsonify({"message": "Access forbidden"}), 403
 
-    technicians = User.query.filter_by(role="technician").all()
+    technicians = LegacyUser.query.filter_by(role="technician").all()
     return jsonify([
         {"id": t.id, "username": t.username, "email": t.email}
         for t in technicians

@@ -1,3 +1,5 @@
+//frontend/src/components/KPIcard.jsx
+
 import React from "react";
 import "../css/KPIcard.css";
 

@@ -1,3 +1,5 @@
+//frontend/src/components/InstallationForm.jsx
+
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../context/axiosInstance";
 import "../css/InstallationForm.css";

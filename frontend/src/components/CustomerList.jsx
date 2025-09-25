@@ -1,4 +1,4 @@
-// CustomerList.jsx
+// frontend/src/components/CustomerList.jsx
 import React, { useEffect, useState } from "react";
 import { getCustomers } from "../services/customersService";
 import Customer360Modal from "./Customer360Modal";

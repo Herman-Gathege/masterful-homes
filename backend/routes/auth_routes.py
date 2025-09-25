@@ -1,6 +1,6 @@
 # backend/routes/auth_routes.py
 from flask import Blueprint, request, jsonify
-from models import db, User
+from legacy_models import db, LegacyUser
 from flask_bcrypt import Bcrypt
 from utils.jwt_utils import generate_tokens, decode_token
 from config import Config
@@ -21,12 +21,12 @@ def register():
     if not username or not email or not password:
         return jsonify({"message": "Username, email, and password are required."}), 400
 
-    if User.query.filter_by(email=email).first():
+    if LegacyUser.query.filter_by(email=email).first():
         return jsonify({"message": "User already exists with this email."}), 409
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
 
-    new_user = User(
+    new_user = LegacyUser(
         username=username,
         email=email,
         password_hash=hashed_password,
@@ -53,7 +53,7 @@ def login():
     if not email or not password:
         return jsonify({"message": "Email and password are required."}), 400
 
-    user = User.query.filter_by(email=email).first()
+    user = LegacyUser.query.filter_by(email=email).first()
 
     if not user or not bcrypt.check_password_hash(user.password_hash, password):
         return jsonify({"message": "Invalid credentials"}), 401

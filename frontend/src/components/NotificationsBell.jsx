@@ -1,3 +1,5 @@
+//frontend/src/components/NotificationsBell.jsx
+
 import React, { useEffect, useRef, useState } from "react";
 import useNotificationStore from "../store/notificationStore";
 import "../css/NotificationsBell.css";

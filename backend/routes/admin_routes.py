@@ -1,6 +1,6 @@
 # backend/routes/admin_routes.py
 from flask import Blueprint, request, jsonify
-from models import db, User
+from legacy_models import db, LegacyUser
 from utils.auth_middleware import token_required
 from flask_bcrypt import Bcrypt
 
@@ -14,7 +14,7 @@ def get_users(current_user):
     if current_user.role != "admin":
         return jsonify({"message": "Access forbidden"}), 403
 
-    users = User.query.all()
+    users = LegacyUser.query.all()
     users_data = [{
         "id": user.id,
         "username": user.username,
@@ -41,11 +41,11 @@ def create_user(current_user):
     if not username or not email or not password or not role:
         return jsonify({"message": "Missing required fields"}), 400
 
-    if User.query.filter_by(email=email).first():
+    if LegacyUser.query.filter_by(email=email).first():
         return jsonify({"message": "User already exists with this email"}), 409
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
-    new_user = User(username=username, email=email,
+    new_user = LegacyUser(username=username, email=email,
                     password_hash=hashed_password, role=role)
 
     db.session.add(new_user)
@@ -61,7 +61,7 @@ def update_user(current_user, user_id):
     if current_user.role != "admin":
         return jsonify({"message": "Access forbidden"}), 403
 
-    user = User.query.get(user_id)
+    user = LegacyUser.query.get(user_id)
     if not user:
         return jsonify({"message": "User not found"}), 404
 
@@ -84,7 +84,7 @@ def delete_user(current_user, user_id):
     if current_user.role != "admin":
         return jsonify({"message": "Access forbidden"}), 403
 
-    user = User.query.get(user_id)
+    user = LegacyUser.query.get(user_id)
     if not user:
         return jsonify({"message": "User not found"}), 404
 

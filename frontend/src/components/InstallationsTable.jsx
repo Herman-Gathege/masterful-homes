@@ -1,3 +1,5 @@
+//frontend/src/components/InstallationsTable.jsx
+
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../context/axiosInstance";
 import Customer360Modal from "./Customer360Modal";

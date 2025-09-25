@@ -1,7 +1,7 @@
 # backend/routes/search_routes.py
 
 from flask import Blueprint, request, jsonify
-from models import db, User, Customer, Installation, Invoice, Ticket
+from legacy_models import db, LegacyUser, LegacyCustomer, LegacyInstallation, LegacyInvoice, LegacyTicket
 from utils.auth_middleware import token_required
 
 search_bp = Blueprint("search", __name__)
@@ -15,35 +15,35 @@ def global_search(current_user):
         return jsonify({"message": "Query is required"}), 400
 
     # 🔎 Customers
-    customers = Customer.query.filter(
-        (Customer.name.ilike(f"%{q}%")) |
-        (Customer.email.ilike(f"%{q}%")) |
-        (Customer.phone.ilike(f"%{q}%"))
+    customers = LegacyCustomer.query.filter(
+        (LegacyCustomer.name.ilike(f"%{q}%")) |
+        (LegacyCustomer.email.ilike(f"%{q}%")) |
+        (LegacyCustomer.phone.ilike(f"%{q}%"))
     ).all()
 
     # 🔎 Users (admins, managers, technicians, finance)
-    users = User.query.filter(
-        (User.username.ilike(f"%{q}%")) |
-        (User.email.ilike(f"%{q}%")) |
-        (User.role.ilike(f"%{q}%"))
+    users = LegacyUser.query.filter(
+        (LegacyUser.username.ilike(f"%{q}%")) |
+        (LegacyUser.email.ilike(f"%{q}%")) |
+        (LegacyUser.role.ilike(f"%{q}%"))
     ).all()
 
     # 🔎 Installations
-    installations = Installation.query.filter(
-        (Installation.customer_name.ilike(f"%{q}%")) |
-        (Installation.package_type.ilike(f"%{q}%")) |
-        (Installation.status.ilike(f"%{q}%"))
+    installations = LegacyInstallation.query.filter(
+        (LegacyInstallation.customer_name.ilike(f"%{q}%")) |
+        (LegacyInstallation.package_type.ilike(f"%{q}%")) |
+        (LegacyInstallation.status.ilike(f"%{q}%"))
     ).all()
 
     # 🔎 Invoices
-    invoices = Invoice.query.filter(
-        (Invoice.status.ilike(f"%{q}%"))
+    invoices = LegacyInvoice.query.filter(
+        (LegacyInvoice.status.ilike(f"%{q}%"))
     ).all()
 
     # 🔎 Tickets
-    tickets = Ticket.query.filter(
-        (Ticket.issue.ilike(f"%{q}%")) |
-        (Ticket.status.ilike(f"%{q}%"))
+    tickets = LegacyTicket.query.filter(
+        (LegacyTicket.issue.ilike(f"%{q}%")) |
+        (LegacyTicket.status.ilike(f"%{q}%"))
     ).all()
 
     # Format response

@@ -1,3 +1,4 @@
+//frontend/src/components/BreakdownTable.jsx
 import React from "react";
 import "../css/BreakdownTable.css";
 

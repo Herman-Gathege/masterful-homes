@@ -1,6 +1,6 @@
 # backend/routes/invoice_routes.py
 from flask import Blueprint, request, jsonify
-from models import db, Invoice, Installation, Customer
+from legacy_models import db, LegacyInvoice, LegacyInstallation, LegacyCustomer
 from utils.decorators import role_required
 
 invoice_bp = Blueprint("invoice_bp", __name__)
@@ -9,7 +9,7 @@ invoice_bp = Blueprint("invoice_bp", __name__)
 @invoice_bp.route("/invoices", methods=["GET"])
 @role_required(["admin", "finance"])
 def get_invoices():
-    invoices = Invoice.query.all()
+    invoices = LegacyInvoice.query.all()
     return jsonify([
         {
             "id": inv.id,
@@ -35,15 +35,15 @@ def create_invoice():
     amount = data.get("amount")
 
     # check installation exists & is completed
-    installation = Installation.query.get(installation_id)
+    installation = LegacyInstallation.query.get(installation_id)
     if not installation:
         return jsonify({"message": "Installation not found"}), 404
     if installation.status != "Completed":
         return jsonify({"message": "Installation must be completed before invoicing"}), 400
-    if Invoice.query.filter_by(installation_id=installation_id).first():
+    if LegacyInvoice.query.filter_by(installation_id=installation_id).first():
         return jsonify({"message": "Invoice already exists for this installation"}), 400
 
-    invoice = Invoice(
+    invoice = LegacyInvoice(
         amount=amount,
         status="pending",
         owner_id=data.get("owner_id"),  # finance/admin creating
@@ -57,7 +57,7 @@ def create_invoice():
 @invoice_bp.route("/invoices/<int:invoice_id>", methods=["PUT"])
 @role_required(["admin", "finance"])
 def update_invoice(invoice_id):
-    invoice = Invoice.query.get(invoice_id)
+    invoice = LegacyInvoice.query.get(invoice_id)
     if not invoice:
         return jsonify({"message": "Invoice not found"}), 404
 
@@ -70,7 +70,7 @@ def update_invoice(invoice_id):
 @invoice_bp.route("/invoices/<int:invoice_id>", methods=["DELETE"])
 @role_required(["admin"])
 def delete_invoice(invoice_id):
-    invoice = Invoice.query.get(invoice_id)
+    invoice = LegacyInvoice.query.get(invoice_id)
     if not invoice:
         return jsonify({"message": "Invoice not found"}), 404
 
@@ -82,11 +82,11 @@ def delete_invoice(invoice_id):
 @invoice_bp.route("/invoices/summary", methods=["GET"])
 @role_required(["admin", "finance"])
 def invoice_summary():
-    total = db.session.query(db.func.sum(Invoice.amount)) \
-        .filter(Invoice.status == "paid").scalar() or 0
-    pending = Invoice.query.filter_by(status="pending").count()
-    paid = Invoice.query.filter_by(status="paid").count()
-    overdue = Invoice.query.filter_by(status="overdue").count()
+    total = db.session.query(db.func.sum(LegacyInvoice.amount)) \
+        .filter(LegacyInvoice.status == "paid").scalar() or 0
+    pending = LegacyInvoice.query.filter_by(status="pending").count()
+    paid = LegacyInvoice.query.filter_by(status="paid").count()
+    overdue = LegacyInvoice.query.filter_by(status="overdue").count()
     return jsonify({
         "total_revenue": total,
         "pending": pending,

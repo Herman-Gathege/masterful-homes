@@ -1,7 +1,7 @@
 #backend/routes/finance_routes.py
 from flask import Blueprint, jsonify, request
 from sqlalchemy import func
-from models import db, Invoice, Installation, User
+from legacy_models import db, LegacyInvoice, LegacyInstallation, LegacyUser
 from utils.auth_middleware import token_required
 
 finance_bp = Blueprint("finance", __name__)
@@ -13,7 +13,7 @@ def get_invoices(current_user):
     if current_user.role not in ["finance", "admin", "manager"]:
         return jsonify({"message": "Access forbidden"}), 403
 
-    invoices = Invoice.query.all()
+    invoices = LegacyInvoice.query.all()
     data = [
         {
             "id": inv.id,
@@ -33,7 +33,7 @@ def update_invoice(current_user, invoice_id):
     if current_user.role not in ["finance", "admin"]:
         return jsonify({"message": "Access forbidden"}), 403
 
-    invoice = Invoice.query.get(invoice_id)
+    invoice = LegacyInvoice.query.get(invoice_id)
     if not invoice:
         return jsonify({"message": "Not found"}), 404
 
@@ -51,36 +51,36 @@ def finance_summary(current_user):
 
     # ✅ Only sum PAID invoices for revenue
     total_revenue = (
-        db.session.query(func.coalesce(func.sum(Invoice.amount), 0))
-        .filter(Invoice.status == "paid")
+        db.session.query(func.coalesce(func.sum(LegacyInvoice.amount), 0))
+        .filter(LegacyInvoice.status == "paid")
         .scalar()
     )
 
     jobs_completed = (
-        db.session.query(func.count(Installation.id))
-        .filter(Installation.status == "Completed")
+        db.session.query(func.count(LegacyInstallation.id))
+        .filter(LegacyInstallation.status == "Completed")
         .scalar()
     )
 
     outstanding_jobs = (
-        db.session.query(func.count(Installation.id))
-        .filter(Installation.status.in_(["Scheduled", "In Progress"]))
+        db.session.query(func.count(LegacyInstallation.id))
+        .filter(LegacyInstallation.status.in_(["Scheduled", "In Progress"]))
         .scalar()
     )
 
     average_price = (
-        db.session.query(func.coalesce(func.avg(Invoice.amount), 0))
-        .filter(Invoice.status == "paid")  # ✅ use only paid invoices
+        db.session.query(func.coalesce(func.avg(LegacyInvoice.amount), 0))
+        .filter(LegacyInvoice.status == "paid")  # ✅ use only paid invoices
         .scalar()
     )
 
     # ✅ Monthly revenue from paid invoices only
     monthly_revenue = (
         db.session.query(
-            func.to_char(Invoice.created_at, 'YYYY-MM').label("month"),
-            func.sum(Invoice.amount).label("revenue"),
+            func.to_char(LegacyInvoice.created_at, 'YYYY-MM').label("month"),
+            func.sum(LegacyInvoice.amount).label("revenue"),
         )
-        .filter(Invoice.status == "paid")
+        .filter(LegacyInvoice.status == "paid")
         .group_by("month")
         .order_by("month")  # 👈 ensures results are chronological
         .all()
@@ -108,12 +108,12 @@ def finance_breakdown(current_user):
     # ✅ Revenue by package from PAID invoices
     by_package = (
         db.session.query(
-            Installation.package_type,
-            func.sum(Invoice.amount).label("revenue")
+            LegacyInstallation.package_type,
+            func.sum(LegacyInvoice.amount).label("revenue")
         )
-        .join(Invoice, Invoice.installation_id == Installation.id)
-        .filter(Invoice.status == "paid")
-        .group_by(Installation.package_type)
+        .join(LegacyInvoice, LegacyInvoice.installation_id == LegacyInstallation.id)
+        .filter(LegacyInvoice.status == "paid")
+        .group_by(LegacyInstallation.package_type)
         .all()
     )
     package_data = [{"package_type": row[0], "revenue": float(row[1])} for row in by_package]
@@ -121,13 +121,13 @@ def finance_breakdown(current_user):
     # ✅ Revenue by technician from PAID invoices
     by_technician = (
         db.session.query(
-            User.username,
-            func.sum(Invoice.amount).label("revenue")
+            LegacyUser.username,
+            func.sum(LegacyInvoice.amount).label("revenue")
         )
-        .join(Installation, User.id == Installation.technician_id)
-        .join(Invoice, Invoice.installation_id == Installation.id)
-        .filter(Invoice.status == "paid")
-        .group_by(User.username)
+        .join(LegacyInstallation, LegacyUser.id == LegacyInstallation.technician_id)
+        .join(LegacyInvoice, LegacyInvoice.installation_id == LegacyInstallation.id)
+        .filter(LegacyInvoice.status == "paid")
+        .group_by(LegacyUser.username)
         .all()
     )
     tech_data = [{"technician_name": row[0], "revenue": float(row[1])} for row in by_technician]
