@@ -64,6 +64,9 @@ const Login = () => {
             Login
           </button>
         </form>
+        <p style={styles.text}>
+          Don't have an account? <a href="/signup">Sign Up</a>
+        </p>
       </div>
     </div>
   );

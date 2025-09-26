@@ -1,17 +1,33 @@
+// AboutUs.jsx (DashWise Revamp with animations & visuals)
 import React from "react";
 import Footer from "../components/Footer";
-import { FaLightbulb, FaHome, FaHandsHelping, FaCogs, FaUserCheck } from "react-icons/fa"; 
-import { MdDesignServices } from "react-icons/md";
+import {
+  FaLightbulb,
+  FaUsers,
+  FaHandsHelping,
+  FaCogs,
+  FaUserCheck,
+} from "react-icons/fa";
+import { MdDashboardCustomize } from "react-icons/md";
+import { motion } from "framer-motion";
 
 const AboutUs = () => {
   return (
     <div style={{ backgroundColor: "#ffffff", fontFamily: "sans-serif" }}>
       {/* Intro Section */}
       <section style={{ textAlign: "center", padding: "3rem 1rem" }}>
-        <h1 style={{ color: "#1b263b", fontSize: "3rem" }}>
-          Smart Homes. Thoughtful Renovations.
-        </h1>
-        <p
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ color: "#1b263b", fontSize: "3rem" }}
+        >
+          Smarter Work. Simpler Management.
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
           style={{
             maxWidth: "800px",
             margin: "1rem auto",
@@ -19,10 +35,19 @@ const AboutUs = () => {
             fontSize: "1.2rem",
           }}
         >
-          At <strong>Masterful Homes</strong>, we believe your home should adapt
-          to you. We combine smart technology and modern design so life feels
-          easy, efficient, and pleasantly elevated.
-        </p>
+          At <strong>DashWise</strong>, we believe businesses should run smoothly,
+          not stressfully. We bring together HR, tasks, time tracking, and
+          compliance into one smart dashboard so teams can focus on growth —
+          not juggling tools.
+        </motion.p>
+        <motion.img
+          src="/assets/about-placeholder.png"
+          alt="Team collaboration"
+          style={{ maxWidth: "600px", width: "100%", marginTop: "2rem", borderRadius: "8px" }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        />
       </section>
 
       {/* Mission + Vision */}
@@ -35,22 +60,37 @@ const AboutUs = () => {
           margin: "4rem 0",
         }}
       >
-        <div style={{ flex: "1", maxWidth: "400px", textAlign: "center" }}>
-          <FaLightbulb size={40} color="#1b263b" style={{ marginBottom: "1rem" }} />
-          <h2 style={{ color: "#1b263b" }}>Our Mission</h2>
-          <p style={{ color: "#1b263b" }}>
-            To transform homes into responsive, efficient, and inspiring spaces
-            through automation, thoughtful renovations, and personalized design.
-          </p>
-        </div>
-        <div style={{ flex: "1", maxWidth: "400px", textAlign: "center" }}>
-          <FaHome size={40} color="#1b263b" style={{ marginBottom: "1rem" }} />
-          <h2 style={{ color: "#1b263b" }}>Our Vision</h2>
-          <p style={{ color: "#1b263b" }}>
-            A world where every home empowers its owners — balancing comfort,
-            security, and sustainability with seamless living.
-          </p>
-        </div>
+        {[
+          {
+            icon: <FaLightbulb size={40} color="#1b263b" />,
+            title: "Our Mission",
+            desc: "To empower organizations of all sizes with accessible, centralized, and efficient tools that simplify daily operations.",
+          },
+          {
+            icon: <FaUsers size={40} color="#1b263b" />,
+            title: "Our Vision",
+            desc: "A future where every business has the clarity and confidence to grow with one powerful dashboard.",
+          },
+        ].map((item, idx) => (
+          <motion.div
+            key={idx}
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 200 }}
+            style={{
+              flex: "1",
+              maxWidth: "400px",
+              textAlign: "center",
+              background: "#f9f9f9",
+              padding: "2rem",
+              borderRadius: "10px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            }}
+          >
+            <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
+            <h2 style={{ color: "#1b263b" }}>{item.title}</h2>
+            <p style={{ color: "#1b263b" }}>{item.desc}</p>
+          </motion.div>
+        ))}
       </section>
 
       {/* Story Section */}
@@ -61,7 +101,14 @@ const AboutUs = () => {
           textAlign: "center",
         }}
       >
-        <h2 style={{ color: "#1b263b" }}>Our Story</h2>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ color: "#1b263b" }}
+        >
+          Our Story
+        </motion.h2>
         <p
           style={{
             maxWidth: "900px",
@@ -71,21 +118,24 @@ const AboutUs = () => {
             lineHeight: "1.8",
           }}
         >
-          We started Masterful Homes with a simple belief: your space should
-          serve you. Too often, homes feel complicated or outdated — either
-          overloaded with tech that isn’t intuitive, or stuck in designs that no
-          longer fit modern living. <br />
-          <br />
-          That’s why we built a service that blends automation and design. From
-          quick smart-plug setups to full-scale renovations, our work ensures
-          every home feels modern, efficient, and uniquely yours.
+          We built DashWise after seeing the challenges businesses face when
+          managing scattered tools. Too often, managers struggle with inefficiency,
+          employees feel disconnected, and important insights get lost.
         </p>
+        <motion.img
+          src="/assets/story-placeholder.png"
+          alt="Business workflow"
+          style={{ maxWidth: "700px", width: "100%", borderRadius: "8px" }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        />
       </section>
 
       {/* Why Choose Us */}
-      <section style={{ backgroundColor: "#f0f4f8", padding: "4rem 2rem" }}>
+      <section style={{ padding: "4rem 2rem" }}>
         <h2 style={{ textAlign: "center", color: "#1b263b" }}>
-          Why Choose Us?
+          Why Choose DashWise?
         </h2>
         <div
           style={{
@@ -98,61 +148,52 @@ const AboutUs = () => {
           {[
             {
               icon: <FaCogs size={40} color="#1b263b" />,
-              title: "Smart Innovation",
-              desc: "From lighting to climate control, we integrate the latest technology to simplify daily living.",
+              title: "All-in-One Efficiency",
+              desc: "Replace multiple apps with one dashboard.",
             },
             {
-              icon: <MdDesignServices size={40} color="#1b263b" />,
-              title: "Thoughtful Design",
-              desc: "Renovations that balance beauty with function — because great spaces look good and work perfectly.",
+              icon: <MdDashboardCustomize size={40} color="#1b263b" />,
+              title: "Customizable Modules",
+              desc: "Enable only what you need. DashWise grows with you.",
             },
             {
               icon: <FaHandsHelping size={40} color="#1b263b" />,
               title: "Dedicated Support",
-              desc: "We guide you from design to installation to post-setup tweaks, ensuring your home evolves with you.",
+              desc: "From onboarding to scaling — we’ve got you covered.",
             },
           ].map((item, idx) => (
-            <div
+            <motion.div
               key={idx}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 200 }}
               style={{
                 width: "300px",
                 marginBottom: "2rem",
                 textAlign: "center",
+                background: "#f9f9f9",
+                padding: "2rem",
+                borderRadius: "10px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
               }}
             >
               <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
               <h3 style={{ color: "#1b263b" }}>{item.title}</h3>
               <p style={{ color: "#1b263b" }}>{item.desc}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Approach Section */}
-      <section style={{ padding: "4rem 2rem", textAlign: "center" }}>
-        <FaUserCheck size={40} color="#1b263b" style={{ marginBottom: "1rem" }} />
-        <h2 style={{ color: "#1b263b" }}>How We Work</h2>
-        <p
-          style={{
-            maxWidth: "850px",
-            margin: "2rem auto",
-            color: "#1b263b",
-            fontSize: "1.1rem",
-            lineHeight: "1.8",
-          }}
-        >
-          Every project starts with discovery — understanding your routines,
-          style, and needs. From there, we design clear options, install with
-          care, and train your household until it’s second nature. Our support
-          doesn’t stop at delivery — we’re here as your life and home evolve.
-        </p>
-      </section>
-
-      {/* Call to Action */}
+      {/* CTA */}
       <section style={{ textAlign: "center", padding: "4rem 2rem" }}>
-        <h2 style={{ color: "#1b263b" }}>
-          Ready to Master Your Living Space?
-        </h2>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ color: "#1b263b" }}
+        >
+          Ready to Work Smarter?
+        </motion.h2>
         <p
           style={{
             maxWidth: "800px",
@@ -161,9 +202,8 @@ const AboutUs = () => {
             color: "#1b263b",
           }}
         >
-          From small smart upgrades to complete transformations, we’re here to
-          help you build a home that works beautifully — and feels uniquely
-          yours.
+          Whether you’re a small team or a growing enterprise, DashWise gives
+          you the clarity and control you need. Join us today.
         </p>
       </section>
 
