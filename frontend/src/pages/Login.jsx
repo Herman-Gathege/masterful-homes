@@ -18,16 +18,11 @@ const Login = () => {
     e.preventDefault();
     setError("");
     try {
-      const { access_token, refresh_token, role } = await loginUser(
-        credentials
-      );
+      const { access_token, refresh_token, role } = await loginUser(credentials);
       login(access_token, refresh_token, role);
 
-      // redirect based on role
-      if (role === "admin") navigate("/dashboard/admin");
-      else if (role === "manager") navigate("/dashboard/manager");
-      else if (role === "finance") navigate("/dashboard/finance");
-      else navigate("/dashboard/technician");
+      // Always send user to /dashboard
+      navigate("/dashboard");
     } catch (err) {
       setError(err);
     }
@@ -39,27 +34,24 @@ const Login = () => {
         <h2 style={styles.title}>Welcome Back</h2>
         {error && <p style={{ color: "red" }}>{error}</p>}
         <form onSubmit={handleSubmit} style={styles.form}>
-          
-            <input
-              type="email"
-              name="email"
-              value={credentials.email}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="Enter(work email)"
-            />
-          
-         
-            <input
-              type="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="Enter Your Password"
-            />
+          <input
+            type="email"
+            name="email"
+            value={credentials.email}
+            onChange={handleChange}
+            required
+            style={styles.input}
+            placeholder="Enter (work email)"
+          />
+          <input
+            type="password"
+            name="password"
+            value={credentials.password}
+            onChange={handleChange}
+            required
+            style={styles.input}
+            placeholder="Enter Your Password"
+          />
           <button type="submit" style={styles.button}>
             Login
           </button>
@@ -68,6 +60,7 @@ const Login = () => {
     </div>
   );
 };
+
 const styles = {
   container: {
     minHeight: "10vh",
@@ -114,30 +107,6 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
     transition: "background 0.3s",
-  },
-  message: {
-    color: "red",
-    textAlign: "center",
-    marginTop: "1rem",
-  },
-  row: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: "0.9rem",
-  },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.4rem",
-    color: "#333",
-  },
-  checkbox: {
-    accentColor: "#1b263b",
-  },
-  forgotLink: {
-    color: "#1b263b",
-    textDecoration: "none",
   },
 };
 

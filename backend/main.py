@@ -3,6 +3,8 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from extensions import db, bcrypt, jwt, migrate   # ✅ import from extensions
+from modules.config.routes import bp as config_bp
+
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -23,10 +25,17 @@ def create_app(test_config=None):
     with app.app_context():
         import core.models
 
-    CORS(app, resources={r"/api/*": {"origins": [
-        "http://localhost:5173",
-        "https://masterful-homes.vercel.app"
-    ]}}, supports_credentials=True)
+    # ✅ Correctly place CORS inside create_app
+    CORS(app, resources={r"/api/*": {
+        "origins": [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://masterful-homes.vercel.app"
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True
+    }})
 
     # Import and register older blueprints
     from routes.auth_routes import auth_bp
@@ -39,6 +48,7 @@ def create_app(test_config=None):
     from routes.invoice_routes import invoice_bp
 
     # Import and register new module blueprints
+    app.register_blueprint(config_bp)
     from modules.hr.routes import hr_bp
     from modules.time.routes import time_bp
     from modules.tasks.routes import tasks_bp
@@ -54,7 +64,7 @@ def create_app(test_config=None):
     # Register older blueprints
     app.register_blueprint(invoice_bp, url_prefix="/api")
     app.register_blueprint(notification_bp, url_prefix="/api")
-    app.register_blueprint(search_bp, url_prefix="/api")    
+    app.register_blueprint(search_bp, url_prefix="/api")
     app.register_blueprint(customer_bp, url_prefix="/api")
     app.register_blueprint(finance_bp, url_prefix="/api")
     app.register_blueprint(manager_bp, url_prefix="/api")
@@ -64,7 +74,7 @@ def create_app(test_config=None):
     @app.route("/")
     def index():
         return {"message": "Welcome to Masterful Homes Backend!"}, 200
-    
+
     @app.route("/api/health")
     def health():
         return {"status": "ok"}, 200

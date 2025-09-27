@@ -1,119 +1,22 @@
-
-// frontend/src/pages/dashboard/ManagerDashboard.jsx
-
-import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
-import { AuthContext } from "../../context/AuthContext";
-import InstallationsTable from "../../components/InstallationsTable";
-import Modal from "../../components/Modal";
-import TechnicianSchedule from "../../components/TechnicianSchedule";
-import InstallationForm from "../../components/InstallationForm";
+import React, { useContext } from "react";
+import { Outlet } from "react-router-dom";
 import { SidebarContext } from "../../context/SidebarContext";
-import CustomerList from "../../components/CustomerList";
-
-import {
-  FaHome,
-  FaTools,
-  FaCalendarAlt,
-  FaSignOutAlt,
-  FaChevronLeft,
-  FaChevronRight,
-  FaUserCog,
-} from "react-icons/fa";
+import Sidebar from "./Sidebar";
 
 import "../../css/Admindashboard.css";
 
 function ManagerDashboard() {
-  const [activeSection, setActiveSection] = useState("dashboard");
-  const [showModal, setShowModal] = useState(false);
   const { collapsed, setCollapsed } = useContext(SidebarContext);
-
-  const { logout } = useContext(AuthContext);
-  const navigate = useNavigate();
-
-  const handleSidebarClick = (section) => {
-    if (section === "logout") {
-      logout();
-      navigate("/login");
-      return;
-    }
-    setActiveSection(section);
-  };
 
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <div className={`sidebar ${collapsed ? "collapsed" : ""}`}>
-        <button
-          className="collapse-btn"
-          onClick={() => setCollapsed(!collapsed)}
-        >
-          {collapsed ? <FaChevronRight /> : <FaChevronLeft />}
-        </button>
-        <ul>
-          <li
-            onClick={() => handleSidebarClick("dashboard")}
-            className={activeSection === "dashboard" ? "active" : ""}
-          >
-            <FaHome className="icon" />
-            {!collapsed && "Dashboard"}
-          </li>
-          <li
-            onClick={() => handleSidebarClick("installations")}
-            className={activeSection === "installations" ? "active" : ""}
-          >
-            <FaTools className="icon" />
-            {!collapsed && "Installations"}
-          </li>
-          <li
-            onClick={() => handleSidebarClick("scheduling")}
-            className={activeSection === "scheduling" ? "active" : ""}
-          >
-            <FaCalendarAlt className="icon" />
-            {!collapsed && "Scheduling"}
-          </li>
-          <li
-            onClick={() => handleSidebarClick("customers")}
-            className={activeSection === "customers" ? "active" : ""}
-          >
-            <FaUserCog className="icon" />
-            {!collapsed && "Customers"}
-          </li>
-          <li onClick={() => handleSidebarClick("logout")}>
-            <FaSignOutAlt className="icon" />
-            {!collapsed && "Logout"}
-          </li>
-        </ul>
-      </div>
+      <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
       {/* Content */}
       <div className="content">
         <h2>Manager Dashboard</h2>
-
-        {activeSection === "dashboard" && (
-          <p>Welcome, Manager! Select a section from the sidebar.</p>
-        )}
-
-        {activeSection === "installations" && (
-          <>
-            <button
-              className="open-modal-btn"
-              onClick={() => setShowModal(true)}
-            >
-              New Installation
-            </button>
-
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-              <InstallationForm onSuccess={() => window.location.reload()} />
-            </Modal>
-
-            <InstallationsTable />
-          </>
-        )}
-
-        {activeSection === "scheduling" && <TechnicianSchedule />}
-
-        {activeSection === "customers" && <CustomerList />}
+        <Outlet /> {/* Module routes load here */}
       </div>
     </div>
   );
