@@ -1,3 +1,5 @@
+//frontend/src/modules/Sidebar/Sidebar.jsx
+
 import React, { useState, useEffect, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
@@ -10,7 +12,8 @@ import {
 } from "react-icons/fa";
 import { getTenantConfig } from "../../services/configService";
 import { AuthContext } from "../../context/AuthContext";
-import { SidebarContext } from "../../context/SidebarContext"; 
+import { SidebarContext } from "../../context/SidebarContext";
+import useNotificationStore from "../../store/notificationStore"; // ✅ import store
 import "./Sidebar.css";
 
 const Sidebar = ({ tenantId = "tenant_abc" }) => {
@@ -22,14 +25,8 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
   const { collapsed, setCollapsed } = useContext(SidebarContext);
   const navigate = useNavigate();
 
-  // 👇 moduleMap now defines "end" explicitly
-  const moduleMap = {
-    dashboard: { label: "Dashboard", icon: <FaHome />, path: "/dashboard", end: true },
-    hr: { label: "HR", icon: <FaUsers />, path: "/dashboard/hr", end: false },
-    tasks: { label: "Tasks", icon: <FaTasks />, path: "/dashboard/tasks", end: false },
-    time: { label: "Time", icon: <FaClock />, path: "/dashboard/time", end: false },
-    notifications: { label: "Notifications", icon: <FaBell />, path: "/dashboard/notifications", end: false },
-  };
+  //notifications from notification store
+  const { unreadCount, refreshUnread } = useNotificationStore();
 
   useEffect(() => {
     const fetchConfig = async () => {
@@ -47,6 +44,13 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
     fetchConfig();
   }, [tenantId]);
 
+  // auto-refresh unread count every 30s
+  useEffect(() => {
+    refreshUnread();
+    const interval = setInterval(refreshUnread, 30_000);
+    return () => clearInterval(interval);
+  }, [refreshUnread]);
+
   const handleLogout = () => {
     logout();
     navigate("/login");
@@ -59,6 +63,35 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
       </div>
     );
   }
+
+  // 👇 moduleMap now defines "end" explicitly
+  const moduleMap = {
+    dashboard: {
+      label: "Dashboard",
+      icon: <FaHome />,
+      path: "/dashboard",
+      end: true,
+    },
+    hr: { label: "HR", icon: <FaUsers />, path: "/dashboard/hr", end: false },
+    tasks: {
+      label: "Tasks",
+      icon: <FaTasks />,
+      path: "/dashboard/tasks",
+      end: false,
+    },
+    time: {
+      label: "Time",
+      icon: <FaClock />,
+      path: "/dashboard/time",
+      end: false,
+    },
+    notifications: {
+      label: "Notifications",
+      icon: <FaBell />,
+      path: "/dashboard/notifications",
+      end: false,
+    },
+  };
 
   return (
     <div
@@ -85,11 +118,26 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
             <li key={mod}>
               <NavLink
                 to={item.path}
-                end={item.end} // 👈 uses config from moduleMap
+                end={item.end}
                 className={({ isActive }) => (isActive ? "active" : "")}
               >
-                <span className="icon">{item.icon}</span>
-                {!collapsed && item.label}
+                <span className="icon" style={{ position: "relative" }}>
+                  {item.icon}
+                  {/* Small dot when collapsed */}
+                  {collapsed && mod === "notifications" && unreadCount > 0 && (
+                    <span className="sidebar-dot"></span>
+                  )}
+                </span>
+
+                {/* Numeric badge when expanded */}
+                {!collapsed && (
+                  <>
+                    {item.label}
+                    {mod === "notifications" && unreadCount > 0 && (
+                      <span className="sidebar-badge">{unreadCount}</span>
+                    )}
+                  </>
+                )}
               </NavLink>
             </li>
           );

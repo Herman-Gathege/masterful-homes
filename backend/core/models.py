@@ -190,7 +190,7 @@ class Notification(db.Model):
     message = db.Column(db.Text)
     payload = db.Column(db.JSON, nullable=True)
     severity = db.Column(db.Enum(NotificationSeverityEnum), default=NotificationSeverityEnum.INFO)
-    read = db.Column(db.Boolean, default=False)
+    is_read = db.Column(db.Boolean, default=False)
     delivered = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     read_at = db.Column(db.DateTime(timezone=True), nullable=True)
