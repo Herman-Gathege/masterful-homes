@@ -113,10 +113,13 @@ def seed_notifications(n=10):
             type="info",
             message=fake.sentence(),
             severity="info",
+            is_read=False,   # ✅ ensure seeded as unread
+            delivered=False, # ✅ match your model
         )
         db.session.add(note)
     db.session.commit()
     print(f"✅ {n} Notifications created")
+
 
 
 def seed_audit_logs(n=10):

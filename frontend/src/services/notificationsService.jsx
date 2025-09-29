@@ -1,20 +1,22 @@
 // frontend/src/services/notificationsService.jsx
 import axiosInstance from "../context/axiosInstance";
 
-export const getNotifications = async (page = 1, per_page = 10) => {
-  const res = await axiosInstance.get(`/notifications?page=${page}&per_page=${per_page}`);
+export const fetchNotifications = async (limit = 20, offset = 0) => {
+  const res = await axiosInstance.get(`/notifications/`, {
+    params: { limit, offset },
+  });
   return res.data;
 };
 
-export const getUnreadCount = async () => {
-  const res = await axiosInstance.get("/notifications/unread_count");
-  return res.data.unread;
+export const fetchUnreadCount = async () => {
+  const res = await axiosInstance.get(`/notifications/unread_count`);
+  return res.data.unread_count;
 };
 
-export const markAsRead = async (id) => {
+export const markNotificationAsRead = async (id) => {
   await axiosInstance.post(`/notifications/read/${id}`);
 };
 
 export const markAllAsRead = async () => {
-  await axiosInstance.post("/notifications/read_all");
+  await axiosInstance.post(`/notifications/read_all`);
 };

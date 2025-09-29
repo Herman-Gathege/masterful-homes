@@ -1,0 +1,143 @@
+/* ==========================
+   Drawer Base
+========================== */
+.notifications-drawer {
+  background: #fff;
+  border-left: 1px solid #e0e0e0;
+  height: 100%;
+  width: 340px;              /* fixed width for side panel */
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  box-shadow: -2px 0 6px rgba(0, 0, 0, 0.08);
+  border-radius: 6px 0 0 6px; /* rounded inner corner */
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ==========================
+   Header
+========================== */
+.notifications-drawer .drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid #eaeaea;
+  background-color: #fafafa;
+  position: sticky; /* keeps header fixed */
+  top: 0;
+  z-index: 10;
+}
+
+.notifications-drawer .drawer-header h5 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #053f5c;
+}
+
+.notifications-drawer .drawer-header button {
+  font-size: 13px;
+  padding: 5px 10px;
+  border: 1px solid #007bff;
+  background: #fff;
+  color: #007bff;
+  border-radius: 20px;         /* pill button */
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.notifications-drawer .drawer-header button:hover {
+  background: #007bff;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* ==========================
+   List Items
+========================== */
+.notifications-drawer ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+}
+
+.notifications-drawer li {
+  padding: 14px 18px;
+  border-bottom: 1px solid #f1f1f1;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.notifications-drawer li:hover {
+  background: #f9f9f9;
+  transform: translateX(3px); /* more pronounced nudge */
+}
+
+/* Unread vs Read states */
+.notifications-drawer li.unread {
+  background: #eef5ff;  /* softer blue */
+  font-weight: 600;
+  border-left: 4px solid #007bff; /* accent bar */
+}
+
+.notifications-drawer li.read {
+  background: #fff;
+  font-weight: normal;
+}
+
+/* ==========================
+   Message & Time
+========================== */
+.notifications-drawer li div {
+  margin-bottom: 4px;
+  color: #222;
+  line-height: 1.4;
+  font-size: 14px;
+}
+
+.notifications-drawer small {
+  color: #888;
+  font-size: 12px;
+}
+
+/* ==========================
+   Empty State
+========================== */
+.notifications-drawer .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #888;
+}
+
+.notifications-drawer .empty-state i {
+  font-size: 40px;
+  margin-bottom: 12px;
+  display: block;
+  color: #ccc;
+}
+
+/* Loading skeletons */
+.loading-state {
+  padding: 20px;
+}
+
+.skeleton {
+  height: 40px;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
