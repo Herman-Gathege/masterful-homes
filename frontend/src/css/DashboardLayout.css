@@ -1,0 +1,30 @@
+/* ==========================
+   Dashboard Layout Base
+========================== */
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+  background: #f9f9f9; /* subtle background */
+}
+
+/* ==========================
+   Content Area
+========================== */
+.content {
+  flex: 1;
+  padding: 1.5rem;
+  margin-left: 200px; /* matches expanded sidebar width */
+  transition: margin-left 0.3s ease, width 0.3s ease;
+  margin-top: 20px; /* space for top navbar */
+}
+
+/* When sidebar is collapsed */
+.content.collapsed {
+  margin-left: 100px; /* matches collapsed sidebar width */
+}
+
+/* Make content fluid */
+.content > * {
+  max-width: 100%;
+  box-sizing: border-box;
+}

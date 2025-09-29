@@ -1,7 +1,7 @@
-// frontend/src/context/AuthContext.jsx
+// src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
-import jwt_decode from "jwt-decode"; // Vite-compatible
+import jwt_decode from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -11,60 +11,64 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
+  // load from localStorage on mount
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedRefresh = localStorage.getItem("refresh_token");
     const savedRole = localStorage.getItem("role");
+    const savedUser = localStorage.getItem("user");
 
-    if (savedToken && savedRefresh && savedRole) {
+    if (savedToken && savedRefresh) {
       setToken(savedToken);
       setRefreshToken(savedRefresh);
-      setRole(savedRole);
+      setRole(savedRole || null);
 
       try {
-        const decoded = jwt_decode(savedToken);
-        setUser({
-          id: decoded.user_id,
-          username: decoded.username,
-          role: decoded.role,
-        });
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          const decoded = jwt_decode(savedToken);
+          setUser({
+            id: decoded.sub, // user id comes from "sub"
+            username: decoded.username || decoded.email,
+            role: decoded.role,
+            email: decoded.email,
+            tenant_id: decoded.tenant_id,
+          });
+        }
       } catch (err) {
         console.error("Failed to decode saved token", err);
       }
     }
   }, []);
 
-  const login = (accessToken, newRefreshToken, newRole) => {
+  // login: centralize persisting tokens + user
+  const login = (accessToken, newRefreshToken, userObj) => {
+    if (!accessToken || !newRefreshToken) return;
+
     localStorage.setItem("token", accessToken);
     localStorage.setItem("refresh_token", newRefreshToken);
-    localStorage.setItem("role", newRole);
+    if (userObj?.role) localStorage.setItem("role", userObj.role);
+    if (userObj) localStorage.setItem("user", JSON.stringify(userObj));
 
     setToken(accessToken);
     setRefreshToken(newRefreshToken);
-    setRole(newRole);
-
-    try {
-      const decoded = jwt_decode(accessToken);
-      setUser({
-        id: decoded.user_id,
-        username: decoded.username,
-        role: decoded.role,
-      });
-    } catch (err) {
-      console.error("Failed to decode login token", err);
-    }
+    setRole(userObj?.role || null);
+    setUser(userObj || null);
   };
 
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("role");
+    localStorage.removeItem("user");
     setToken(null);
     setRefreshToken(null);
     setRole(null);
     setUser(null);
   };
 
+  // Refresh access token using the refresh token (sent in Authorization header)
   const refreshAccessToken = async () => {
     if (!refreshToken) {
       logout();
@@ -72,12 +76,13 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      const response = await axios.post("https://masterful-homes.onrender.com/api/refresh", {
-        refresh_token: refreshToken,
-      });
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/auth/refresh",
+        {},
+        { headers: { Authorization: `Bearer ${refreshToken}` } }
+      );
 
       const { access_token, refresh_token: newRefresh } = response.data;
-
       if (!access_token || !newRefresh) throw new Error("Invalid refresh response");
 
       localStorage.setItem("token", access_token);
@@ -88,13 +93,16 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const decoded = jwt_decode(access_token);
-        setUser({
-          id: decoded.user_id,
-          username: decoded.username,
-          role: decoded.role,
-        });
+        setUser((prev) => ({
+          ...(prev || {}),
+          id: decoded.sub || prev?.id,
+          username: decoded.username || prev?.username,
+          role: decoded.role || prev?.role,
+          email: decoded.email || prev?.email,
+          tenant_id: decoded.tenant_id || prev?.tenant_id,
+        }));
       } catch (err) {
-        console.error("Failed to decode refreshed token", err);
+        // ignore decode errors
       }
 
       return access_token;

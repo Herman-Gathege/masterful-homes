@@ -1,8 +1,9 @@
-// Login.jsx
+// src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
+import "../css/Auth.css"; // 👈 new shared auth styles
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -18,127 +19,52 @@ const Login = () => {
     e.preventDefault();
     setError("");
     try {
-      const { access_token, refresh_token, role } = await loginUser(
-        credentials
-      );
-      login(access_token, refresh_token, role);
-
-      // redirect based on role
-      if (role === "admin") navigate("/dashboard/admin");
-      else if (role === "manager") navigate("/dashboard/manager");
-      else if (role === "finance") navigate("/dashboard/finance");
-      else navigate("/dashboard/technician");
+      const { access_token, refresh_token, user } = await loginUser(credentials);
+      login(access_token, refresh_token, user);
+      navigate("/dashboard");
     } catch (err) {
-      setError(err);
+      setError(err?.response?.data?.error || "Login failed. Please try again.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formCard}>
-        <h2 style={styles.title}>Welcome Back</h2>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        <form onSubmit={handleSubmit} style={styles.form}>
-          
-            <input
-              type="email"
-              name="email"
-              value={credentials.email}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="Enter(work email)"
-            />
-          
-         
-            <input
-              type="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              required
-              style={styles.input}
-              placeholder="Enter Your Password"
-            />
-          <button type="submit" style={styles.button}>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2 className="auth-title">Welcome Back</h2>
+        {error && <p className="auth-message">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <input
+            type="email"
+            name="email"
+            value={credentials.email}
+            onChange={handleChange}
+            required
+            className="auth-input"
+            placeholder="Enter work email"
+          />
+
+          <input
+            type="password"
+            name="password"
+            value={credentials.password}
+            onChange={handleChange}
+            required
+            className="auth-input"
+            placeholder="Enter your password"
+          />
+
+          <button type="submit" className="auth-button">
             Login
           </button>
         </form>
+
+        <p className="auth-text">
+          Don’t have an account? <NavLink to="/signup">Sign Up</NavLink>
+        </p>
       </div>
     </div>
   );
-};
-const styles = {
-  container: {
-    minHeight: "10vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    background: "#ffffff",
-    padding: "2rem",
-    marginTop: "10rem",
-  },
-  formCard: {
-    backgroundColor: "#ffffff",
-    padding: "3rem",
-    borderRadius: "12px",
-    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.1)",
-    width: "100%",
-    maxWidth: "450px",
-  },
-  title: {
-    textAlign: "center",
-    marginBottom: "2rem",
-    color: "#1b263b",
-    fontSize: "2rem",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1.2rem",
-  },
-  input: {
-    padding: "0.8rem",
-    fontSize: "0.9rem",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    outline: "none",
-    transition: "0.2s",
-  },
-  button: {
-    padding: "0.9rem",
-    fontSize: "1rem",
-    backgroundColor: "#1b263b",
-    color: "#fff",
-    border: "none",
-    borderRadius: "8px",
-    cursor: "pointer",
-    transition: "background 0.3s",
-  },
-  message: {
-    color: "red",
-    textAlign: "center",
-    marginTop: "1rem",
-  },
-  row: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: "0.9rem",
-  },
-  checkboxLabel: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.4rem",
-    color: "#333",
-  },
-  checkbox: {
-    accentColor: "#1b263b",
-  },
-  forgotLink: {
-    color: "#1b263b",
-    textDecoration: "none",
-  },
 };
 
 export default Login;

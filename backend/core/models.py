@@ -78,6 +78,7 @@ class User(db.Model):
     tenant_id = db.Column(db.String(64), index=True, nullable=False)
     email = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(255))
+    password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.Enum(RoleEnum), default=RoleEnum.TECHNICIAN)
     department = db.Column(db.String(128))
     team = db.Column(db.String(128))

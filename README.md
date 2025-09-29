@@ -144,3 +144,5 @@ uv run flask --app main:create_app db upgrade
 
 # Then reseed
 uv run python seed.py
+
+uv run ./main.py

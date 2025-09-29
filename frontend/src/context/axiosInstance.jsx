@@ -1,4 +1,4 @@
-// frontend/src/context/axiosInstance.jsx
+// src/context/axiosInstance.jsx
 import axios from "axios";
 
 let store = {
@@ -8,54 +8,42 @@ let store = {
 };
 
 export const setAuthStore = (authContext) => {
+  // keep references to the latest functions/values
   store.token = authContext.token;
   store.refreshAccessToken = authContext.refreshAccessToken;
   store.logout = authContext.logout;
 };
 
 const axiosInstance = axios.create({
-  baseURL: "https://masterful-homes.onrender.com/api",
+  baseURL: "http://127.0.0.1:5000/api",
   withCredentials: true,
 });
 
-// // Request interceptor → attach access token only
-// axiosInstance.interceptors.request.use(
-//   (config) => {
-//     if (store.token) {
-//       config.headers.Authorization = `Bearer ${store.token}`;
-//     }
-//     // NEVER send refresh token in headers
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
-
-// Request interceptor → attach access token from localStorage
+// Attach access token from in-memory store
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (store.token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${store.token}`;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-
-// Response interceptor → attempt refresh on 401 and retry once
+// Response interceptor -> try refresh on 401 once
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest?._retry) {
       originalRequest._retry = true;
 
       try {
-        const newAccessToken = await store.refreshAccessToken();
+        const newAccessToken = await store.refreshAccessToken?.();
         if (newAccessToken) {
-          // update header and retry
+          store.token = newAccessToken;
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
           return axiosInstance(originalRequest);
         }

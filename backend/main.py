@@ -29,7 +29,7 @@ def create_app(test_config=None):
     ]}}, supports_credentials=True)
 
     # Import and register older blueprints
-    from routes.auth_routes import auth_bp
+    # from routes.auth_routes import auth_bp
     from routes.admin_routes import admin_bp
     from routes.manager_routes import manager_bp
     from routes.finance_routes import finance_bp
@@ -44,7 +44,11 @@ def create_app(test_config=None):
     from modules.tasks.routes import tasks_bp
     from modules.dashboard.routes import dashboard_bp
     from modules.notifications.routes import notifications_bp
+    from modules.auth.routes import auth_bp
 
+    # Register new module blueprints
+    app.register_blueprint(auth_bp, url_prefix="/api/auth")
+    
     app.register_blueprint(hr_bp, url_prefix="/api")
     app.register_blueprint(time_bp, url_prefix="/api")
     app.register_blueprint(tasks_bp, url_prefix="/api")
@@ -58,7 +62,7 @@ def create_app(test_config=None):
     app.register_blueprint(customer_bp, url_prefix="/api")
     app.register_blueprint(finance_bp, url_prefix="/api")
     app.register_blueprint(manager_bp, url_prefix="/api")
-    app.register_blueprint(auth_bp, url_prefix="/api")
+    # app.register_blueprint(auth_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api")
 
     @app.route("/")
