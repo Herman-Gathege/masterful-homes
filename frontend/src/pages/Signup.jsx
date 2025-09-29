@@ -1,15 +1,16 @@
-// Signup.jsx
+// src/pages/Signup.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerUser } from "../services/authService";
+import { AuthContext } from "../context/AuthContext";
 
 const Signup = () => {
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
-    role: "technician", // default role
   });
+  const { login } = useContext(AuthContext);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const navigate = useNavigate();
@@ -18,17 +19,20 @@ const Signup = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    try {
-      await registerUser(form);
-      setSuccess("Account created! Please login.");
-      setTimeout(() => navigate("/login"), 1500);
-    } catch (err) {
-      setError(err);
-    }
-  };
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  try {
+    const { access_token, refresh_token, user } = await registerUser(form);
+
+    // auto-login after signup
+    login(access_token, refresh_token, user);
+    navigate("/dashboard");
+  } catch (err) {
+    setError(err?.response?.data?.error || "Signup failed");
+  }
+};
 
   return (
     <div style={styles.container}>
@@ -64,16 +68,6 @@ const Signup = () => {
             style={styles.input}
             placeholder="Create a password"
           />
-          <select
-            name="role"
-            value={form.role}
-            onChange={handleChange}
-            style={styles.select}
-          >
-            <option value="technician">Technician</option>
-            <option value="manager">Manager</option>
-            <option value="finance">Finance</option>
-          </select>
           <button type="submit" style={styles.button}>
             Sign Up
           </button>
@@ -123,15 +117,6 @@ const styles = {
     outline: "none",
     transition: "0.2s",
   },
-  select: {
-    padding: "0.8rem",
-    fontSize: "0.9rem",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-    outline: "none",
-    background: "#fff",
-    cursor: "pointer",
-  },
   button: {
     padding: "0.9rem",
     fontSize: "1rem",
@@ -151,6 +136,10 @@ const styles = {
     color: "green",
     textAlign: "center",
     marginBottom: "1rem",
+  },
+  text: {
+    textAlign: "center",
+    marginTop: "1rem",
   },
 };
 

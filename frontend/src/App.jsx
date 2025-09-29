@@ -1,4 +1,4 @@
-// App.jsx
+// src/App.jsx
 import { useContext, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -18,10 +18,14 @@ import AboutUs from "./pages/AboutUs";
 import Services from "./pages/Services";
 
 import UserRegistrationForm from "./components/UserRegistrationForm";
-import AdminDashboard from "./pages/dashboard/AdminDashboard";
-import ManagerDashboard from "./pages/dashboard/ManagerDashboard";
-import TechnicianDashboard from "./pages/dashboard/TechnicianDashboard";
-import FinanceDashboard from "./pages/dashboard/FinanceDashboard";
+
+// NEW: imports for modular dashboards
+import DashboardLayout from "./layouts/DashboardLayout";
+import Dashboard from "./modules/Dashboard";
+import HR from "./modules/HR";
+import Tasks from "./modules/Tasks";
+import Time from "./modules/Time";
+import Notifications from "./modules/Notifications";
 
 function AppContent() {
   const auth = useContext(AuthContext);
@@ -30,37 +34,36 @@ function AppContent() {
     setAuthStore(auth);
   }, [auth.token, auth.refreshToken]);
 
-  const DashboardRouter = () => {
-    const { role } = useContext(AuthContext);
-    console.log("Role in DashboardRouter:", role);
-
-    if (role === "admin") return <AdminDashboard />;
-    if (role === "manager") return <ManagerDashboard />;
-    if (role === "technician") return <TechnicianDashboard />;
-    if (role === "finance") return <FinanceDashboard />;
-
-    return <Navigate to="/" />;
+  const handleLogout = () => {
+    console.log("Logout clicked");
+    // TODO: clear auth + redirect to login
   };
 
   return (
     <Router>
       <Navbar />
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/services" element={<Services />} />
-
         <Route path="/register" element={<UserRegistrationForm />} />
-        <Route path="/dashboard" element={<DashboardRouter />} />
-        <Route path="/dashboard/manager" element={<ManagerDashboard />} />
-        <Route path="/dashboard/technician" element={<TechnicianDashboard />} />
-        <Route path="/dashboard/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard/finance" element={<FinanceDashboard />} />
+
+        {/* Modular Dashboard */}
+        <Route path="/dashboard" element={<DashboardLayout onLogout={handleLogout} />}>
+          <Route index element={<Dashboard />} />
+          <Route path="hr" element={<HR />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="time" element={<Time />} />
+          <Route path="notifications" element={<Notifications />} />
+        </Route>
+
+        {/* Fallback */}
+        <Route path="*" element={<h2>Page Not Found</h2>} />
       </Routes>
-      {/* <Footer /> */}
     </Router>
   );
 }

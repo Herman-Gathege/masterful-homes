@@ -1,0 +1,118 @@
+/* ==========================
+   Sidebar Base
+========================== */
+.sidebar {
+  width: 250px;
+  min-width: 250px;
+  background-color: var(--primary-light);
+  color: var(--text-light);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow-y: auto;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  transition: width 0.3s ease;
+  z-index: 100;
+}
+
+.sidebar.collapsed {
+  width: 70px;
+  min-width: 70px;
+}
+
+/* ==========================
+   Logo Area
+========================== */
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.sidebar-logo img {
+  max-width: 120px;
+  max-height: 40px;
+  object-fit: contain;
+  transition: max-width 0.3s ease;
+}
+
+.sidebar.collapsed .sidebar-logo img {
+  max-width: 40px;
+}
+
+/* ==========================
+   Theme Variants
+========================== */
+.sidebar.light {
+  background-color: #ffffff;
+  color: #222;
+}
+
+.sidebar.dark {
+  background-color: #1a1a1a;
+  color: #eee;
+}
+
+.sidebar.light ul li:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebar.dark ul li:hover {
+  background-color: #333;
+}
+
+/* ==========================
+   Menu Items
+========================== */
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar ul li {
+  padding: 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid var(--secondary-dark);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background-color 0.3s ease;
+}
+
+.sidebar ul li.active {
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.sidebar .icon {
+  font-size: 18px;
+}
+
+/* ==========================
+   Collapse Button
+========================== */
+.collapse-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  margin-bottom: 1rem;
+  align-self: flex-end;
+  font-size: 18px;
+}
+
+/* ==========================
+   Loading State
+========================== */
+.sidebar .loading {
+  text-align: center;
+  padding: 2rem;
+  font-size: 14px;
+  opacity: 0.7;
+}

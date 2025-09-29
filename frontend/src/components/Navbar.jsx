@@ -1,4 +1,4 @@
-// Navbar.jsx
+// frontend/src/components/Navbar.jsx
 import React, { useContext, useState, useEffect } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
@@ -6,10 +6,10 @@ import NotificationsBell from "./NotificationsBell";
 import SearchBar from "./SearchBar";
 import logo from "../assets/logo-icon.jpeg";
 import UserAvatar from "./UserAvatar";
-import "../css/Navbar.css"; // 👈 add a css file for responsiveness
+import "../css/Navbar.css";
 
 const Navbar = () => {
-  const { authenticated, logout, role } = useContext(AuthContext);
+  const { authenticated, logout } = useContext(AuthContext);
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,17 +25,6 @@ const Navbar = () => {
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [menuOpen]);
-
-  const getDashboardLabel = () =>
-    role === "admin"
-      ? "Admin Panel"
-      : role === "manager"
-      ? "Manager Hub"
-      : role === "technician"
-      ? "Tech Center"
-      : role === "finance"
-      ? "Finance Portal"
-      : "Dashboard";
 
   const handleLogout = () => {
     logout();
@@ -80,12 +69,14 @@ const Navbar = () => {
         )}
       </div>
 
-      {/* Right: Auth / Notifications / Avatar / Hamburger */}
+      {/* Right: Notifications / Avatar OR Signup */}
       <div className="navbar-right">
-        {authenticated && <NotificationsBell />}
-        {authenticated && <UserAvatar onLogout={handleLogout} />}
-
-        {!authenticated && (
+        {authenticated ? (
+          <>
+            <NotificationsBell />
+            <UserAvatar onLogout={handleLogout} />
+          </>
+        ) : (
           <NavLink to="/signup" className="signup-btn desktop-only">
             Get Started
           </NavLink>
@@ -108,14 +99,6 @@ const Navbar = () => {
           <>
             <li>
               <SearchBar />
-            </li>
-            <li>
-              <NavLink
-                to={`/dashboard/${role}`}
-                onClick={() => setMenuOpen(false)}
-              >
-                {getDashboardLabel()}
-              </NavLink>
             </li>
             <li>
               <button onClick={handleLogout} className="logout-btn">

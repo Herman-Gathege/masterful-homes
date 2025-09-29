@@ -63,6 +63,58 @@
   display: none; /* hide on desktop */
 }
 
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem; /* space between bell, avatar, button */
+}
+
+.navbar-right .signup-btn,
+.navbar-right > div {
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f4d03f; /* yellow background */
+  color: #1b263b;            /* dark text/initial */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  border: 2px solid #fff;    /* makes it visible on dark navbar */
+}
+
+/* Avatar */
+.user-avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f4d03f;
+  color: #1b263b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  cursor: pointer;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ensure navbar right items are visible */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1100; /* above sidebar */
+}
+
+
 /* Mobile menu hidden by default */
 .mobile-menu {
   display: none;
@@ -76,6 +128,7 @@
   background-color: #1b263b;
   z-index: 999;
 }
+
 
 /* Show hamburger + mobile menu under 768px */
 @media (max-width: 768px) {

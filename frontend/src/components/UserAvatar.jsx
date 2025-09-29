@@ -1,11 +1,12 @@
-// // src/components/UserAvatar.jsx
-
+// src/components/UserAvatar.jsx
 import React, { useState, useRef, useEffect, useContext } from "react";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 
+import "../css/Navbar.css";
+
 const UserAvatar = ({ onLogout }) => {
-  const { user, role } = useContext(AuthContext); // Access user and role from AuthContext
+  const { user } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -22,36 +23,17 @@ const UserAvatar = ({ onLogout }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const getDashboardLabel = () =>
-    role === "admin"
-      ? "Admin Panel"
-      : role === "manager"
-      ? "Manager Hub"
-      : role === "technician"
-      ? "Tech Center"
-      : role === "finance"
-      ? "Finance Portal"
-      : "Dashboard";
-
-  const avatarLetter = user?.username?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || "?";
+  const avatarLetter =
+    (user?.username && user.username[0]?.toUpperCase()) ||
+    (user?.email && user.email[0]?.toUpperCase()) ||
+    "?";
 
   return (
-    <div ref={dropdownRef} style={{ position: "relative" }}>
+    <div ref={dropdownRef} style={{ position: "relative" }} className="user-avatar">
       <div
         onClick={toggleDropdown}
-        style={{
-          width: "36px",
-          height: "36px",
-          borderRadius: "50%",
-          backgroundColor: "#f4d03f",
-          color: "#1b263b",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "bold",
-          cursor: "pointer",
-          userSelect: "none",
-        }}
+        className="user-avatar-circle"
+        title={user?.username || user?.email || "Account"}
       >
         {user?.photoUrl ? (
           <img
@@ -75,36 +57,40 @@ const UserAvatar = ({ onLogout }) => {
             position: "absolute",
             top: "45px",
             right: 0,
-            background: "#e9ebecff", // From SearchBar.css results background
-            color: "#455a70", // From SearchBar.css text
+            background: "#fff",
+            color: "#222",
             borderRadius: "8px",
             boxShadow: "0 4px 10px rgba(0, 0, 0, 0.15)",
-            width: "160px",
+            width: "180px",
             zIndex: 2000,
           }}
         >
           <ul style={{ listStyle: "none", margin: 0, padding: "8px 0" }}>
             <li>
               <NavLink
-                to={`/dashboard/${role}`}
+                to="/dashboard"
                 onClick={() => setOpen(false)}
                 style={({ isActive }) => ({
-                  ...menuItemStyle,
-                  color: isActive ? "#1b263b" : "#455a70",
-                  background: isActive ? "#778da9" : "transparent",
+                  padding: "10px 15px",
+                  display: "block",
+                  color: isActive ? "#1b263b" : "#333",
+                  textDecoration: "none",
                 })}
               >
-                {getDashboardLabel()}
+                Dashboard
               </NavLink>
             </li>
             <li
-              style={menuItemStyle}
-              onClick={() => alert("Go to Settings")} // Placeholder retained
+              style={{ padding: "10px 15px", cursor: "pointer" }}
+              onClick={() => {
+                setOpen(false);
+                alert("Go to Settings");
+              }}
             >
               Settings
             </li>
             <li
-              style={menuItemStyle}
+              style={{ padding: "10px 15px", cursor: "pointer" }}
               onClick={() => {
                 setOpen(false);
                 onLogout();
@@ -117,14 +103,6 @@ const UserAvatar = ({ onLogout }) => {
       )}
     </div>
   );
-};
-
-const menuItemStyle = {
-  padding: "10px 15px",
-  cursor: "pointer",
-  transition: "background 0.2s, color 0.2s",
-  display: "block",
-  color: "#455a70", // From SearchBar.css text
 };
 
 export default UserAvatar;
