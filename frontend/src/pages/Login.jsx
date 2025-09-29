@@ -1,8 +1,9 @@
 // src/pages/Login.jsx
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { loginUser } from "../services/authService";
 import { AuthContext } from "../context/AuthContext";
+import "../css/Auth.css"; // 👈 new shared auth styles
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
@@ -19,31 +20,28 @@ const Login = () => {
     setError("");
     try {
       const { access_token, refresh_token, user } = await loginUser(credentials);
-
-      // store tokens + user in context (AuthContext persists to localStorage)
       login(access_token, refresh_token, user);
-
-      // unified redirect
       navigate("/dashboard");
     } catch (err) {
-      setError(err?.response?.data?.error || err || "Login failed. Please try again.");
+      setError(err?.response?.data?.error || "Login failed. Please try again.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.formCard}>
-        <h2 style={styles.title}>Welcome Back</h2>
-        {error && <p style={styles.message}>{error}</p>}
-        <form onSubmit={handleSubmit} style={styles.form}>
+    <div className="auth-container">
+      <div className="auth-card">
+        <h2 className="auth-title">Welcome Back</h2>
+        {error && <p className="auth-message">{error}</p>}
+
+        <form onSubmit={handleSubmit} className="auth-form">
           <input
             type="email"
             name="email"
             value={credentials.email}
             onChange={handleChange}
             required
-            style={styles.input}
-            placeholder="Enter(work email)"
+            className="auth-input"
+            placeholder="Enter work email"
           />
 
           <input
@@ -52,16 +50,17 @@ const Login = () => {
             value={credentials.password}
             onChange={handleChange}
             required
-            style={styles.input}
-            placeholder="Enter Your Password"
+            className="auth-input"
+            placeholder="Enter your password"
           />
 
-          <button type="submit" style={styles.button}>
+          <button type="submit" className="auth-button">
             Login
           </button>
         </form>
-        <p style={styles.text}>
-          Don't have an account? <a href="/signup">Sign Up</a>
+
+        <p className="auth-text">
+          Don’t have an account? <NavLink to="/signup">Sign Up</NavLink>
         </p>
       </div>
     </div>
@@ -69,59 +68,3 @@ const Login = () => {
 };
 
 export default Login;
-
-// add styles object
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    backgroundColor: "#f4f6f8",
-  },
-  formCard: {
-    backgroundColor: "#fff",
-    padding: "2rem",
-    borderRadius: "8px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    width: "100%",
-    maxWidth: "400px",
-  },
-  title: {
-    fontSize: "1.5rem",
-    marginBottom: "1rem",
-    textAlign: "center",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "1rem",
-  },
-  input: {
-    padding: "0.75rem",
-    borderRadius: "6px",
-    border: "1px solid #ccc",
-    fontSize: "1rem",
-  },
-  button: {
-    padding: "0.75rem",
-    borderRadius: "6px",
-    border: "none",
-    backgroundColor: "#1b263b",
-    color: "#fff",
-    fontSize: "1rem",
-    fontWeight: "600",
-    cursor: "pointer",
-  },
-  text: {
-    marginTop: "1rem",
-    fontSize: "0.9rem",
-    textAlign: "center",
-  },
-  message: {
-    color: "red",
-    fontSize: "0.9rem",
-    marginBottom: "0.5rem",
-    textAlign: "center",
-  },
-};

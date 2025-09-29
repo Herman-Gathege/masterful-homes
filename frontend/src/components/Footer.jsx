@@ -8,140 +8,65 @@ import {
   FaInstagram,
 } from "react-icons/fa";
 import logo from "../assets/logo.jpeg";
+import "../css/Footer.css"; // 👈 new stylesheet
 
 function Footer() {
   return (
-    <footer
-      style={{
-        backgroundColor: "#1b263b",
-        color: "#fff",
-        padding: "3rem 1rem",
-        marginTop: "3rem",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "0 auto",
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-          gap: "2rem",
-        }}
-      >
+    <footer className="footer">
+      <div className="footer-container">
         {/* Logo + Tagline */}
-        <div>
-          <Link
-            to="/"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              textDecoration: "none",
-              color: "#fff",
-              marginBottom: "1rem",
-            }}
-          >
-            <img
-              src={logo}
-              alt="DashWise Logo"
-              style={{ height: "40px", marginRight: "10px" }}
-            />
-            <span style={{ fontWeight: "bold", fontSize: "20px" }}>
-              DashWise
-            </span>
+        <div className="footer-section">
+          <Link to="/" className="footer-logo">
+            <img src={logo} alt="DashWise Logo" />
+            <span>DashWise</span>
           </Link>
-          <p style={{ fontSize: "0.95rem", lineHeight: "1.6" }}>
+          <p>
             The all-in-one business dashboard to manage teams, tasks, and
             compliance built for growth, designed for impact.
           </p>
         </div>
 
         {/* Quick Links */}
-        <div>
-          <h4 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>
-            Quick Links
-          </h4>
-          <ul style={{ listStyle: "none", padding: 0, lineHeight: "1.8" }}>
+        <div className="footer-section">
+          <h4>Quick Links</h4>
+          <ul>
             <li>
-              <Link to="/about-us" style={{ color: "#fff", textDecoration: "none" }}>
-                About Us
-              </Link>
+              <Link to="/about-us">About Us</Link>
             </li>
             <li>
-              <Link to="/services" style={{ color: "#fff", textDecoration: "none" }}>
-                Services
-              </Link>
+              <Link to="/services">Services</Link>
             </li>
             <li>
-              <Link to="/contact-us" style={{ color: "#fff", textDecoration: "none" }}>
-                Contact
-              </Link>
+              <Link to="/contact-us">Contact</Link>
             </li>
             <li>
-              <Link to="/signup" style={{ color: "#fff", textDecoration: "none" }}>
-                Get Started
-              </Link>
+              <Link to="/signup">Get Started</Link>
             </li>
           </ul>
         </div>
 
         {/* Contact Info */}
-        <div>
-          <h4 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>
-            Contact
-          </h4>
-          <p style={{ margin: "0.3rem 0" }}>Email: support@dashwise.com</p>
-          <p style={{ margin: "0.3rem 0" }}>Phone: +254 700 000 000</p>
-          <p style={{ margin: "0.3rem 0" }}>Nairobi, Kenya</p>
+        <div className="footer-section">
+          <h4>Contact</h4>
+          <p>Email: support@dashwise.com</p>
+          <p>Phone: +254 700 000 000</p>
+          <p>Nairobi, Kenya</p>
         </div>
 
         {/* Social Links */}
-        <div>
-          <h4 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>
-            Follow Us
-          </h4>
-          <div style={{ display: "flex", gap: "0.8rem" }}>
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "#fff",
-                fontSize: "1.2rem",
-              }}
-            >
+        <div className="footer-section">
+          <h4>Follow Us</h4>
+          <div className="social-links">
+            <a href="https://facebook.com" target="_blank" rel="noreferrer">
               <FaFacebookF />
             </a>
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "#fff",
-                fontSize: "1.2rem",
-              }}
-            >
+            <a href="https://twitter.com" target="_blank" rel="noreferrer">
               <FaTwitter />
             </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "#fff",
-                fontSize: "1.2rem",
-              }}
-            >
+            <a href="https://linkedin.com" target="_blank" rel="noreferrer">
               <FaLinkedinIn />
             </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "#fff",
-                fontSize: "1.2rem",
-              }}
-            >
+            <a href="https://instagram.com" target="_blank" rel="noreferrer">
               <FaInstagram />
             </a>
           </div>
@@ -149,18 +74,8 @@ function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div
-        style={{
-          textAlign: "center",
-          marginTop: "2rem",
-          fontSize: "0.9rem",
-          borderTop: "1px solid rgba(255,255,255,0.2)",
-          paddingTop: "1rem",
-        }}
-      >
-        <p>
-          &copy; {new Date().getFullYear()} DashWise. All rights reserved.
-        </p>
+      <div className="footer-bottom">
+        <p>&copy; {new Date().getFullYear()} DashWise. All rights reserved.</p>
       </div>
     </footer>
   );
