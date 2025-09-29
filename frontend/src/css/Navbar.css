@@ -1,43 +1,59 @@
+/* ==========================
+   Navbar Base
+========================== */
 .navbar {
-  background-color: #1b263b;
-  padding: 8px 16px;
+  background-color: #053f5c; /* deep blue to match sidebar hover/active */
+  padding: 0 20px;
+  height: 60px;
   color: #fff;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 60px;
-  z-index: 1000;
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
+/* ==========================
+   Left (Logo)
+========================== */
 .logo {
   display: flex;
   align-items: center;
   text-decoration: none;
   color: #fff;
-  font-weight: bold;
-  font-size: 16px;
+  font-weight: 700;
+  font-size: 18px;
+  gap: 8px;
 }
 
 .logo img {
-  height: 24px;
-  margin-right: 8px;
+  height: 28px;
+  border-radius: 6px;
 }
 
+/* ==========================
+   Center Links
+========================== */
 .menu-links {
   list-style: none;
   display: flex;
-  gap: 16px;
+  gap: 24px;
 }
 
 .menu-links li a {
   color: #fff;
   text-decoration: none;
-  padding: 6px 8px;
   font-weight: 500;
+  padding: 6px 0;
+  transition: color 0.2s ease;
+}
+
+.menu-links li a:hover {
+  color: #f4d03f; /* yellow accent */
 }
 
 .menu-links li a.active {
@@ -45,77 +61,57 @@
   border-bottom: 2px solid #f4d03f;
 }
 
-.signup-btn {
-  background-color: #f4d03f;
-  color: #1b263b;
-  text-decoration: none;
-  padding: 6px 16px;
-  border-radius: 6px;
-  font-weight: 600;
-}
-
-.menu-toggle {
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 24px;
-  cursor: pointer;
-  display: none; /* hide on desktop */
-}
-
+/* ==========================
+   Right (Avatar, Buttons)
+========================== */
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 1rem; /* space between bell, avatar, button */
+  gap: 1rem;
 }
 
-.navbar-right .signup-btn,
-.navbar-right > div {
-  display: flex;
-  align-items: center;
+.signup-btn {
+  background-color: #f4d03f;
+  color: #053f5c;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background-color: #f4d03f; /* yellow background */
-  color: #1b263b;            /* dark text/initial */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  cursor: pointer;
-  user-select: none;
-  border: 2px solid #fff;    /* makes it visible on dark navbar */
+.signup-btn:hover {
+  background-color: #ffd633;
 }
 
 /* Avatar */
+.user-avatar,
 .user-avatar-circle {
   width: 36px;
   height: 36px;
   border-radius: 50%;
   background-color: #f4d03f;
-  color: #1b263b;
-  display: inline-flex;
+  color: #053f5c;
+  display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   cursor: pointer;
-  user-select: none;
-  overflow: hidden;
+  border: 2px solid #fff;
 }
 
-/* ensure navbar right items are visible */
-.navbar-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 1100; /* above sidebar */
+/* ==========================
+   Mobile
+========================== */
+.menu-toggle {
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  display: none;
 }
 
-
-/* Mobile menu hidden by default */
 .mobile-menu {
   display: none;
   flex-direction: column;
@@ -125,23 +121,34 @@
   top: 60px;
   left: 0;
   right: 0;
-  background-color: #1b263b;
-  z-index: 999;
+  background-color: #053f5c;
+  z-index: 1099;
 }
 
+.mobile-menu li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+  padding: 8px;
+  border-radius: 6px;
+}
 
-/* Show hamburger + mobile menu under 768px */
+.mobile-menu li a:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .menu-links {
-    display: none; /* hide desktop links */
+    display: none;
   }
   .menu-toggle {
-    display: block; /* show hamburger */
+    display: block;
   }
   .mobile-menu.open {
     display: flex;
   }
   .desktop-only {
-    display: none
+    display: none;
   }
 }

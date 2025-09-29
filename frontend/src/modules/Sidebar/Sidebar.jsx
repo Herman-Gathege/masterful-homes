@@ -1,30 +1,34 @@
-// frontend/src/modules/Sidebar/Sidebar.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaHome, FaUsers, FaTasks, FaClock, FaBell, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaHome,
+  FaUsers,
+  FaTasks,
+  FaClock,
+  FaBell,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import { getTenantConfig } from "../../services/configService";
-import { AuthContext } from "../../context/AuthContext"; // 👈 bring in AuthContext
+import { AuthContext } from "../../context/AuthContext";
+import { SidebarContext } from "../../context/SidebarContext"; 
 import "./Sidebar.css";
 
-const Sidebar = ({ tenantId = "tenant_abc", collapsed, setCollapsed }) => {
+const Sidebar = ({ tenantId = "tenant_abc" }) => {
   const [modules, setModules] = useState([]);
   const [branding, setBranding] = useState({ logo: "", theme: "light" });
   const [loading, setLoading] = useState(true);
 
-  const { logout } = useContext(AuthContext); // 👈 access logout
+  const { logout } = useContext(AuthContext);
+  const { collapsed, setCollapsed } = useContext(SidebarContext);
   const navigate = useNavigate();
 
-  // Map backend modules to sidebar items
+  // 👇 moduleMap now defines "end" explicitly
   const moduleMap = {
-    dashboard: { label: "Dashboard", icon: <FaHome />, path: "/dashboard" },
-    hr: { label: "HR", icon: <FaUsers />, path: "/dashboard/hr" },
-    tasks: { label: "Tasks", icon: <FaTasks />, path: "/dashboard/tasks" },
-    time: { label: "Time", icon: <FaClock />, path: "/dashboard/time" },
-    notifications: {
-      label: "Notifications",
-      icon: <FaBell />,
-      path: "/dashboard/notifications",
-    },
+    dashboard: { label: "Dashboard", icon: <FaHome />, path: "/dashboard", end: true },
+    hr: { label: "HR", icon: <FaUsers />, path: "/dashboard/hr", end: false },
+    tasks: { label: "Tasks", icon: <FaTasks />, path: "/dashboard/tasks", end: false },
+    time: { label: "Time", icon: <FaClock />, path: "/dashboard/time", end: false },
+    notifications: { label: "Notifications", icon: <FaBell />, path: "/dashboard/notifications", end: false },
   };
 
   useEffect(() => {
@@ -44,8 +48,8 @@ const Sidebar = ({ tenantId = "tenant_abc", collapsed, setCollapsed }) => {
   }, [tenantId]);
 
   const handleLogout = () => {
-    logout(); // clear auth state + localStorage
-    navigate("/login"); // redirect
+    logout();
+    navigate("/login");
   };
 
   if (loading) {
@@ -57,7 +61,11 @@ const Sidebar = ({ tenantId = "tenant_abc", collapsed, setCollapsed }) => {
   }
 
   return (
-    <div className={`sidebar ${branding.theme || "light"} ${collapsed ? "collapsed" : ""}`}>
+    <div
+      className={`sidebar ${branding.theme || "light"} ${
+        collapsed ? "collapsed" : ""
+      }`}
+    >
       {/* Logo */}
       <div className="sidebar-logo">
         {branding.logo && <img src={branding.logo} alt="Company Logo" />}
@@ -77,6 +85,7 @@ const Sidebar = ({ tenantId = "tenant_abc", collapsed, setCollapsed }) => {
             <li key={mod}>
               <NavLink
                 to={item.path}
+                end={item.end} // 👈 uses config from moduleMap
                 className={({ isActive }) => (isActive ? "active" : "")}
               >
                 <span className="icon">{item.icon}</span>
@@ -87,11 +96,13 @@ const Sidebar = ({ tenantId = "tenant_abc", collapsed, setCollapsed }) => {
         })}
 
         {/* Logout button always at bottom */}
-        <li className="logout-item" onClick={handleLogout}>
-          <span className="icon">
-            <FaSignOutAlt />
-          </span>
-          {!collapsed && "Logout"}
+        <li className="logout-item">
+          <button onClick={handleLogout}>
+            <span className="icon">
+              <FaSignOutAlt />
+            </span>
+            {!collapsed && "Logout"}
+          </button>
         </li>
       </ul>
     </div>

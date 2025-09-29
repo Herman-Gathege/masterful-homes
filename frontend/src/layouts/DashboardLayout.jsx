@@ -1,28 +1,27 @@
-// src/layouts/DashboardLayout.jsx
-import React, { useState } from "react";
+import React, { useContext } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "../modules/Sidebar/Sidebar";
-import { SidebarContext } from "../context/SidebarContext";
+import { SidebarProvider, SidebarContext } from "../context/SidebarContext"; 
+import "../css/DashboardLayout.css"; // 👈 import new CSS
 
 function DashboardLayout({ onLogout }) {
-  const [collapsed, setCollapsed] = useState(false);
+  return (
+    <SidebarProvider>
+      <LayoutContent onLogout={onLogout} />
+    </SidebarProvider>
+  );
+}
+
+function LayoutContent({ onLogout }) {
+  const { collapsed } = useContext(SidebarContext);
 
   return (
-    <SidebarContext.Provider value={{ collapsed, setCollapsed }}>
-      <div className="dashboard-container">
-        <Sidebar
-          tenantId="tenant_abc" // later: pull from AuthContext/JWT
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-          onLogout={onLogout}
-        />
-        <div
-          className={`content ${collapsed ? "collapsed" : ""} `}
-        >
-          <Outlet />
-        </div>
+    <div className="dashboard-container">
+      <Sidebar tenantId="tenant_abc" onLogout={onLogout} />
+      <div className={`content ${collapsed ? "collapsed" : ""}`}>
+        <Outlet />
       </div>
-    </SidebarContext.Provider>
+    </div>
   );
 }
 
