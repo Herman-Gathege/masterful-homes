@@ -1,4 +1,4 @@
-// App.jsx
+// src/App.jsx
 import { useContext, useEffect } from "react";
 import {
   BrowserRouter as Router,
@@ -23,13 +23,6 @@ import ManagerDashboard from "./pages/dashboard/ManagerDashboard";
 import TechnicianDashboard from "./pages/dashboard/TechnicianDashboard";
 import FinanceDashboard from "./pages/dashboard/FinanceDashboard";
 
-// Shared module pages
-import DashboardPage from "./modules/Dashboard/DashboardPage";
-import HRPage from "./modules/HR/HRPage";
-import TasksPage from "./modules/Tasks/TasksPage";
-import TimePage from "./modules/Time/TimePage";
-import NotificationsPage from "./modules/Notifications/NotificationsPage";
-
 function AppContent() {
   const auth = useContext(AuthContext);
 
@@ -37,7 +30,6 @@ function AppContent() {
     setAuthStore(auth);
   }, [auth.token, auth.refreshToken]);
 
-  // Role-based router for dashboards
   const DashboardRouter = () => {
     const { role } = useContext(AuthContext);
     console.log("Role in DashboardRouter:", role);
@@ -47,7 +39,7 @@ function AppContent() {
     if (role === "technician") return <TechnicianDashboard />;
     if (role === "finance") return <FinanceDashboard />;
 
-    return <Navigate to="/" replace />;
+    return <Navigate to="/" />;
   };
 
   return (
@@ -61,21 +53,12 @@ function AppContent() {
         <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/services" element={<Services />} />
-
         <Route path="/register" element={<UserRegistrationForm />} />
-
-        {/* Role-based dashboard route */}
-        <Route path="/dashboard/*" element={<DashboardRouter />}>
-          {/* Shared module child routes */}
-          <Route path="home" element={<DashboardPage />} />
-          <Route path="hr" element={<HRPage />} />
-          <Route path="tasks" element={<TasksPage />} />
-          <Route path="time" element={<TimePage />} />
-          <Route path="notifications" element={<NotificationsPage />} />
-        </Route>
-
-        {/* Catch-all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="/dashboard" element={<DashboardRouter />} />
+        <Route path="/dashboard/manager" element={<ManagerDashboard />} />
+        <Route path="/dashboard/technician" element={<TechnicianDashboard />} />
+        <Route path="/dashboard/admin" element={<AdminDashboard />} />
+        <Route path="/dashboard/finance" element={<FinanceDashboard />} />
       </Routes>
     </Router>
   );

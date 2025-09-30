@@ -1,6 +1,8 @@
 #backend/modules/dashboard/routes.py
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from core.models import TenantConfig
+
 
 from .service import (
     active_employees_count,
@@ -10,7 +12,7 @@ from .service import (
     revenue_today
 )
 
-dashboard_bp = Blueprint("dashboard", __name__, url_prefix="/dashboard")
+dashboard_bp = Blueprint("dashboard", __name__)
 
 @dashboard_bp.route("/ping", methods=["GET"])
 def ping():
@@ -19,7 +21,6 @@ def ping():
 
 
 
-dashboard_bp = Blueprint("dashboard", __name__)
 
 @dashboard_bp.route("/kpi/overview", methods=["GET"])
 # @jwt_required()  # protect if required
@@ -48,3 +49,39 @@ def kpi_overview():
         "low_stock": low_stock_list,
         "revenue_today": revenue,
     })
+
+
+
+@dashboard_bp.route("/config", methods=["GET"])
+# @jwt_required(optional=True)  # optional while testing
+def get_config():
+    """
+    Return tenant config that drives the frontend sidebar and branding.
+    """
+    tenant_id = None
+    try:
+        identity = get_jwt_identity()
+        if isinstance(identity, dict):
+            tenant_id = identity.get("tenant_id")
+        elif isinstance(identity, str):
+            tenant_id = identity
+    except Exception:
+        tenant_id = None
+
+    # fallback to query param for now
+    if not tenant_id:
+        tenant_id = request.args.get("tenant_id")
+
+    if not tenant_id:
+        return jsonify({"error": "tenant_id required"}), 400
+
+    config = TenantConfig.query.filter_by(tenant_id=tenant_id).first()
+    if not config:
+        return jsonify({"error": "Tenant config not found"}), 404
+
+    return jsonify({
+        "tenant_id": config.tenant_id,
+        "enabled_modules": config.enabled_modules or [],
+        "branding": config.branding or {},
+        "trial_status": config.trial_status or ""
+    }), 200

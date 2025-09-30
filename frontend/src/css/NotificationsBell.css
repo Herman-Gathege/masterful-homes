@@ -51,7 +51,7 @@
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   border-radius: 6px;
   z-index: 10;
-  color: #333; /* make text visible */
+  animation: fadeIn 0.2s ease-in-out;
 }
 
 .dropdown-header {
@@ -104,4 +104,16 @@
   text-align: center;
   padding: 20px;
   color: #666;
+}
+
+/* Smooth fade-in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

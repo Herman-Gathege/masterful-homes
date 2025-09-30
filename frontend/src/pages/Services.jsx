@@ -1,117 +1,161 @@
+// src/pages/Services.jsx
 import React from "react";
 import {
-  FaCogs,
-  FaBolt,
-  FaLock,
-  FaLeaf,
   FaUsers,
-  FaPaintRoller,
-  FaLightbulb,
-  FaMobileAlt,
+  FaTasks,
+  FaClock,
+  FaShieldAlt,
+  FaChartBar,
+  FaCogs,
   FaHandsHelping,
 } from "react-icons/fa";
 import {
-  MdOutlineDesignServices,
-  MdOutlineHomeRepairService,
+  MdDashboardCustomize,
+  MdOutlineIntegrationInstructions,
 } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import Footer from "../components/Footer";
 
 const Services = () => {
   return (
-    <div style={{ fontFamily: "sans-serif", backgroundColor: "#ffffff" }}>
+    <div
+      style={{ fontFamily: "Inter, sans-serif", backgroundColor: "#ffffff" }}
+    >
       {/* Hero */}
       <section
         style={{
-          padding: "4rem 2rem",
           textAlign: "center",
+          padding: "5rem 1rem",
           backgroundColor: "#f5f7fa",
         }}
       >
-        <h1 style={{ fontSize: "3rem", color: "#1b263b" }}>Our Services</h1>
-        <p
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
           style={{
-            maxWidth: "800px",
-            margin: "1rem auto",
-            fontSize: "1.2rem",
-            color: "#1b263b",
+            fontSize: "3rem",
+            fontWeight: "700",
+            color: "#053f5c",
           }}
         >
-          Smart home automations, thoughtful renovations, and customizable
-          packages — helping you live in a home that adapts to you.
-        </p>
+          Our Services
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          style={{
+            maxWidth: "800px",
+            margin: "1.5rem auto",
+            fontSize: "1.2rem",
+            color: "#053f5c",
+          }}
+        >
+          DashWise unifies HR, tasks, time tracking, and compliance into one
+          powerful platform — helping your business work smarter, faster, and
+          more securely.
+        </motion.p>
+        <motion.img
+          src="/src/assets/hero-image.jpeg"
+          alt="Dashboard Preview"
+          style={{
+            maxWidth: "720px",
+            width: "100%",
+            marginTop: "2rem",
+            borderRadius: "10px",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+          }}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        />
       </section>
 
-      {/* Core Services */}
-      <section style={{ padding: "3rem 2rem" }}>
-        <h2 style={{ textAlign: "center", color: "#1b263b" }}>
-          Smart Living, with or without Renovations
+      {/* Core Modules */}
+      <section style={{ padding: "5rem 2rem" }}>
+        <h2
+          style={{
+            textAlign: "center",
+            color: "#053f5c",
+            fontWeight: "700",
+          }}
+        >
+          Core Modules for Smarter Management
         </h2>
-
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "2rem",
-            marginTop: "2rem",
-            maxWidth: "1000px",
+            marginTop: "3rem",
+            maxWidth: "1200px",
             marginLeft: "auto",
             marginRight: "auto",
           }}
         >
           {[
             {
-              icon: <FaCogs size={40} color="#1b263b" />,
-              title: "Whole-home Control",
-              desc: "Lighting, climate, security, and entertainment that respond to your voice, touch, schedule, or presence.",
+              icon: <FaUsers size={40} color="#053f5c" />,
+              title: "HR Directory",
+              desc: "Manage employees, roles, and onboarding from one dashboard.",
             },
             {
-              icon: <MdOutlineDesignServices size={40} color="#1b263b" />,
-              title: "Personalized Scenes",
-              desc: "Modes like Work, Entertain, or Zen set lights, music, and temperature to match your lifestyle in a single tap.",
+              icon: <FaTasks size={40} color="#053f5c" />,
+              title: "Task Management",
+              desc: "Assign, track, and complete tasks seamlessly across your team.",
             },
             {
-              icon: <FaUsers size={40} color="#1b263b" />,
-              title: "Multi-user Friendly",
-              desc: "Profiles for partners, kids, roommates, and guests — simple, secure, and intuitive.",
+              icon: <FaClock size={40} color="#053f5c" />,
+              title: "Time & Attendance",
+              desc: "Track hours, manage PTO, and generate payroll-ready reports.",
             },
             {
-              icon: <FaLeaf size={40} color="#1b263b" />,
-              title: "Energy Savings",
-              desc: "Smart thermostats, occupancy sensors, and schedules that cut waste without sacrificing comfort.",
+              icon: <FaShieldAlt size={40} color="#053f5c" />,
+              title: "Compliance & Docs",
+              desc: "Securely store documents with audit trails and reminders.",
             },
             {
-              icon: <FaLock size={40} color="#1b263b" />,
-              title: "Security & Peace of Mind",
-              desc: "Smart locks, cameras, and presence simulation that protect your home when you’re away.",
+              icon: <FaChartBar size={40} color="#053f5c" />,
+              title: "Insights & KPIs",
+              desc: "Visualize productivity and monitor performance in real-time.",
             },
             {
-              icon: <FaBolt size={40} color="#1b263b" />,
-              title: "Performance Upgrades",
-              desc: "Soundproofing, insulation, and layout tweaks for comfort and efficiency.",
+              icon: <MdDashboardCustomize size={40} color="#053f5c" />,
+              title: "Customizable Dashboard",
+              desc: "Enable only the modules you need and scale as you grow.",
             },
           ].map((item, idx) => (
-            <div
+            <motion.div
               key={idx}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 200 }}
               style={{
-                backgroundColor: "#f9f9f9",
-                padding: "1.5rem",
-                borderRadius: "10px",
+                background: "#f9f9f9",
+                padding: "2rem",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderTop: "4px solid #053f5c",
                 textAlign: "center",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
               }}
             >
               <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
-              <h3 style={{ color: "#1b263b" }}>{item.title}</h3>
-              <p style={{ color: "#1b263b" }}>{item.desc}</p>
-            </div>
+              <h3 style={{ color: "#053f5c", fontWeight: "600" }}>
+                {item.title}
+              </h3>
+              <p style={{ color: "#053f5c" }}>{item.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Lifestyle Modes */}
-      <section style={{ padding: "3rem 2rem", backgroundColor: "#f0f4f8" }}>
-        <h2 style={{ textAlign: "center", color: "#1b263b" }}>
-          Work Better, Unwind Faster, Entertain Easier
+      {/* Workflows Section */}
+      <section style={{ padding: "5rem 2rem", backgroundColor: "#e6eef5" }}>
+        <h2
+          style={{ textAlign: "center", color: "#053f5c", fontWeight: "700" }}
+        >
+          Workflows That Simplify Your Day
         </h2>
         <div
           style={{
@@ -119,46 +163,58 @@ const Services = () => {
             flexWrap: "wrap",
             justifyContent: "center",
             gap: "2rem",
-            marginTop: "2rem",
+            marginTop: "3rem",
           }}
         >
           {[
             {
-              icon: <FaMobileAlt size={40} color="#1b263b" />,
-              title: "Work Mode",
-              desc: "Task lighting, glare-free shades, quiet fans, and rock-solid Wi-Fi for productivity in one tap.",
+              icon: (
+                <MdOutlineIntegrationInstructions size={40} color="#053f5c" />
+              ),
+              title: "Onboarding Flow",
+              desc: "Add employees, assign docs, and track progress automatically.",
             },
             {
-              icon: <FaLightbulb size={40} color="#1b263b" />,
-              title: "Entertain Mode",
-              desc: "Whole-home audio, ambient lighting, and custom scenes to delight your guests.",
+              icon: <FaCogs size={40} color="#053f5c" />,
+              title: "Automated Processes",
+              desc: "Cut manual work with recurring workflows that just work.",
             },
             {
-              icon: <FaLeaf size={40} color="#1b263b" />,
-              title: "Zen Mode",
-              desc: "Circadian lighting, clutter-free design, and soothing temperature routines for relaxation.",
+              icon: <FaHandsHelping size={40} color="#053f5c" />,
+              title: "Team Collaboration",
+              desc: "Unify communication, tasks, and goals in one platform.",
             },
           ].map((item, idx) => (
-            <div
+            <motion.div
               key={idx}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 200 }}
               style={{
-                flex: "1 1 250px",
-                maxWidth: "300px",
+                width: "300px",
                 textAlign: "center",
+                background: "#fff",
+                padding: "2rem",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderTop: "4px solid #053f5c",
               }}
             >
               <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
-              <h3 style={{ color: "#1b263b" }}>{item.title}</h3>
-              <p style={{ color: "#1b263b" }}>{item.desc}</p>
-            </div>
+              <h3 style={{ color: "#053f5c", fontWeight: "600" }}>
+                {item.title}
+              </h3>
+              <p style={{ color: "#053f5c" }}>{item.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Packages */}
-      <section style={{ padding: "3rem 2rem" }}>
-        <h2 style={{ textAlign: "center", color: "#1b263b" }}>
-          Packages (Customizable)
+      {/* Plans/Packages */}
+      <section style={{ padding: "5rem 2rem" }}>
+        <h2
+          style={{ textAlign: "center", color: "#053f5c", fontWeight: "700" }}
+        >
+          Plans for Every Team
         </h2>
         <div
           style={{
@@ -166,162 +222,93 @@ const Services = () => {
             flexWrap: "wrap",
             justifyContent: "center",
             gap: "2rem",
-            marginTop: "2rem",
+            marginTop: "3rem",
           }}
         >
           {[
             {
-              icon: <FaBolt size={40} color="#1b263b" />,
-              title: "QuickStart Automation",
-              desc: "Ideal for renters or no-reno projects. Includes core scenes, lighting, thermostat setup, and starter security.",
+              icon: <FaUsers size={40} color="#053f5c" />,
+              title: "Starter Plan",
+              desc: "Perfect for small teams. Includes HR directory, tasks, and attendance.",
             },
             {
-              icon: <MdOutlineHomeRepairService size={40} color="#1b263b" />,
-              title: "Home Mastery Core",
-              desc: "Multi-room automation with integrated lighting, shades, climate, audio, and family routines.",
+              icon: <FaChartBar size={40} color="#053f5c" />,
+              title: "Growth Plan",
+              desc: "Adds insights, compliance tools, and advanced workflows.",
             },
             {
-              icon: <FaHandsHelping size={40} color="#1b263b" />,
-              title: "Total Transformation",
-              desc: "Full renovation + automation: design, finishes, wiring, premium lighting/audio, and custom smart living scenes.",
+              icon: <FaShieldAlt size={40} color="#053f5c" />,
+              title: "Enterprise Plan",
+              desc: "All modules unlocked with custom integrations and premium support.",
             },
           ].map((item, idx) => (
-            <div
+            <motion.div
               key={idx}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 200 }}
               style={{
-                flex: "1 1 250px",
-                maxWidth: "300px",
+                width: "300px",
                 textAlign: "center",
+                background: "#f9f9f9",
+                padding: "2rem",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                borderTop: "4px solid #053f5c",
               }}
             >
               <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
-              <h3 style={{ color: "#1b263b" }}>{item.title}</h3>
-              <p style={{ color: "#1b263b" }}>{item.desc}</p>
-            </div>
+              <h3 style={{ color: "#053f5c", fontWeight: "600" }}>
+                {item.title}
+              </h3>
+              <p style={{ color: "#053f5c" }}>{item.desc}</p>
+            </motion.div>
           ))}
         </div>
-      </section>
-
-      {/* A-la-carte Upgrades */}
-      <section style={{ padding: "3rem 2rem", backgroundColor: "#f0f4f8" }}>
-        <h2 style={{ textAlign: "center", color: "#1b263b" }}>
-          A-la-carte Upgrades
-        </h2>
-        <div
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            gap: "2rem",
-            marginTop: "2rem",
-          }}
-        >
-          {[
-            {
-              icon: <FaPaintRoller size={40} color="#1b263b" />,
-              title: "Paint Refresh & Accents",
-              desc: "Transform mood and clarity with colors and finishes.",
-            },
-            {
-              icon: <FaLightbulb size={40} color="#1b263b" />,
-              title: "Lighting Upgrades",
-              desc: "Dimmers, accent strips, and switch replacements for instant atmosphere.",
-            },
-            {
-              icon: <FaCogs size={40} color="#1b263b" />,
-              title: "Smart Starters",
-              desc: "Plugs, sensors, and shades to automate what matters most right now.",
-            },
-            {
-              icon: <FaUsers size={40} color="#1b263b" />,
-              title: "Organization Touches",
-              desc: "Cable management, discreet storage, and clutter control for a calm space.",
-            },
-          ].map((item, idx) => (
-            <div
-              key={idx}
-              style={{
-                flex: "1 1 250px",
-                maxWidth: "300px",
-                textAlign: "center",
-              }}
-            >
-              <div style={{ marginBottom: "1rem" }}>{item.icon}</div>
-              <h3 style={{ color: "#1b263b" }}>{item.title}</h3>
-              <p style={{ color: "#1b263b" }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Process */}
-      <section style={{ padding: "3rem 2rem" }}>
-        <h2 style={{ textAlign: "center", color: "#1b263b" }}>How We Work</h2>
-        <ol
-          style={{
-            maxWidth: "800px",
-            margin: "2rem auto",
-            color: "#1b263b",
-            fontSize: "1.1rem",
-            lineHeight: "1.8",
-          }}
-        >
-          <li>
-            <strong>Discovery:</strong> Walkthrough of needs, routines, and
-            style.
-          </li>
-          <li>
-            <strong>Design:</strong> Clear plan with minimal to full-reno
-            options.
-          </li>
-          <li>
-            <strong>Build & Integrate:</strong> Clean installs, premium
-            finishes, smooth setup.
-          </li>
-          <li>
-            <strong>Onboarding:</strong> We train you and your family until it’s
-            second nature.
-          </li>
-          <li>
-            <strong>Support:</strong> Continuous tweaks as your life evolves.
-          </li>
-        </ol>
       </section>
 
       {/* CTA */}
       <section
         style={{
           textAlign: "center",
-          padding: "4rem 2rem",
+          padding: "5rem 2rem",
           backgroundColor: "#f5f7fa",
         }}
       >
-        <h2 style={{ color: "#1b263b" }}>Live Like the Master of Your Home</h2>
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          style={{ color: "#053f5c", fontWeight: "700" }}
+        >
+          Work Smarter with DashWise
+        </motion.h2>
         <p
           style={{
             maxWidth: "800px",
-            margin: "1rem auto",
+            margin: "1.5rem auto",
             fontSize: "1.2rem",
-            color: "#1b263b",
+            color: "#053f5c",
           }}
         >
-          Whether it’s small smart upgrades or complete transformations, we’ll
-          help you create a home that feels modern, secure, and uniquely yours.
+          From startups to enterprises, DashWise adapts to your needs. Simplify
+          management, cut manual work, and unlock real-time insights.
         </p>
-        <button
-          style={{
-            padding: "0.75rem 1.5rem",
-            fontSize: "1rem",
-            backgroundColor: "#1b263b",
-            color: "#fff",
-            border: "none",
-            borderRadius: "5px",
-            cursor: "pointer",
-            marginTop: "1rem",
-          }}
-        >
-          Contact Us
-        </button>
+        <Link to="/signup">
+          <button
+            style={{
+              padding: "0.9rem 1.8rem",
+              fontSize: "1rem",
+              backgroundColor: "#f4d03f",
+              color: "#053f5c",
+              border: "none",
+              borderRadius: "6px",
+              fontWeight: "600",
+              cursor: "pointer",
+            }}
+          >
+            Get Started
+          </button>
+        </Link>
       </section>
 
       <Footer />

@@ -144,3 +144,9 @@ uv run flask --app main:create_app db upgrade
 
 # Then reseed
 uv run python seed.py
+
+uv run ./main.py
+
+#entering psql
+psql postgresql://neondb_owner:npg_3Vg8CKrRUXJm@ep-floral-dream-adlenlmi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require
+

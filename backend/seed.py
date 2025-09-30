@@ -7,7 +7,7 @@ from flask_bcrypt import Bcrypt
 
 from main import create_app
 from extensions import db
-from core.models import User, Task, TimeEntry, InventoryItem, Notification, AuditLog
+from core.models import User, Task, TimeEntry, InventoryItem, Notification, AuditLog, TenantConfig
 
 fake = Faker()
 bcrypt = Bcrypt()
@@ -113,10 +113,13 @@ def seed_notifications(n=10):
             type="info",
             message=fake.sentence(),
             severity="info",
+            is_read=False,   # ✅ ensure seeded as unread
+            delivered=False, # ✅ match your model
         )
         db.session.add(note)
     db.session.commit()
     print(f"✅ {n} Notifications created")
+
 
 
 def seed_audit_logs(n=10):
@@ -137,6 +140,24 @@ def seed_audit_logs(n=10):
     print(f"✅ {n} Audit logs created")
 
 
+def seed_tenant_config():
+    """Seed tenant configuration for sidebar + branding."""
+    config = TenantConfig.query.filter_by(tenant_id=TENANT).first()
+    if not config:
+        config = TenantConfig(
+            tenant_id=TENANT,
+            enabled_modules=["dashboard", "hr", "time", "tasks", "notifications"],
+            branding={"logo": "https://example.com/logo.png", "theme": "light"},
+            trial_status="14 days left"
+        )
+        db.session.add(config)
+        db.session.commit()
+        print(f"✅ TenantConfig seeded for {TENANT}")
+    else:
+        print(f"ℹ️ TenantConfig already exists for {TENANT}")
+
+
+
 def run_all():
     app = create_app()
     with app.app_context():
@@ -147,6 +168,7 @@ def run_all():
         seed_time_entries()
         seed_notifications()
         seed_audit_logs()
+        seed_tenant_config()
         print("🎉 Seeding complete!")
 
 
