@@ -26,6 +26,8 @@ import HR from "./modules/HR";
 import Tasks from "./modules/Tasks";
 import Time from "./modules/Time";
 import Notifications from "./modules/Notifications";
+import DashboardPage from "./modules/Dashboard/DashboardPage";
+
 
 function AppContent() {
   const auth = useContext(AuthContext);
@@ -59,7 +61,9 @@ function AppContent() {
           <Route path="tasks" element={<Tasks />} />
           <Route path="time" element={<Time />} />
           <Route path="notifications" element={<Notifications />} />
-        </Route>
+          <Route path="dashboard" element={<DashboardPage />} />
+          
+          </Route>
 
         {/* Fallback */}
         <Route path="*" element={<h2>Page Not Found</h2>} />

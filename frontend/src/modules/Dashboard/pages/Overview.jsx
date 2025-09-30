@@ -1,15 +1,12 @@
+// src/modules/dashboard/pages/Overview.jsx
 import React from "react";
+import DashboardPage from "../DashboardPage"; // import your KPI component
 
-function Overview() {
+export default function Overview() {
   return (
     <div>
       <h2>Dashboard Overview</h2>
-      <p>
-        This is the KPI snapshot: active employees, jobs completed today, 
-        low stock alerts, overdue tasks, and revenue.
-      </p>
+      <DashboardPage />
     </div>
   );
 }
-
-export default Overview;
