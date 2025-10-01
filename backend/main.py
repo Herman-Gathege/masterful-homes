@@ -33,19 +33,22 @@ def create_app(test_config=None):
 
     # Import and register new module blueprints
     from modules.hr.routes import hr_bp
-    from modules.time.routes import time_bp
+    # from modules.time.routes import time_bp
     from modules.tasks.routes import tasks_bp
     from modules.dashboard.routes import dashboard_bp
     # from modules.notifications.routes import notifications_bp
     from modules.auth.routes import auth_bp
     from modules.notifications import notifications_bp
-    
+    from modules.time import time_bp
+
+
 
 
     # Register new module blueprints
     app.register_blueprint(auth_bp, url_prefix="/api/auth")    
     app.register_blueprint(hr_bp, url_prefix="/api")
-    app.register_blueprint(time_bp, url_prefix="/api")
+    # app.register_blueprint(time_bp, url_prefix="/api")
+    app.register_blueprint(time_bp, url_prefix='/api/time')
     app.register_blueprint(tasks_bp, url_prefix="/api")
     app.register_blueprint(dashboard_bp, url_prefix="/api")
     # app.register_blueprint(notifications_bp)

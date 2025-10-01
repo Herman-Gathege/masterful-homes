@@ -1,3 +1,4 @@
+//frontend/src/components/NotificationsBell.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import useNotificationStore from "../store/notificationStore";
