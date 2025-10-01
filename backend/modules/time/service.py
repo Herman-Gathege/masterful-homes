@@ -1,13 +1,18 @@
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import and_, func
 from extensions import db
-from core.models import TimeEntry, User, Task, TimeEntryKindEnum, Shift
+from core.models import TimeEntry, User, Task, TimeEntryKindEnum, Shift, Notification
+
+from datetime import datetime, timezone, timedelta
+from sqlalchemy import and_, func
+from extensions import db
+from core.models import TimeEntry, User, Task, TimeEntryKindEnum, Shift, Notification
 
 def get_open_entry(user_id):
     """Check for open TimeEntry (end_time is None)."""
     return TimeEntry.query.filter_by(user_id=user_id, end_time=None).first()
 
-def clock_in(user_id, tenant_id, kind=TimeEntryKindEnum.REGULAR, task_id=None, notes=None):
+def clock_in(user_id, tenant_id, start_time, kind=TimeEntryKindEnum.REGULAR, task_id=None, notes=None):
     if get_open_entry(user_id):
         raise ValueError("User already clocked in.")
     
@@ -15,11 +20,30 @@ def clock_in(user_id, tenant_id, kind=TimeEntryKindEnum.REGULAR, task_id=None, n
         tenant_id=tenant_id,
         user_id=user_id,
         kind=kind,
-        start_time=datetime.now(timezone.utc),
+        start_time=start_time,  # Use the provided start_time
         task_id=task_id,
         notes=notes
     )
     db.session.add(entry)
+    db.session.commit()
+    return entry
+
+def clock_out(user_id, end_time, notes=None):
+    entry = get_open_entry(user_id)
+    if not entry:
+        raise ValueError("No open entry to clock out.")
+    
+    now = datetime.now(timezone.utc)
+    entry.end_time = end_time  # Use the provided end_time
+    entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0  # Hours
+    
+    if entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
+        entry.kind = TimeEntryKindEnum.OVERTIME
+        create_notification(entry.tenant_id, entry.user_id, f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}")
+
+    if notes:
+        entry.notes = (entry.notes or '') + ' ' + notes
+    
     db.session.commit()
     return entry
 
@@ -34,7 +58,8 @@ def clock_out(user_id, notes=None):
     
     if entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
         entry.kind = TimeEntryKindEnum.OVERTIME
-    
+        create_notification(entry.tenant_id, entry.user_id, f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}")
+
     if notes:
         entry.notes = (entry.notes or '') + ' ' + notes
     
@@ -176,3 +201,31 @@ def assign_users(shift_id, user_ids):
             shift.assignees.append(user)
     db.session.commit()
     return {"message": f"Assigned {len(users)} users to shift {shift_id}"}
+
+def delete_shift(shift_id):
+    """Delete a shift and its assignments."""
+    shift = Shift.query.get_or_404(shift_id)
+    db.session.delete(shift)
+    db.session.commit()
+    return {"message": f"Deleted shift {shift_id}"}
+
+def create_notification(tenant_id, user_id, message):
+    """Create a notification for a user."""
+    notification = Notification(
+        tenant_id=tenant_id,
+        user_id=user_id,
+        message=message,
+        created_at=datetime.now(timezone.utc),
+        is_read=False
+    )
+    db.session.add(notification)
+    db.session.commit()
+    return notification
+
+def check_missing_clockouts(tenant_id, threshold_hours=12):
+    """Check for open entries exceeding threshold and create notifications."""
+    threshold = datetime.now(timezone.utc) - timedelta(hours=threshold_hours)
+    open_entries = TimeEntry.query.filter_by(tenant_id=tenant_id, end_time=None).all()
+    for entry in open_entries:
+        if entry.start_time < threshold:
+            create_notification(tenant_id, entry.user_id, f"Missing clock-out detected: Open since {entry.start_time.isoformat()}")

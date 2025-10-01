@@ -101,9 +101,7 @@ class User(db.Model):
 
     time_entries = db.relationship('TimeEntry', backref='user', lazy='dynamic')
     notifications = db.relationship('Notification', backref='user', lazy='dynamic')
-    shifts = db.relationship("Shift", secondary=shift_assignments, back_populates="assignees")  # Added for shift assignments
-
-    # Corrected tasks relationship
+    shifts = db.relationship("Shift", secondary=shift_assignments, back_populates="assignees")
     tasks = db.relationship(
         "Task",
         secondary=task_assignments,
@@ -137,11 +135,9 @@ class Task(db.Model):
         secondaryjoin=(User.id == task_assignments.c.user_id),
         back_populates="tasks"
     )
-
     notifications = db.relationship('Notification', backref='task', lazy='dynamic')
     required_items = db.relationship('InventoryItem', secondary=task_required_items, back_populates='tasks')
     time_entries = db.relationship('TimeEntry', backref='task', lazy='dynamic')
-
     assigned_by_user = db.relationship(
         "User",
         primaryjoin="Task.id==task_assignments.c.task_id",
@@ -176,15 +172,17 @@ class TimeEntry(db.Model):
     start_time = db.Column(db.DateTime(timezone=True), nullable=False)
     end_time = db.Column(db.DateTime(timezone=True), nullable=True)
     kind = db.Column(db.Enum(TimeEntryKindEnum), default=TimeEntryKindEnum.REGULAR)
-    duration = db.Column(db.Float, nullable=True)  # Calculated hours for quick access
-    notes = db.Column(db.Text, nullable=True)  # User/manager comments
-    is_approved = db.Column(db.Boolean, default=False)  # For approval flow
+    duration = db.Column(db.Float, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    is_approved = db.Column(db.Boolean, default=False)
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True)
-    shift_id = db.Column(db.Integer, db.ForeignKey('shifts.id'), nullable=True)  # Added for shift linkage
+    shift_id = db.Column(db.Integer, db.ForeignKey('shifts.id'), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
-    shift = db.relationship('Shift', back_populates='time_entries')  # Added relationship
+    shift = db.relationship('Shift', back_populates='time_entries')
+    # Removed task = db.relationship('Task', back_populates='time_entries')
+    # Rely on backref 'task' from Task.time_entries
 
     __table_args__ = (
         db.Index("idx_timeentry_tenant_user", "tenant_id", "user_id"),
@@ -198,14 +196,18 @@ class Notification(db.Model):
     tenant_id = db.Column(db.String(64), index=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True, index=True)
     task_id = db.Column(db.Integer, db.ForeignKey('tasks.id'), nullable=True)
-    type = db.Column(db.String(128))
-    message = db.Column(db.Text)
+    type = db.Column(db.String(128), nullable=True)  # Made nullable for flexibility
+    message = db.Column(db.Text, nullable=False)  # Required field
     payload = db.Column(db.JSON, nullable=True)
     severity = db.Column(db.Enum(NotificationSeverityEnum), default=NotificationSeverityEnum.INFO)
     is_read = db.Column(db.Boolean, default=False)
     delivered = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     read_at = db.Column(db.DateTime(timezone=True), nullable=True)
+
+    __table_args__ = (
+        db.Index('ix_notification_user_created', 'user_id', 'created_at'),
+    )
 
 class AuditLog(db.Model):
     __tablename__ = "audit_logs"
@@ -220,9 +222,6 @@ class AuditLog(db.Model):
     ip_address = db.Column(db.String(64), nullable=True)
     timestamp = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
-# ------------------------
-# New Model: Shift
-# ------------------------
 class Shift(db.Model):
     __tablename__ = "shifts"
     id = db.Column(db.Integer, primary_key=True)
@@ -237,9 +236,12 @@ class Shift(db.Model):
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
     assignees = db.relationship("User", secondary=shift_assignments, back_populates="shifts")
-    time_entries = db.relationship('TimeEntry', back_populates='shift')  # Added for linkage
+    time_entries = db.relationship('TimeEntry', back_populates='shift')
 
     __table_args__ = (
         db.Index('ix_shift_tenant_start', 'tenant_id', 'start_time'),
-        db.UniqueConstraint('tenant_id', 'start_time', 'end_time', name='uq_shift_timeslot'),  # Prevent overlaps
+        # Removed uq_shift_timeslot to rely on service.py validation; add back if needed with buffer logic
     )
+
+
+    
