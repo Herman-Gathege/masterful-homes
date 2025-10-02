@@ -1,4 +1,4 @@
-// frontend/src/store/notificationStore.jsx
+//frontend/src/store/notificationStore.jsx
 import { create } from "zustand";
 import {
   fetchNotifications,
@@ -12,19 +12,31 @@ const useNotificationStore = create((set) => ({
   unreadCount: 0,
   loading: false,
 
-  // Load notifications
+  // Helpers
+  setLoading: (loading) => set({ loading }),
+  setNotifications: (notifications) =>
+    set({
+      notifications,
+      unreadCount: notifications.filter((n) => !n.is_read).length,
+    }),
+  setUnreadCount: (count) => set({ unreadCount: count }),
+
+  // API-driven actions
   loadNotifications: async () => {
     set({ loading: true });
     try {
       const data = await fetchNotifications();
-      set({ notifications: data, loading: false });
+      set({
+        notifications: data,
+        unreadCount: data.filter((n) => !n.is_read).length,
+        loading: false,
+      });
     } catch (err) {
       console.error("❌ Failed to load notifications", err);
       set({ loading: false });
     }
   },
 
-  // Refresh unread count only
   refreshUnread: async () => {
     try {
       const count = await fetchUnreadCount();
@@ -34,7 +46,6 @@ const useNotificationStore = create((set) => ({
     }
   },
 
-  // Mark single notification
   markAsRead: async (id) => {
     try {
       await markNotificationAsRead(id);
@@ -49,7 +60,6 @@ const useNotificationStore = create((set) => ({
     }
   },
 
-  // Mark all
   markAllAsRead: async () => {
     try {
       await markAllService();

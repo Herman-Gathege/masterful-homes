@@ -1,8 +1,4 @@
-from datetime import datetime, timezone, timedelta
-from sqlalchemy import and_, func
-from extensions import db
-from core.models import TimeEntry, User, Task, TimeEntryKindEnum, Shift, Notification
-
+# backend/modules/time/service.py
 from datetime import datetime, timezone, timedelta
 from sqlalchemy import and_, func
 from extensions import db
@@ -20,7 +16,7 @@ def clock_in(user_id, tenant_id, start_time, kind=TimeEntryKindEnum.REGULAR, tas
         tenant_id=tenant_id,
         user_id=user_id,
         kind=kind,
-        start_time=start_time,  # Use the provided start_time
+        start_time=start_time,
         task_id=task_id,
         notes=notes
     )
@@ -33,28 +29,8 @@ def clock_out(user_id, end_time, notes=None):
     if not entry:
         raise ValueError("No open entry to clock out.")
     
-    now = datetime.now(timezone.utc)
-    entry.end_time = end_time  # Use the provided end_time
+    entry.end_time = end_time
     entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0  # Hours
-    
-    if entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
-        entry.kind = TimeEntryKindEnum.OVERTIME
-        create_notification(entry.tenant_id, entry.user_id, f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}")
-
-    if notes:
-        entry.notes = (entry.notes or '') + ' ' + notes
-    
-    db.session.commit()
-    return entry
-
-def clock_out(user_id, notes=None):
-    entry = get_open_entry(user_id)
-    if not entry:
-        raise ValueError("No open entry to clock out.")
-    
-    now = datetime.now(timezone.utc)
-    entry.end_time = now
-    entry.duration = (now - entry.start_time).total_seconds() / 3600.0  # Hours
     
     if entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
         entry.kind = TimeEntryKindEnum.OVERTIME

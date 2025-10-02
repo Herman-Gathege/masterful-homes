@@ -5,8 +5,9 @@ export const fetchNotifications = async (limit = 20, offset = 0) => {
   const res = await axiosInstance.get(`/notifications/`, {
     params: { limit, offset },
   });
-  return res.data;
+  return res.data.data; // unwrap notifications array
 };
+
 
 export const fetchUnreadCount = async () => {
   const res = await axiosInstance.get(`/notifications/unread_count`);

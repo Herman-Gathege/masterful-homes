@@ -1,3 +1,4 @@
+# backend/modules/notifications/__init__.py
 from flask import Blueprint
 
 notifications_bp = Blueprint("notifications", __name__, url_prefix="/api/notifications")

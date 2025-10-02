@@ -1,3 +1,4 @@
+# backend/modules/notifications/routes.py
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from . import notifications_bp
@@ -16,15 +17,19 @@ def list_notifications():
     offset = int(request.args.get("offset", 0))
 
     notifs = service.get_notifications(user_id, limit, offset)
-    return jsonify([
-        {
-            "id": n.id,
-            "message": n.message,
-            "is_read": n.is_read,
-            "created_at": n.created_at.isoformat(),
-        }
-        for n in notifs
-    ])
+    return jsonify({
+        "data": [
+            {
+                "id": n.id,
+                "message": n.message,
+                "is_read": n.is_read,
+                "created_at": n.created_at.isoformat(),
+            }
+            for n in notifs
+        ],
+        "pagination": {"limit": limit, "offset": offset, "count": len(notifs)}
+    }), 200
+
 
 @notifications_bp.route("/unread_count", methods=["GET"])
 @jwt_required()

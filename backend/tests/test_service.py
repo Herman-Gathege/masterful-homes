@@ -44,7 +44,7 @@ def test_service_functions():
         # Test clock_in
         print("⏰ Testing clock_in...")
         start_time = datetime.now(timezone.utc)
-        clock_in_result = clock_in(user.id, tenant, start_time)  # Corrected order
+        clock_in_result = clock_in(user.id, tenant, start_time)
         if clock_in_result:
             print(f"✅ clock_in succeeded for user {user.id} at {start_time}")
             new_entry = TimeEntry.query.filter_by(user_id=user.id, end_time=None).order_by(TimeEntry.start_time.desc()).first()
@@ -59,10 +59,10 @@ def test_service_functions():
         if new_entry:
             print("⏰ Testing clock_out...")
             end_time = start_time + timedelta(hours=4)  # 4-hour shift
-            clock_out_result = clock_out(user.id, end_time)  # Removed tenant_id=tenant
+            clock_out_result = clock_out(user.id, end_time, notes=None)
             if clock_out_result:
                 print(f"✅ clock_out succeeded for user {user.id} at {end_time}")
-                updated_entry = TimeEntry.query.get(new_entry.id)
+                updated_entry = db.session.get(TimeEntry, new_entry.id)  # Updated to use Session.get()
                 if updated_entry and updated_entry.end_time == end_time:
                     print(f"  - TimeEntry updated: End={updated_entry.end_time}, Duration={updated_entry.duration}")
                 else:
@@ -89,7 +89,7 @@ def test_service_functions():
 
         # Test create_notification
         print("📩 Testing create_notification...")
-        notification = create_notification(user.id, tenant, "Test notification", "warning", "test")
+        notification = create_notification(tenant, user.id, "Test notification")  # Adjusted to match function signature
         if notification:
             print(f"✅ Notification created: ID={notification.id}, Message={notification.message}")
             db.session.delete(notification)

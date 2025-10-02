@@ -12,7 +12,7 @@ auth_bp = Blueprint("auth", __name__)
 
 def generate_tokens(user):
     """Helper to generate access + refresh tokens with tenant + role claims."""
-    identity = str(user.id)  # keep identity simple
+    identity = str(user.id)  # keep identity simple (string user.id)
     claims = {
         "username": user.full_name or user.email,
         "email": user.email,
@@ -23,6 +23,8 @@ def generate_tokens(user):
         "access_token": create_access_token(identity=identity, fresh=True, additional_claims=claims),
         "refresh_token": create_refresh_token(identity=identity, additional_claims=claims),
     }
+
+
 
 
 @auth_bp.route("/register", methods=["POST"])

@@ -1,3 +1,4 @@
+# backend/modules/notifications/service.py
 from core.models import db, Notification
 
 def get_notifications(user_id, limit=20, offset=0):
