@@ -18,6 +18,8 @@ def clock_in(user_id, tenant_id, start_time=None, kind=TimeEntryKindEnum.REGULAR
 
     if start_time is None:
         start_time = datetime.now(timezone.utc)
+    elif isinstance(start_time, str):
+        start_time = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
 
     entry = TimeEntry(
         tenant_id=tenant_id,
@@ -31,6 +33,7 @@ def clock_in(user_id, tenant_id, start_time=None, kind=TimeEntryKindEnum.REGULAR
     db.session.commit()
     return entry
 
+
 def clock_out(user_id, end_time=None, notes=None):
     """Close the open entry for user_id. end_time defaults to now UTC."""
     entry = get_open_entry(user_id)
@@ -39,19 +42,23 @@ def clock_out(user_id, end_time=None, notes=None):
 
     if end_time is None:
         end_time = datetime.now(timezone.utc)
+    elif isinstance(end_time, str):
+        end_time = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
 
     entry.end_time = end_time
-    entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0  # hours
+    entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0
 
     # Overtime detection
     if entry.duration and entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
         entry.kind = TimeEntryKindEnum.OVERTIME
-        # send notification to manager(s) or tenant admin
         try:
             from modules.notifications.service import create_notification
-            create_notification(entry.tenant_id, entry.user_id, f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}")
+            create_notification(
+                entry.tenant_id,
+                entry.user_id,
+                f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}"
+            )
         except Exception:
-            # swallow notification errors to avoid breaking clock_out
             pass
 
     if notes:
@@ -59,6 +66,7 @@ def clock_out(user_id, end_time=None, notes=None):
 
     db.session.commit()
     return entry
+
 
 def get_current_status(user_id, tenant_id):
     open_entry = get_open_entry(user_id)

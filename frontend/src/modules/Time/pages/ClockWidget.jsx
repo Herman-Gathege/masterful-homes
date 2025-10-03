@@ -9,7 +9,7 @@ import {
 
 const ClockWidget = () => {
   const { user } = useContext(AuthContext);
-  const { data: status, refetch } = useCurrentStatus(user?.tenant_id);
+  const { data: status, refetch } = useCurrentStatus();
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const { setClockStatus, clockStatus } = useTimeStore();

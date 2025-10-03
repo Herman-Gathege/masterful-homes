@@ -22,18 +22,16 @@ export const useClockOut = () =>
 // -----------------------------
 // Current Status
 // -----------------------------
-export const useCurrentStatus = (tenantId) =>
+export const useCurrentStatus = () =>
   useQuery({
-    queryKey: ['currentStatus', tenantId],
+    queryKey: ['currentStatus'],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`${API_BASE}/current-status`, {
-        params: { tenant_id: tenantId },  // ✅ must include tenant_id
-      });
+      const { data } = await axiosInstance.get(`/time/current-status`);
       return data.data;
     },
-    enabled: !!tenantId,
     refetchInterval: 30000,
   });
+
 
 // -----------------------------
 // Timesheets
@@ -43,17 +41,16 @@ export const useTimesheet = (userId, tenantId, startDate, endDate) =>
     queryKey: ['timesheet', userId, tenantId, startDate, endDate],
     queryFn: async () => {
       const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, {
-        params: { 
-          tenant_id: tenantId,   // ✅ add tenant_id here too
-          start_date: startDate, 
-          end_date: endDate 
+        params: {
+          tenant_id: tenantId, // ✅ still required here
+          start_date: startDate,
+          end_date: endDate,
         },
       });
-      return data.data;
+      return data.data; // unwrap -> list of entries
     },
     enabled: !!userId && !!tenantId,
   });
-
 
 // -----------------------------
 // Summary Report (Manager/Admin)
@@ -80,9 +77,8 @@ export const useShifts = (tenantId) =>
       const res = await axiosInstance.get(`${API_BASE}/shifts`, {
         params: { tenant_id: tenantId },
       });
-
       // 🔑 Transform backend -> FullCalendar format
-      return res.data.data.map((shift) => ({
+      return (res.data.data || []).map((shift) => ({
         id: shift.id,
         title: shift.description || 'Shift',
         start: shift.start_time,
@@ -103,7 +99,7 @@ export const useDeleteShift = () =>
   });
 
 // -----------------------------
-// Notifications
+// Notifications (optional restore)
 // -----------------------------
 // export const useLoadNotifications = () =>
 //   useQuery({
