@@ -10,19 +10,21 @@ from core.models import User
 auth_bp = Blueprint("auth", __name__)
 
 
-def generate_tokens(user):
-    """Helper to generate access + refresh tokens with tenant + role claims."""
-    identity = str(user.id)  # keep identity simple (string user.id)
-    claims = {
-        "username": user.full_name or user.email,
-        "email": user.email,
-        "role": user.role,
-        "tenant_id": user.tenant_id,
-    }
+def _build_identity(user):
+    # ensure strings for JSON-safety
     return {
-        "access_token": create_access_token(identity=identity, fresh=True, additional_claims=claims),
-        "refresh_token": create_refresh_token(identity=identity, additional_claims=claims),
+        "id": str(user.id),
+        "tenant_id": user.tenant_id,
+        "role": user.role,
+        "email": user.email,
+        "full_name": user.full_name or ""
     }
+
+def generate_tokens(user):
+    identity = _build_identity(user)
+    access = create_access_token(identity=identity, fresh=True)
+    refresh = create_refresh_token(identity=identity)
+    return {"access_token": access, "refresh_token": refresh}
 
 
 
@@ -98,12 +100,11 @@ def login():
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
-    identity = get_jwt_identity()  # just user.id now
-    if not identity:
-        return jsonify({"error": "Invalid token"}), 401
+    identity = get_jwt_identity()  # this is already a dict from _build_identity
+    if not identity or "id" not in identity:
+        return jsonify({"error": "Invalid token identity"}), 401
 
-    # Recreate user context
-    user = User.query.get(identity)
+    user = User.query.get(identity["id"])
     if not user:
         return jsonify({"error": "User not found"}), 404
 
@@ -111,18 +112,13 @@ def refresh():
     return jsonify(tokens), 200
 
 
+
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required()
 def me():
-    identity = get_jwt_identity()  # user.id
-    claims = get_jwt()  # includes role, email, tenant_id
-    return jsonify({
-        "user_id": identity,
-        "username": claims.get("username"),
-        "email": claims.get("email"),
-        "role": claims.get("role"),
-        "tenant_id": claims.get("tenant_id"),
-    }), 200
+    identity = get_jwt_identity()
+    return jsonify(identity), 200
+
 
 
 @auth_bp.route("/logout", methods=["POST"])

@@ -1,6 +1,7 @@
 // src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
+import { setAuthStore } from "./axiosInstance";
 import jwt_decode from "jwt-decode";
 
 export const AuthContext = createContext();
@@ -11,38 +12,9 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [user, setUser] = useState(null);
 
-  // load from localStorage on mount
-  useEffect(() => {
-    const savedToken = localStorage.getItem("token");
-    const savedRefresh = localStorage.getItem("refresh_token");
-    const savedRole = localStorage.getItem("role");
-    const savedUser = localStorage.getItem("user");
-
-    if (savedToken && savedRefresh) {
-      setToken(savedToken);
-      setRefreshToken(savedRefresh);
-      setRole(savedRole || null);
-
-      try {
-        if (savedUser) {
-          setUser(JSON.parse(savedUser));
-        } else {
-          const decoded = jwt_decode(savedToken);
-          setUser({
-            id: decoded.sub, // user id comes from "sub"
-            username: decoded.username || decoded.email,
-            role: decoded.role,
-            email: decoded.email,
-            tenant_id: decoded.tenant_id,
-          });
-        }
-      } catch (err) {
-        console.error("Failed to decode saved token", err);
-      }
-    }
-  }, []);
-
-  // login: centralize persisting tokens + user
+  // ----------------------------
+  // login/logout helpers
+  // ----------------------------
   const login = (accessToken, newRefreshToken, userObj) => {
     if (!accessToken || !newRefreshToken) return;
 
@@ -68,7 +40,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Refresh access token using the refresh token (sent in Authorization header)
+  // ----------------------------
+  // refresh access token
+  // ----------------------------
   const refreshAccessToken = async () => {
     if (!refreshToken) {
       logout();
@@ -83,7 +57,9 @@ export const AuthProvider = ({ children }) => {
       );
 
       const { access_token, refresh_token: newRefresh } = response.data;
-      if (!access_token || !newRefresh) throw new Error("Invalid refresh response");
+      if (!access_token || !newRefresh) {
+        throw new Error("Invalid refresh response");
+      }
 
       localStorage.setItem("token", access_token);
       localStorage.setItem("refresh_token", newRefresh);
@@ -101,7 +77,7 @@ export const AuthProvider = ({ children }) => {
           email: decoded.email || prev?.email,
           tenant_id: decoded.tenant_id || prev?.tenant_id,
         }));
-      } catch (err) {
+      } catch {
         // ignore decode errors
       }
 
@@ -113,7 +89,51 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const authenticated = !!token;
+  // ----------------------------
+  // load from localStorage
+  // ----------------------------
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedRefresh = localStorage.getItem("refresh_token");
+    const savedRole = localStorage.getItem("role");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken && savedRefresh) {
+      setToken(savedToken);
+      setRefreshToken(savedRefresh);
+      setRole(savedRole || null);
+
+      try {
+        if (savedUser) {
+          setUser(JSON.parse(savedUser));
+        } else {
+          const decoded = jwt_decode(savedToken);
+          setUser({
+            id: decoded.sub,
+            username: decoded.username || decoded.email,
+            role: decoded.role,
+            email: decoded.email,
+            tenant_id: decoded.tenant_id,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to decode saved token", err);
+      }
+    }
+  }, []);
+
+  // ----------------------------
+  // sync axios with latest auth
+  // ----------------------------
+  useEffect(() => {
+    if (token) {
+      setAuthStore({
+        token,
+        refreshAccessToken,
+        logout,
+      });
+    }
+  }, [token, refreshAccessToken, logout]);
 
   return (
     <AuthContext.Provider
@@ -122,7 +142,7 @@ export const AuthProvider = ({ children }) => {
         refreshToken,
         role,
         user,
-        authenticated,
+        authenticated: !!token,
         login,
         logout,
         refreshAccessToken,

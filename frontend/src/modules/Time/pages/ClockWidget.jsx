@@ -1,30 +1,29 @@
-//frontend/src/modules/Time/pages/ClockWidget.jsx
-import React, { useEffect, useContext } from 'react';
-import useTimeStore from '../../../store/timeStore';
-import { AuthContext } from '../../../context/AuthContext';
-import { useClockIn, useClockOut, useCurrentStatus } from '../../../services/timeService';
+import React, { useEffect, useContext } from "react";
+import useTimeStore from "../../../store/timeStore";
+import { AuthContext } from "../../../context/AuthContext";
+import {
+  useClockIn,
+  useClockOut,
+  useCurrentStatus,
+} from "../../../services/timeService";
 
 const ClockWidget = () => {
-  const { user } = useContext(AuthContext); // 👈 get logged in user
-  const { data: status, refetch } = useCurrentStatus();
+  const { user } = useContext(AuthContext);
+  const { data: status, refetch } = useCurrentStatus(user?.tenant_id);
   const clockIn = useClockIn();
   const clockOut = useClockOut();
   const { setClockStatus, clockStatus } = useTimeStore();
 
   useEffect(() => {
-    if (status?.data) {
-      setClockStatus(status.data);
+    if (status) {
+      setClockStatus(status); // ✅ already unwrapped in service
     }
   }, [status, setClockStatus]);
 
   const handleClockIn = () => {
     if (!user) return;
     clockIn.mutate(
-      {
-        user_id: user.id,
-        tenant_id: user.tenant_id,
-        start_time: new Date().toISOString(),
-      },
+      { start_time: new Date().toISOString() }, // ✅ only start_time
       { onSuccess: () => refetch() }
     );
   };
@@ -32,10 +31,7 @@ const ClockWidget = () => {
   const handleClockOut = () => {
     if (!user) return;
     clockOut.mutate(
-      {
-        user_id: user.id,
-        end_time: new Date().toISOString(),
-      },
+      { end_time: new Date().toISOString() }, // ✅ only end_time
       { onSuccess: () => refetch() }
     );
   };
@@ -43,10 +39,10 @@ const ClockWidget = () => {
   return (
     <div aria-label="Clock Widget" className="clock-widget">
       <p>
-        Status:{' '}
+        Status:{" "}
         {clockStatus.is_clocked_in
-          ? `Clocked In (${clockStatus.elapsed_hours.toFixed(1)}h)`
-          : 'Clocked Out'}
+          ? `Clocked In (${clockStatus.current_entry?.elapsed_hours.toFixed(1)}h)`
+          : "Clocked Out"}
       </p>
 
       {clockStatus.is_clocked_in ? (

@@ -1,4 +1,3 @@
-// frontend/src/modules/Time/pages/ShiftCalendar.jsx
 import React, { useContext } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -12,7 +11,7 @@ import interactionPlugin from "@fullcalendar/interaction";
 
 const ShiftCalendar = () => {
   const { user } = useContext(AuthContext);
-  const { data, refetch } = useShifts(user?.tenant_id);
+  const { data: events = [], refetch } = useShifts(user?.tenant_id);
   const createShift = useCreateShift();
   const deleteShift = useDeleteShift();
 
@@ -24,7 +23,6 @@ const ShiftCalendar = () => {
 
     createShift.mutate(
       {
-        tenant_id: user.tenant_id,
         start_time: start.toISOString(),
         end_time: end.toISOString(),
       },
@@ -41,11 +39,11 @@ const ShiftCalendar = () => {
   return (
     <div aria-label="Shift Calendar">
       <FullCalendar
-        plugins={[dayGridPlugin, interactionPlugin]} // 👈 add interaction plugin
+        plugins={[dayGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
         dateClick={handleDateClick}
         eventClick={handleEventClick}
-        events={data?.data || []}
+        events={events} // ✅ no more `.data`
       />
     </div>
   );

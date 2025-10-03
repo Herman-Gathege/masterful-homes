@@ -1,141 +1,121 @@
-# backend/modules/time/routes.py
-from flask import jsonify, request, Blueprint
-from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt  # Added get_jwt
-from . import time_bp
-from .service import clock_in, clock_out, get_current_status, get_timesheet, get_summary_report
+from flask import jsonify, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from . import time_bp, service
 
 @time_bp.route("/ping", methods=["GET"])
 def ping():
     return {"message": "Time module is alive!"}, 200
 
-@time_bp.route('/clock-in', methods=['POST'])
+
+@time_bp.route("/clock-in", methods=["POST"])
 @jwt_required()
 def clock_in_route():
-    claims = get_jwt()   # ✅ use full claims dict
-    current_user = {
-        "id": claims["sub"],
-        "tenant_id": claims.get("tenant_id"),
-        "role": claims.get("role"),
-    }
+    identity = get_jwt_identity()
+    user_id = int(identity["id"])
+    tenant_id = identity["tenant_id"]
 
-    if current_user['role'] not in ['technician', 'contractor', 'manager']:
-        return jsonify({'error': 'Unauthorized'}), 403
-
-    data = request.json
-    try:
-        entry = clock_in(
-            user_id=current_user['id'],
-            tenant_id=current_user['tenant_id'],
-            kind=data.get('kind', 'regular'),
-            task_id=data.get('task_id'),
-            notes=data.get('notes'),
-            start_time=data.get('start_time')
-        )
-        return jsonify({
-            'data': {
-                'id': entry.id,
-                'start_time': entry.start_time.isoformat(),
-                'status': 'clocked_in'
-            },
-            'message': 'Clocked in successfully'
-        }), 201
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 409
-
-
-@time_bp.route('/clock-out', methods=['POST'])
-@jwt_required()
-def clock_out_route():
-    claims = get_jwt()   # ✅ use full claims dict
-    current_user = {
-        "id": claims["sub"],
-        "tenant_id": claims.get("tenant_id"),
-        "role": claims.get("role"),
-    }
-
-    if current_user['role'] not in ['technician', 'contractor', 'manager']:
-        return jsonify({'error': 'Unauthorized'}), 403
-
-    data = request.json
-    try:
-        entry = clock_out(user_id=current_user['id'], notes=data.get('notes'))
-        return jsonify({
-            'data': {
-                'id': entry.id,
-                'end_time': entry.end_time.isoformat(),
-                'duration_hours': entry.duration,
-                'kind': entry.kind
-            },
-            'message': 'Clocked out'
-        }), 200
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 409
-
-    
-
-
-@time_bp.route('/current-status', methods=['GET'])
-@jwt_required()
-def current_status_route():
-    claims = get_jwt()  # ✅ get full claims dict
-    current_user = {
-        "id": claims["sub"],   # ID is always in 'sub'
-        "tenant_id": claims.get("tenant_id"),
-        "role": claims.get("role"),
-    }
-
-    tenant_id = request.args.get('tenant_id')
-    if tenant_id != current_user['tenant_id']:
-        return jsonify({'error': 'Tenant mismatch'}), 403
-
-    status = get_current_status(user_id=current_user['id'], tenant_id=current_user['tenant_id'])
-    return jsonify({'data': status}), 200
-
-
-@time_bp.route('/timesheets/<int:user_id>', methods=['GET'])
-@jwt_required()
-def get_timesheet_route(user_id):
-    claims = get_jwt()
-    current_user = {
-        "id": claims["sub"],  # string
-        "tenant_id": claims.get("tenant_id"),
-        "role": claims.get("role"),
-        "full_name": claims.get("username") or claims.get("email", "Unknown"),
-    }
-
-    # Only allow self, manager, or superadmin
-    if current_user["id"] != str(user_id) and current_user["role"] not in ["manager", "superadmin"]:
+    if identity["role"] not in ["technician", "contractor", "employee", "admin"]:
         return jsonify({"error": "Unauthorized"}), 403
 
-    start_date = request.args.get("start_date")
-    end_date = request.args.get("end_date")
+    data = request.get_json(silent=True) or {}
+    start_time = data.get("start_time")
 
     try:
-        timesheet = get_timesheet(user_id, current_user["tenant_id"], start_date, end_date)
+        entry = service.clock_in(user_id, tenant_id, start_time=start_time)
         return jsonify({
-            "data": timesheet,
-            "user": {"id": user_id, "name": current_user["full_name"]},
+            "id": entry.id,
+            "user_id": entry.user_id,
+            "start_time": entry.start_time.isoformat(),
+            "end_time": None,
+            "status": "open"
+        }), 201
+    except ValueError as e:
+        return jsonify({"error": str(e)}), 409
+
+
+@time_bp.route("/clock-out", methods=["POST"])
+@jwt_required()
+def clock_out_route():
+    identity = get_jwt_identity()
+    user_id = int(identity["id"])
+
+    data = request.get_json(silent=True) or {}
+    end_time = data.get("end_time")
+    notes = data.get("notes")
+
+    try:
+        entry = service.clock_out(user_id, end_time=end_time, notes=notes)
+        return jsonify({
+            "id": entry.id,
+            "user_id": entry.user_id,
+            "start_time": entry.start_time.isoformat(),
+            "end_time": entry.end_time.isoformat() if entry.end_time else None,
+            "duration_hours": entry.duration
         }), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
 
-@time_bp.route('/reports/summary', methods=['GET'])
+@time_bp.route("/current-status", methods=["GET"])
+@jwt_required()
+def current_status_route():
+    identity = get_jwt_identity()
+    current_user = {
+        "id": int(identity["id"]),
+        "tenant_id": identity.get("tenant_id"),
+        "role": identity.get("role"),
+    }
+
+    tenant_id = request.args.get("tenant_id")
+    if tenant_id != current_user["tenant_id"]:
+        return jsonify({"error": "Tenant mismatch"}), 403
+
+    status = service.get_current_status(
+        user_id=current_user["id"],
+        tenant_id=current_user["tenant_id"]
+    )
+    return jsonify({"data": status}), 200
+
+
+@time_bp.route("/timesheets/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_timesheet_route(user_id):
+    identity = get_jwt_identity()
+    tenant_id = identity["tenant_id"]
+
+    if int(identity["id"]) != user_id and identity["role"] not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    data = service.get_timesheet(user_id, tenant_id, start_date, end_date)
+    return jsonify({"data": data}), 200
+
+
+@time_bp.route("/reports/summary", methods=["GET"])
 @jwt_required()
 def get_summary_report_route():
-    """Generate a summary report (manager/admin view)."""
-    claims = get_jwt()  # Get full payload as dict
-    current_user = {
-        'tenant_id': claims['tenant_id'],
-        'role': claims['role']
-    }
-    if current_user['role'] not in ['manager', 'superadmin']:
-        return jsonify({'error': 'Unauthorized'}), 403
+    identity = get_jwt_identity()
+    tenant_id = identity["tenant_id"]
+    role = identity["role"]
 
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    try:
-        report = get_summary_report(current_user['tenant_id'], start_date, end_date)
-        return jsonify({'data': report}), 200
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+    if role not in ["manager", "superadmin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    report = service.get_summary_report(tenant_id, start_date, end_date)
+    return jsonify({"data": report}), 200
+
+
+@time_bp.route("/exceptions", methods=["GET"])
+@jwt_required()
+def exceptions_route():
+    identity = get_jwt_identity()
+    if identity["role"] not in ["manager", "admin"]:
+        return jsonify({"error": "Not authorized"}), 403
+
+    tenant_id = identity.get("tenant_id")
+    data = service.get_exceptions(tenant_id)
+    return jsonify({"data": data}), 200

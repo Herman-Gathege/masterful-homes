@@ -1,18 +1,19 @@
-//frontend/src/store/notificationStore.jsx
 import { create } from "zustand";
 import {
   fetchNotifications,
   fetchUnreadCount,
   markNotificationAsRead,
-  markAllAsRead as markAllService,
+  markAllAsRead,
 } from "../services/notificationsService";
 
-const useNotificationStore = create((set) => ({
+const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
   loading: false,
 
+  // ------------------
   // Helpers
+  // ------------------
   setLoading: (loading) => set({ loading }),
   setNotifications: (notifications) =>
     set({
@@ -21,11 +22,15 @@ const useNotificationStore = create((set) => ({
     }),
   setUnreadCount: (count) => set({ unreadCount: count }),
 
-  // API-driven actions
-  loadNotifications: async () => {
+  reset: () => set({ notifications: [], unreadCount: 0, loading: false }),
+
+  // ------------------
+  // API Actions
+  // ------------------
+  loadNotifications: async (limit = 20, offset = 0) => {
     set({ loading: true });
     try {
-      const data = await fetchNotifications();
+      const data = await fetchNotifications(limit, offset);
       set({
         notifications: data,
         unreadCount: data.filter((n) => !n.is_read).length,
@@ -49,6 +54,8 @@ const useNotificationStore = create((set) => ({
   markAsRead: async (id) => {
     try {
       await markNotificationAsRead(id);
+
+      // optimistic local update
       set((state) => ({
         notifications: state.notifications.map((n) =>
           n.id === id ? { ...n, is_read: true } : n
@@ -56,13 +63,15 @@ const useNotificationStore = create((set) => ({
         unreadCount: Math.max(state.unreadCount - 1, 0),
       }));
     } catch (err) {
-      console.error("❌ Failed to mark notification as read", err);
+      console.error(`❌ Failed to mark notification ${id} as read`, err);
     }
   },
 
   markAllAsRead: async () => {
     try {
-      await markAllService();
+      await markAllAsRead();
+
+      // optimistic local update
       set((state) => ({
         notifications: state.notifications.map((n) => ({
           ...n,

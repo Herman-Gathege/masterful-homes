@@ -3,6 +3,8 @@ from flask import Flask
 from flask_cors import CORS
 from config import Config
 from extensions import db, bcrypt, jwt, migrate   # ✅ import from extensions
+from flask_jwt_extended.exceptions import JWTExtendedException
+from flask import jsonify
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -56,6 +58,11 @@ def create_app(test_config=None):
 
     
 
+    @app.errorhandler(JWTExtendedException)
+    def handle_jwt_errors(e):
+        print("🔥 JWT ERROR:", str(e))
+        return jsonify({"error": str(e)}), 422
+    
     @app.route("/")
     def index():
         return {"message": "Welcome to Masterful Homes Backend!"}, 200
