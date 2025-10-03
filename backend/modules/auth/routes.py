@@ -10,20 +10,32 @@ from core.models import User
 auth_bp = Blueprint("auth", __name__)
 
 
-def _build_identity(user):
-    # ensure strings for JSON-safety
-    return {
-        "id": str(user.id),
+# def _build_identity(user):
+#     # ensure strings for JSON-safety
+#     return {
+#         "id": str(user.id),
+#         "tenant_id": user.tenant_id,
+#         "role": user.role,
+#         "email": user.email,
+#         "full_name": user.full_name or ""
+#     }
+
+def generate_tokens(user):
+    additional_claims = {
         "tenant_id": user.tenant_id,
         "role": user.role,
         "email": user.email,
         "full_name": user.full_name or ""
     }
-
-def generate_tokens(user):
-    identity = _build_identity(user)
-    access = create_access_token(identity=identity, fresh=True)
-    refresh = create_refresh_token(identity=identity)
+    access = create_access_token(
+        identity=str(user.id),  # <-- sub is now a string
+        fresh=True,
+        additional_claims=additional_claims
+    )
+    refresh = create_refresh_token(
+        identity=str(user.id),
+        additional_claims=additional_claims
+    )
     return {"access_token": access, "refresh_token": refresh}
 
 
