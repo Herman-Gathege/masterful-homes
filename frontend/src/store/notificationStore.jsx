@@ -1,3 +1,4 @@
+// frontend/src/store/notificationStore.jsx
 import { create } from "zustand";
 import {
   fetchNotifications,

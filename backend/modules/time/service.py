@@ -1,9 +1,40 @@
 # backend/modules/time/service.py
 from datetime import datetime, timezone, timedelta
-from sqlalchemy import and_, func
+from sqlalchemy import func
 from extensions import db
 from core.models import TimeEntry, User, Task, TimeEntryKindEnum, Shift, Notification
 
+def _parse_iso_datetime(value):
+    """
+    Accept:
+      - None -> None
+      - datetime instance -> returned (ensure tz-aware as UTC if missing)
+      - ISO string (with or without Z) -> parsed datetime with tzinfo
+      - numeric timestamp string/float -> parsed
+    Raises ValueError for invalid input.
+    """
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        if value.tzinfo is None:
+            return value.replace(tzinfo=timezone.utc)
+        return value
+    if isinstance(value, str):
+        s = value.strip()
+        # Try ISO with Z -> replace and parse
+        try:
+            return datetime.fromisoformat(s.replace("Z", "+00:00"))
+        except Exception:
+            pass
+        # Try numeric timestamp
+        try:
+            ts = float(s)
+            return datetime.fromtimestamp(ts, tz=timezone.utc)
+        except Exception:
+            pass
+        raise ValueError(f"Invalid datetime format: {value!r}")
+    # unsupported type
+    raise ValueError("Unsupported datetime type for parsing")
 
 def get_open_entry(user_id, tenant_id=None):
     q = TimeEntry.query.filter_by(user_id=user_id, end_time=None)
@@ -13,13 +44,22 @@ def get_open_entry(user_id, tenant_id=None):
 
 def clock_in(user_id, tenant_id, start_time=None, kind=TimeEntryKindEnum.REGULAR, task_id=None, notes=None):
     """Create an open TimeEntry. start_time defaults to now UTC."""
+    # prevent duplicate open entry
     if get_open_entry(user_id, tenant_id):
         raise ValueError("User already clocked in.")
 
-    if start_time is None:
+    # parse start_time if string provided
+    if start_time is not None:
+        start_time = _parse_iso_datetime(start_time)
+    else:
         start_time = datetime.now(timezone.utc)
-    elif isinstance(start_time, str):
-        start_time = datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+
+    # accept kind as str too
+    if isinstance(kind, str):
+        try:
+            kind = TimeEntryKindEnum(kind)
+        except Exception:
+            kind = TimeEntryKindEnum.REGULAR
 
     entry = TimeEntry(
         tenant_id=tenant_id,
@@ -33,32 +73,36 @@ def clock_in(user_id, tenant_id, start_time=None, kind=TimeEntryKindEnum.REGULAR
     db.session.commit()
     return entry
 
-
 def clock_out(user_id, end_time=None, notes=None):
     """Close the open entry for user_id. end_time defaults to now UTC."""
     entry = get_open_entry(user_id)
     if not entry:
         raise ValueError("No open entry to clock out.")
 
-    if end_time is None:
+    # parse end_time if provided, else default to now
+    if end_time is not None:
+        end_time = _parse_iso_datetime(end_time)
+    else:
         end_time = datetime.now(timezone.utc)
-    elif isinstance(end_time, str):
-        end_time = datetime.fromisoformat(end_time.replace("Z", "+00:00"))
+
+    # ensure timezone-aware datetimes
+    if end_time.tzinfo is None:
+        end_time = end_time.replace(tzinfo=timezone.utc)
+    if entry.start_time.tzinfo is None:
+        entry.start_time = entry.start_time.replace(tzinfo=timezone.utc)
 
     entry.end_time = end_time
-    entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0
+    entry.duration = (end_time - entry.start_time).total_seconds() / 3600.0  # hours
 
     # Overtime detection
     if entry.duration and entry.duration > 8 and entry.kind == TimeEntryKindEnum.REGULAR:
         entry.kind = TimeEntryKindEnum.OVERTIME
+        # send notification to manager(s) or tenant admin
         try:
             from modules.notifications.service import create_notification
-            create_notification(
-                entry.tenant_id,
-                entry.user_id,
-                f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}"
-            )
+            create_notification(entry.tenant_id, entry.user_id, f"Overtime detected: {entry.duration:.1f} hours on {entry.start_time.date()}")
         except Exception:
+            # swallow notification errors to avoid breaking clock_out
             pass
 
     if notes:
@@ -66,6 +110,8 @@ def clock_out(user_id, end_time=None, notes=None):
 
     db.session.commit()
     return entry
+
+# (the rest of file remains unchanged)
 
 
 def get_current_status(user_id, tenant_id):

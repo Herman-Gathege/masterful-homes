@@ -1,3 +1,4 @@
+// frontend/src/modules/Time/pages/ClockWidget.jsx
 import React, { useEffect, useContext } from "react";
 import useTimeStore from "../../../store/timeStore";
 import { AuthContext } from "../../../context/AuthContext";

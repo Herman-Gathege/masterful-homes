@@ -1,3 +1,4 @@
+// frontend/src/modules/Time/pages/TimesheetTable.jsx
 import React, { useContext } from "react";
 import useTimeStore from "../../../store/timeStore";
 import { AuthContext } from "../../../context/AuthContext";
@@ -33,8 +34,18 @@ const TimesheetTable = () => {
   return (
     <div aria-label="Timesheet Table">
       <div style={{ marginBottom: "1rem" }}>
-        <input type="date" name="startDate" onChange={handleFilterChange} />
-        <input type="date" name="endDate" onChange={handleFilterChange} />
+        <input
+          type="date"
+          name="startDate"
+          value={timesheetFilters.startDate || ""}
+          onChange={handleFilterChange}
+        />
+        <input
+          type="date"
+          name="endDate"
+          value={timesheetFilters.endDate || ""}
+          onChange={handleFilterChange}
+        />
       </div>
 
       <table border="1" cellPadding="6" style={{ width: "100%" }}>

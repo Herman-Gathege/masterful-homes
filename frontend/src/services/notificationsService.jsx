@@ -1,3 +1,5 @@
+
+// frontend/src/services/notificationsService.jsx
 import axiosInstance from "../context/axiosInstance";
 
 export const fetchNotifications = async (limit = 20, offset = 0) => {

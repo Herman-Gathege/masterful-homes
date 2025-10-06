@@ -9,29 +9,30 @@ const API_BASE = '/time';
 // -----------------------------
 export const useClockIn = () =>
   useMutation({
-    // Backend uses JWT for user/tenant, so only optional start_time
     mutationFn: (data) => axiosInstance.post(`${API_BASE}/clock-in`, data),
   });
 
 export const useClockOut = () =>
   useMutation({
-    // Backend uses JWT for user/tenant, so only optional end_time/notes
     mutationFn: (data) => axiosInstance.post(`${API_BASE}/clock-out`, data),
   });
 
 // -----------------------------
 // Current Status
 // -----------------------------
-export const useCurrentStatus = () =>
+export const useCurrentStatus = (tenantId) =>
   useQuery({
-    queryKey: ['currentStatus'],
+    queryKey: ['currentStatus', tenantId],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`/time/current-status`);
-      return data.data;
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      const { data } = await axiosInstance.get(`${API_BASE}/current-status`, { params });
+      // backend returns { data: status }
+      return data.data ?? data;
     },
+    enabled: !!tenantId,
     refetchInterval: 30000,
   });
-
 
 // -----------------------------
 // Timesheets
@@ -40,20 +41,16 @@ export const useTimesheet = (userId, tenantId, startDate, endDate) =>
   useQuery({
     queryKey: ['timesheet', userId, tenantId, startDate, endDate],
     queryFn: async () => {
-      const params = {
-        tenant_id: tenantId,
-      };
-
-      // ✅ Only include filters if user actually set them
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      // only add filters when present (prevents sending "null" strings)
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
-      const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, {
-        params,
-      });
-
-      return data.data; // unwrap -> list of entries
+      const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, { params });
+      return data.data ?? [];
     },
+    // call as soon as we have user & tenant so backend can default date range
     enabled: !!userId && !!tenantId,
   });
 
@@ -64,10 +61,11 @@ export const useSummaryReport = (startDate, endDate) =>
   useQuery({
     queryKey: ['summaryReport', startDate, endDate],
     queryFn: async () => {
-      const { data } = await axiosInstance.get(`${API_BASE}/reports/summary`, {
-        params: { start_date: startDate, end_date: endDate },
-      });
-      return data.data; // unwrap -> { summary: [...], unapproved_count }
+      const params = {};
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+      const { data } = await axiosInstance.get(`${API_BASE}/reports/summary`, { params });
+      return data.data ?? { summary: [], unapproved_count: 0 };
     },
     enabled: !!startDate && !!endDate,
   });
@@ -79,11 +77,11 @@ export const useShifts = (tenantId) =>
   useQuery({
     queryKey: ['shifts', tenantId],
     queryFn: async () => {
-      const res = await axiosInstance.get(`${API_BASE}/shifts`, {
-        params: { tenant_id: tenantId },
-      });
-      // 🔑 Transform backend -> FullCalendar format
-      return (res.data.data || []).map((shift) => ({
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      const res = await axiosInstance.get(`${API_BASE}/shifts`, { params });
+      const arr = (res.data && res.data.data) || [];
+      return arr.map((shift) => ({
         id: shift.id,
         title: shift.description || 'Shift',
         start: shift.start_time,
@@ -102,26 +100,3 @@ export const useDeleteShift = () =>
   useMutation({
     mutationFn: (id) => axiosInstance.delete(`${API_BASE}/shifts/${id}`),
   });
-
-// -----------------------------
-// Notifications (optional restore)
-// -----------------------------
-// export const useLoadNotifications = () =>
-//   useQuery({
-//     queryKey: ['notifications'],
-//     queryFn: async () => {
-//       const { data } = await axiosInstance.get('/notifications');
-//       return data.data; // unwrap -> list of notifications
-//     },
-//     refetchInterval: 30000, // poll every 30s for updates
-//   });
-
-// export const useMarkNotificationAsRead = () =>
-//   useMutation({
-//     mutationFn: (id) => axiosInstance.put(`/notifications/${id}/read`),
-//   });
-
-// export const useMarkAllAsRead = () =>
-//   useMutation({
-//     mutationFn: () => axiosInstance.put('/notifications/mark-all-read'),
-//   });

@@ -15,6 +15,7 @@ class RoleEnum(str, Enum):
     TECHNICIAN = "technician"
     FINANCE = "finance"
     CONTRACTOR = "contractor"
+    EMPLOYEE = "employee"
 
 class TaskTypeEnum(str, Enum):
     INSTALLATION = "installation"
