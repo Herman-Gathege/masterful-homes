@@ -40,13 +40,18 @@ export const useTimesheet = (userId, tenantId, startDate, endDate) =>
   useQuery({
     queryKey: ['timesheet', userId, tenantId, startDate, endDate],
     queryFn: async () => {
+      const params = {
+        tenant_id: tenantId,
+      };
+
+      // ✅ Only include filters if user actually set them
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+
       const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, {
-        params: {
-          tenant_id: tenantId, // ✅ still required here
-          start_date: startDate,
-          end_date: endDate,
-        },
+        params,
       });
+
       return data.data; // unwrap -> list of entries
     },
     enabled: !!userId && !!tenantId,

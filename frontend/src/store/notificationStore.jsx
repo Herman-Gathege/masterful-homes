@@ -10,30 +10,38 @@ const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
   loading: false,
+  hasMore: true, // 👈 track pagination
+  offset: 0,
+  limit: 10,
 
   // ------------------
   // Helpers
   // ------------------
   setLoading: (loading) => set({ loading }),
-  setNotifications: (notifications) =>
-    set({
-      notifications,
-      unreadCount: notifications.filter((n) => !n.is_read).length,
-    }),
-  setUnreadCount: (count) => set({ unreadCount: count }),
-
-  reset: () => set({ notifications: [], unreadCount: 0, loading: false }),
+  reset: () =>
+    set({ notifications: [], unreadCount: 0, hasMore: true, offset: 0 }),
 
   // ------------------
   // API Actions
   // ------------------
-  loadNotifications: async (limit = 20, offset = 0) => {
+  loadNotifications: async (limit = get().limit, offset = 0, append = false) => {
+    if (get().loading) return; // 👈 prevent duplicate calls
     set({ loading: true });
+
     try {
       const data = await fetchNotifications(limit, offset);
+      const current = get().notifications;
+
+      // If less data returned than limit, no more available
+      const hasMore = data.length === limit;
+
       set({
-        notifications: data,
-        unreadCount: data.filter((n) => !n.is_read).length,
+        notifications: append ? [...current, ...data] : data,
+        unreadCount: [...(append ? current : []), ...data].filter(
+          (n) => !n.is_read
+        ).length,
+        hasMore,
+        offset,
         loading: false,
       });
     } catch (err) {
@@ -54,8 +62,6 @@ const useNotificationStore = create((set, get) => ({
   markAsRead: async (id) => {
     try {
       await markNotificationAsRead(id);
-
-      // optimistic local update
       set((state) => ({
         notifications: state.notifications.map((n) =>
           n.id === id ? { ...n, is_read: true } : n
@@ -70,8 +76,6 @@ const useNotificationStore = create((set, get) => ({
   markAllAsRead: async () => {
     try {
       await markAllAsRead();
-
-      // optimistic local update
       set((state) => ({
         notifications: state.notifications.map((n) => ({
           ...n,

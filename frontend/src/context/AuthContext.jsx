@@ -1,4 +1,3 @@
-// src/context/AuthContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { setAuthStore } from "./axiosInstance";
@@ -13,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   // ----------------------------
-  // login/logout helpers
+  // LOGIN / LOGOUT HELPERS
   // ----------------------------
   const login = (accessToken, newRefreshToken, userObj) => {
     if (!accessToken || !newRefreshToken) return;
@@ -41,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ----------------------------
-  // refresh access token
+  // REFRESH ACCESS TOKEN
   // ----------------------------
   const refreshAccessToken = async () => {
     if (!refreshToken) {
@@ -61,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         throw new Error("Invalid refresh response");
       }
 
+      // Persist new tokens
       localStorage.setItem("token", access_token);
       localStorage.setItem("refresh_token", newRefresh);
 
@@ -90,7 +90,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // ----------------------------
-  // load from localStorage
+  // LOAD FROM LOCALSTORAGE
   // ----------------------------
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
@@ -123,17 +123,37 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   // ----------------------------
-  // sync axios with latest auth
+  // SYNC WITH AXIOS INSTANCE
   // ----------------------------
   useEffect(() => {
-    if (token) {
-      setAuthStore({
-        token,
-        refreshAccessToken,
-        logout,
-      });
-    }
+    setAuthStore({
+      token,
+      refreshAccessToken,
+      logout,
+    });
   }, [token, refreshAccessToken, logout]);
+
+  // ----------------------------
+  // SYNC TOKENS ACROSS TABS
+  // ----------------------------
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (["token", "refresh_token"].includes(e.key)) {
+        const newToken = localStorage.getItem("token");
+        const newRefresh = localStorage.getItem("refresh_token");
+
+        if (!newToken || !newRefresh) {
+          logout(); // user logged out elsewhere
+        } else {
+          setToken(newToken);
+          setRefreshToken(newRefresh);
+        }
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   return (
     <AuthContext.Provider
