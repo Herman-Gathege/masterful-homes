@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Clock4, CalendarDays, Table } from "lucide-react";
+import { Clock4, CalendarDays, Table, AlertCircle, BarChart2 } from "lucide-react";
 import ClockWidget from "./pages/ClockWidget";
 import ShiftCalendar from "./pages/ShiftCalendar";
 import TimesheetTable from "./pages/TimesheetTable";
 import ShiftFormModal from "./pages/ShiftFormModal";
 import "../../css/TimeModule.css"; // 👈 We'll update this file below
+import ExceptionPanel from "./pages/ExceptionPanel";
+import ManagerSummary from "./pages/ManagerSummary";
 
 const Time = () => {
   const [activeTab, setActiveTab] = useState("clock");
@@ -13,6 +15,8 @@ const Time = () => {
     { key: "clock", label: "Clock", icon: <Clock4 size={18} /> },
     { key: "calendar", label: "Shifts", icon: <CalendarDays size={18} /> },
     { key: "timesheet", label: "Timesheets", icon: <Table size={18} /> },
+    { key: "exceptions", label: "Exceptions", icon: <AlertCircle size={18} /> },
+    { key: "summary", label: "Summary", icon: <BarChart2 size={18} /> }, 
   ];
 
   const renderContent = () => {
@@ -23,6 +27,10 @@ const Time = () => {
         return <ShiftCalendar />;
       case "timesheet":
         return <TimesheetTable />;
+      case "exceptions":
+        return <ExceptionPanel />;
+      case "summary":
+        return <ManagerSummary />;
       default:
         return null;
     }

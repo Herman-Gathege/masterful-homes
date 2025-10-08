@@ -304,3 +304,28 @@ def get_all_timesheets_route():
         all_entries.extend(entries)
 
     return jsonify({"data": all_entries}), 200
+
+
+
+@time_bp.route("/exceptions/resolve", methods=["POST"])
+@jwt_required()
+def resolve_exception_route():
+    """Mark a time entry exception as resolved."""
+    claims = get_jwt()
+    role = claims.get("role")
+
+    if role not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json() or {}
+    entry_id = data.get("id")
+
+    if not entry_id:
+        return jsonify({"error": "Missing entry ID"}), 400
+
+    try:
+        result = service.resolve_exception(entry_id)
+        return jsonify({"message": "Exception resolved", "data": result}), 200
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({"error": str(e)}), 500

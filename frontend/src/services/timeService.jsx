@@ -120,3 +120,31 @@ export const useAllTimesheets = (tenantId, startDate, endDate) =>
     enabled: !!tenantId && !!startDate && !!endDate,
     refetchOnWindowFocus: false,
   });
+
+
+  // -----------------------------
+// Exceptions
+// -----------------------------
+export const useExceptions = (tenantId) =>
+  useQuery({
+    queryKey: ['exceptions', tenantId],
+    queryFn: async () => {
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      // backend route expected: GET /api/time/exceptions
+      const { data } = await axiosInstance.get(`${API_BASE}/exceptions`, { params });
+      return data.data ?? { missing_clockouts: [], overtime: [] };
+    },
+    enabled: !!tenantId,
+    refetchOnWindowFocus: false,
+  });
+
+// optional client call to mark resolved (if you add route)
+export const resolveException = () =>
+  useMutation({
+    mutationFn: async ({ type, id }) => {
+      // Example: POST /api/time/exceptions/resolve  { type: "missing_clockout", id: 123 }
+      const { data } = await axiosInstance.post(`${API_BASE}/exceptions/resolve`, { type, id });
+      return data;
+    },
+  });

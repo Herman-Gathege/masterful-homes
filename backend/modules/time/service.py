@@ -348,32 +348,63 @@ def check_missing_clockouts(tenant_id, threshold_hours=12):
             )
 
 
+
 def get_exceptions(tenant_id, threshold_hours=12):
-    """Return open entries older than threshold and overtime entries."""
+    """Return open entries older than threshold and overtime entries, including user details."""
+    from core.models import User
+
     threshold = utcnow() - timedelta(hours=threshold_hours)
 
-    missing = TimeEntry.query.filter(
-        TimeEntry.tenant_id == tenant_id,
-        TimeEntry.end_time == None,
-        TimeEntry.start_time < threshold,
-    ).all()
+    # Missing clockouts
+    missing = (
+        db.session.query(TimeEntry, User)
+        .join(User, User.id == TimeEntry.user_id)
+        .filter(
+            TimeEntry.tenant_id == tenant_id,
+            TimeEntry.end_time == None,
+            TimeEntry.start_time < threshold,
+        )
+        .all()
+    )
 
-    overtime = TimeEntry.query.filter(
-        TimeEntry.tenant_id == tenant_id,
-        TimeEntry.duration != None,
-        TimeEntry.duration > 8,
-    ).all()
+    # Overtime
+    overtime = (
+        db.session.query(TimeEntry, User)
+        .join(User, User.id == TimeEntry.user_id)
+        .filter(
+            TimeEntry.tenant_id == tenant_id,
+            TimeEntry.duration != None,
+            TimeEntry.duration > 8,
+        )
+        .all()
+    )
 
     return {
         "missing_clockouts": [
-            {"id": e.id, "user_id": e.user_id, "start_time": e.start_time.isoformat(), "kind": e.kind.value}
+            {
+                "id": e.TimeEntry.id,
+                "user_id": e.User.id,
+                "user_name": e.User.full_name,
+                "user_email": e.User.email,
+                "start_time": e.TimeEntry.start_time.isoformat(),
+                "kind": e.TimeEntry.kind.value,
+            }
             for e in missing
         ],
         "overtime": [
-            {"id": e.id, "user_id": e.user_id, "start_time": e.start_time.isoformat(), "duration": e.duration}
+            {
+                "id": e.TimeEntry.id,
+                "user_id": e.User.id,
+                "user_name": e.User.full_name,
+                "user_email": e.User.email,
+                "start_time": e.TimeEntry.start_time.isoformat(),
+                "duration": e.TimeEntry.duration,
+                "kind": e.TimeEntry.kind.value,
+            }
             for e in overtime
         ],
     }
+
 
 
 def backfill_durations():
@@ -383,3 +414,30 @@ def backfill_durations():
         r.duration = (r.end_time - r.start_time).total_seconds() / 3600.0
     db.session.commit()
     return len(rows)
+
+
+
+def resolve_exception(entry_id):
+    """Mark an exception as resolved by approving or closing the time entry."""
+    entry = TimeEntry.query.get(entry_id)
+    if not entry:
+        raise ValueError(f"Time entry {entry_id} not found")
+
+    # If it's still open, auto clock-out now
+    if entry.end_time is None:
+        entry.end_time = utcnow()
+        entry.duration = (entry.end_time - entry.start_time).total_seconds() / 3600.0
+
+    # Mark it approved to indicate resolution
+    entry.is_approved = True
+
+    db.session.commit()
+
+    return {
+        "id": entry.id,
+        "user_id": entry.user_id,
+        "start_time": entry.start_time.isoformat(),
+        "end_time": entry.end_time.isoformat() if entry.end_time else None,
+        "duration": entry.duration,
+        "is_approved": entry.is_approved,
+    }

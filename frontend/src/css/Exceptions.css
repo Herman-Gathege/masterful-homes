@@ -1,0 +1,40 @@
+.exceptions-panel {
+  background: #fff;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+}
+
+.exceptions-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.exceptions-table {
+  width:100%;
+  border-collapse: collapse;
+}
+
+.exceptions-table th, .exceptions-table td {
+  text-align:left;
+  padding:8px 10px;
+  border-bottom:1px solid #eee;
+}
+
+.exceptions-table tr:hover { background:#fbfbfb; }
+
+.btn {
+  padding:6px 10px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  background:#053f5c;
+  color:#fff;
+  margin-left: 20px;
+}
+
+.btn.small { padding:6px 8px; font-size:0.9rem; background:#f2f2f2; color:#053f5c; border:1px solid #ddd; }
+.muted { color:#666; font-size:0.9rem; }
+.empty { padding:14px; color:#666; }

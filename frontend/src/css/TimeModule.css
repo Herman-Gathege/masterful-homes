@@ -182,3 +182,136 @@
   text-align: center;
   color: #666;
 }
+
+.timesheet-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.timesheet-controls input[type="date"] {
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.timesheet-controls button {
+  background-color: #053f5c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.timesheet-controls button:hover {
+  background-color: #062c41;
+}
+
+.active-range {
+  margin-top: 4px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+
+/* ==========================
+   Manager Summary Dashboard
+========================== */
+.manager-summary {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.summary-filters input[type="date"] {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.summary-filters button {
+  background: #053f5c;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.summary-filters button:hover {
+  background: #062c41;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background: #f8fafc;
+  border: 1px solid #e5e9ec;
+  border-radius: 10px;
+  text-align: center;
+  padding: 1.2rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.summary-card:hover {
+  background: #eaf3f9;
+  transform: translateY(-2px);
+}
+
+.summary-card h3 {
+  color: #053f5c;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.summary-card p {
+  color: #555;
+  margin-top: 0.4rem;
+}
+
+/* ==============================
+   Summary Chart Section
+============================== */
+.summary-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.chart-box {
+  background: #fff;
+  border: 1px solid #e5e9ec;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.chart-box h4 {
+  color: #053f5c;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}

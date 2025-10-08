@@ -1,4 +1,3 @@
-# backend/seed_demo_data.py
 from datetime import datetime, timedelta, timezone
 from flask_bcrypt import Bcrypt
 from faker import Faker
@@ -6,19 +5,32 @@ import random
 
 from main import create_app
 from extensions import db
-from core.models import User, Task, TimeEntry, Notification, RoleEnum, TaskStatusEnum, TimeEntryKindEnum
+from core.models import (
+    User, Task, TimeEntry, Notification, Shift,
+    RoleEnum, TaskStatusEnum, TaskTypeEnum, TimeEntryKindEnum,
+    TenantConfig
+)
 
 fake = Faker()
 bcrypt = Bcrypt()
-TENANT = "tenant_demo"
+TENANT = "tenant_abc"
 
 
 def seed_demo():
-    print("🌱 Seeding demo data...")
+    print("🌱 Seeding rich demo data with shifts...")
 
-    # 1️⃣ Manager
+    # 0️⃣ Clear existing demo data
+    db.session.query(Notification).delete()
+    db.session.query(TimeEntry).delete()
+    db.session.query(Task).delete()
+    db.session.query(Shift).delete()
+    db.session.query(User).filter_by(tenant_id=TENANT).delete()
+    db.session.commit()
+    print("🧹 Cleared old demo data")
+
+    # 1️⃣ Ensure Manager exists
     manager_email = "manager@demo.com"
-    manager = User.query.filter_by(email=manager_email).first()
+    manager = User.query.filter_by(email=manager_email, tenant_id=TENANT).first()
     if not manager:
         manager = User(
             tenant_id=TENANT,
@@ -40,9 +52,9 @@ def seed_demo():
 
     # 2️⃣ Employees
     employees = []
-    for i in range(3):
+    for i in range(4):
         email = f"employee{i+1}@demo.com"
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(email=email, tenant_id=TENANT).first()
         if not user:
             user = User(
                 tenant_id=TENANT,
@@ -52,7 +64,7 @@ def seed_demo():
                 role=RoleEnum.EMPLOYEE,
                 department="Field Ops",
                 team="Team Alpha",
-                location="Nairobi",
+                location=random.choice(["Nairobi", "Mombasa", "Kisumu"]),
                 is_active=True,
             )
             db.session.add(user)
@@ -62,57 +74,110 @@ def seed_demo():
     db.session.commit()
     print(f"✅ Found or created {len(employees)} employees")
 
-    # 3️⃣ Create a sample Task for Employee 1
-    task = Task(
-        tenant_id=TENANT,
-        title="Install smart lights",
-        description="Complete smart lighting installation at customer site.",
-        type="installation",
-        status=TaskStatusEnum.IN_PROGRESS,
-        priority=2,
-        due_date=datetime.now(timezone.utc).date() + timedelta(days=2),
-        created_by=manager.id,
-        scheduled_at=datetime.now(timezone.utc) + timedelta(hours=1),
-        location="Westlands, Nairobi",
-    )
-    db.session.add(task)
+    # 3️⃣ Create Tasks for each employee
+    for emp in employees:
+        for _ in range(random.randint(2, 4)):
+            t = Task(
+                tenant_id=TENANT,
+                title=fake.catch_phrase(),
+                description=fake.paragraph(nb_sentences=2),
+                type=random.choice([e.value for e in TaskTypeEnum]),
+                status=random.choice([e.value for e in TaskStatusEnum]),
+                priority=random.randint(1, 5),
+                due_date=datetime.now(timezone.utc).date() + timedelta(days=random.randint(1, 10)),
+                created_by=manager.id,
+                scheduled_at=datetime.now(timezone.utc) + timedelta(hours=random.randint(1, 48)),
+                location=fake.city(),
+            )
+            db.session.add(t)
+            db.session.flush()
+            t.assignees.append(emp)
     db.session.commit()
+    print("📋 Created demo tasks for employees")
 
-    # Assign Employee 1
-    if employees:
-        task.assignees.append(employees[0])
-        db.session.commit()
-        print(f"🧩 Assigned task '{task.title}' to {employees[0].full_name}")
+    # 4️⃣ Time entries (last 7 days)
+    for emp in employees:
+        for day_offset in range(7):
+            start_time = datetime.now(timezone.utc) - timedelta(days=day_offset, hours=random.randint(8, 10))
+            if random.random() < 0.2:
+                end_time = None
+                duration = None
+            else:
+                duration_hours = random.uniform(6, 10)
+                end_time = start_time + timedelta(hours=duration_hours)
+                duration = duration_hours
 
-        # 4️⃣ Create Time Entry for Employee 1
-        start_time = datetime.now(timezone.utc) - timedelta(hours=9)
-        end_time = datetime.now(timezone.utc)
-        entry = TimeEntry(
+            kind = (
+                TimeEntryKindEnum.OVERTIME
+                if duration and duration > 8
+                else TimeEntryKindEnum.REGULAR
+            )
+
+            entry = TimeEntry(
+                tenant_id=TENANT,
+                user_id=emp.id,
+                start_time=start_time,
+                end_time=end_time,
+                kind=kind,
+                duration=duration,
+                notes=fake.sentence(nb_words=8),
+                is_approved=random.choice([True, False]),
+            )
+            db.session.add(entry)
+            db.session.flush()
+
+            if end_time is None:
+                notif_msg = f"⚠️ Missing clock-out since {start_time.strftime('%Y-%m-%d %H:%M')}"
+            elif duration and duration > 8:
+                notif_msg = f"⏰ Overtime logged: {round(duration, 1)}h on {start_time.date()}"
+            else:
+                notif_msg = None
+
+            if notif_msg:
+                db.session.add(Notification(
+                    tenant_id=TENANT,
+                    user_id=emp.id,
+                    message=notif_msg,
+                    created_at=datetime.now(timezone.utc),
+                    is_read=False,
+                ))
+
+    db.session.commit()
+    print("🕒 Added demo time entries + notifications")
+
+    # 5️⃣ Shifts for the week
+    for day_offset in range(3):
+        start = datetime.now(timezone.utc) + timedelta(days=day_offset, hours=9)
+        end = start + timedelta(hours=8)
+        shift = Shift(
             tenant_id=TENANT,
-            user_id=employees[0].id,
-            start_time=start_time,
-            end_time=end_time,
-            kind=TimeEntryKindEnum.REGULAR,
-            duration=(end_time - start_time).seconds / 3600,
-            notes="Installation completed successfully.",
-            is_approved=True,
-            task_id=task.id,
+            start_time=start,
+            end_time=end,
+            role=RoleEnum.EMPLOYEE,
+            team="Team Alpha",
+            description=f"Shift {day_offset+1} for Team Alpha",
+            is_recurring=False,
         )
-        db.session.add(entry)
-        db.session.commit()
-        print("🕒 Time entry created for Employee 1")
+        db.session.add(shift)
+        db.session.flush()
+        shift.assignees = random.sample(employees, random.randint(2, len(employees)))
+    db.session.commit()
+    print("📅 Created demo shifts")
 
-        # 5️⃣ Generate demo notification
-        notif = Notification(
+    # 6️⃣ Ensure TenantConfig exists
+    config = TenantConfig.query.filter_by(tenant_id=TENANT).first()
+    if not config:
+        config = TenantConfig(
             tenant_id=TENANT,
-            user_id=employees[0].id,
-            message=f"Overtime logged: {round(entry.duration, 1)} hours on {entry.start_time.date()}",
-            created_at=datetime.now(timezone.utc),
-            is_read=False,
+            enabled_modules=["dashboard", "tasks", "notifications"],
+            branding={"theme_color": "#007bff", "logo_url": ""},
+            trial_status="active"
         )
-        db.session.add(notif)
+        db.session.add(config)
         db.session.commit()
-        print("🔔 Demo notification created")
+        print(f"⚙️ Created TenantConfig for {TENANT}")
+    else:
+        print(f"ℹ️ TenantConfig already exists for {TENANT}")
 
     print("🎉 Demo data seeded successfully!")
 
