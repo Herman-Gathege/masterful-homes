@@ -148,7 +148,7 @@ def get_current_status(user_id, tenant_id):
 # -----------------------------
 def get_timesheet(user_id, tenant_id, start_date=None, end_date=None):
     """
-    Return list of time entries with durations.
+    Return list of time entries with user and task info.
     Defaults to current week (Mon–Sun) if no range provided.
     Includes timezone normalization to ensure correct filtering.
     """
@@ -167,18 +167,19 @@ def get_timesheet(user_id, tenant_id, start_date=None, end_date=None):
     if start_date > end_date:
         raise ValueError("Start date must be before end date")
 
-    # ✅ Normalize to UTC full-day boundaries (fixes missing results)
+    # ✅ Normalize to UTC full-day boundaries
     start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
     end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=999999)
 
-    # inclusive upper bound
     end_date_next = end_date + timedelta(seconds=1)
 
-    # Query entries
+    # ✅ Include user info in the join
     entries = (
-        TimeEntry.query.filter_by(user_id=user_id)
+        TimeEntry.query.filter_by(tenant_id=tenant_id)
+        .filter(TimeEntry.user_id == user_id)
         .filter(TimeEntry.start_time >= start_date, TimeEntry.start_time < end_date_next)
-        .outerjoin(Task)
+        .outerjoin(Task, Task.id == TimeEntry.task_id)
+        .outerjoin(User, User.id == TimeEntry.user_id)
         .with_entities(
             TimeEntry.id,
             TimeEntry.start_time,
@@ -188,17 +189,19 @@ def get_timesheet(user_id, tenant_id, start_date=None, end_date=None):
             TimeEntry.is_approved,
             TimeEntry.notes,
             Task.title.label("task_title"),
+            User.full_name.label("user_name"),
+            User.email.label("user_email"),
         )
         .order_by(TimeEntry.start_time.desc())
         .all()
     )
 
-    # Transform to clean dicts
     result = []
     for e in entries:
         dur = e.duration
         if dur is None and e.end_time:
             dur = (e.end_time - e.start_time).total_seconds() / 3600.0
+
         result.append(
             {
                 "id": e.id,
@@ -209,10 +212,13 @@ def get_timesheet(user_id, tenant_id, start_date=None, end_date=None):
                 "is_approved": e.is_approved,
                 "notes": e.notes,
                 "task_title": e.task_title or "N/A",
+                "user_name": e.user_name or "Unknown",
+                "user_email": e.user_email or "",
             }
         )
 
     return result
+
 
 
 

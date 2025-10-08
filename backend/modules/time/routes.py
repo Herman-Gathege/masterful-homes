@@ -3,7 +3,7 @@ from flask import jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from . import time_bp, service
 from datetime import datetime
-from core.models import Shift
+from core.models import Shift, User
 
 
 
@@ -257,3 +257,26 @@ def assign_shift_users_route(shift_id):
         return jsonify(result), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+
+@time_bp.route("/timesheets", methods=["GET"])
+@jwt_required()
+def get_all_timesheets_route():
+    claims = get_jwt()
+    tenant_id = claims.get("tenant_id")
+    role = claims.get("role")
+
+    if role not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
+    users = User.query.filter_by(tenant_id=tenant_id).all()
+
+    all_entries = []
+    for u in users:
+        entries = service.get_timesheet(u.id, tenant_id, start_date, end_date)
+        all_entries.extend(entries)
+
+    return jsonify({"data": all_entries}), 200

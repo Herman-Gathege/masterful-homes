@@ -100,3 +100,23 @@ export const useDeleteShift = () =>
   useMutation({
     mutationFn: (id) => axiosInstance.delete(`${API_BASE}/shifts/${id}`),
   });
+
+
+// -----------------------------
+// All Timesheets (Manager/Admin)
+// -----------------------------
+export const useAllTimesheets = (tenantId, startDate, endDate) =>
+  useQuery({
+    queryKey: ['allTimesheets', tenantId, startDate, endDate],
+    queryFn: async () => {
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+
+      const { data } = await axiosInstance.get(`${API_BASE}/timesheets`, { params });
+      return data.data ?? [];
+    },
+    enabled: !!tenantId && !!startDate && !!endDate,
+    refetchOnWindowFocus: false,
+  });
