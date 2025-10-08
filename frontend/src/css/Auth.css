@@ -14,10 +14,7 @@
    Card
 ========================== */
 .auth-card {
-  background-color: #fff;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+ 
   width: 100%;
   max-width: 420px;
   text-align: center;
@@ -82,9 +79,9 @@
 }
 
 .auth-text a {
-  color: #f4d03f; /* yellow accent */
+  color: #062c41; /* yellow accent */
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
 }
 
 .auth-text a:hover {
@@ -98,4 +95,63 @@
   color: red;
   font-size: 0.9rem;
   margin-bottom: 1rem;
+}
+
+
+/* ==========================
+   Split Layout
+========================== */
+.auth-split-container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.auth-image-side {
+  flex: 1;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+}
+
+.login-image {
+  background-image: url("/auth-pic.jpeg");
+}
+
+.signup-image {
+  background-image: url("/auth-pic.jpeg");
+}
+
+.auth-overlay {
+  background: rgba(0, 0, 0, 0.45);
+  padding: 2rem 3rem;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.auth-overlay h1 {
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+.auth-overlay p {
+  font-size: 1.1rem;
+  color: #ffffff;
+}
+
+/* ==========================
+   Form Section
+========================== */
+.auth-form-side {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f7f9fa;
+  padding: 2rem;
 }
