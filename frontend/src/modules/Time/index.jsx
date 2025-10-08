@@ -30,7 +30,7 @@ const Time = () => {
 
   return (
     <div className="time-module-container">
-      <h1 className="time-header">⏱️ Time Module</h1>
+      <h1 className="time-header">Time Management</h1>
 
       {/* ===== Top Tab Bar ===== */}
       <div className="time-topbar">
