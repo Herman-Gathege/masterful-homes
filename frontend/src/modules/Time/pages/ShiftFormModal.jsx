@@ -3,11 +3,14 @@ import Modal from "../../../components/Modal";
 import { AuthContext } from "../../../context/AuthContext";
 import { useCreateShift, useDeleteShift } from "../../../services/timeService";
 import moment from "moment";
+import { toast } from "../../../utils/toast";
 
 const ShiftFormModal = ({ selectedRange, selectedEvent, onClose }) => {
   const { user } = useContext(AuthContext);
   const createShift = useCreateShift();
   const deleteShift = useDeleteShift();
+  const isManager = ["manager", "admin"].includes(user?.role?.toLowerCase());
+
 
   // Convert ISO/Date -> local datetime-local value: "YYYY-MM-DDTHH:mm"
   const isoToLocalInput = (isoOrDate) => {
@@ -54,50 +57,53 @@ const ShiftFormModal = ({ selectedRange, selectedEvent, onClose }) => {
 
   // Submit: create new shift, or if editing, delete old shift then create new (simple update)
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
 
-    const payload = {
-      tenant_id: user?.tenant_id, // backend uses JWT tenant, but safe to include
-      start_time: localInputToIso(form.start_time),
-      end_time: localInputToIso(form.end_time),
-      description: form.title,
-    };
-
-    try {
-      if (selectedEvent) {
-        // Simple "update" approach: delete old then create new
-        // (backend doesn't provide update endpoint)
-        await deleteShift.mutateAsync(selectedEvent.id);
-        await createShift.mutateAsync(payload);
-      } else {
-        await createShift.mutateAsync(payload);
-      }
-      onClose(true);
-    } catch (err) {
-      console.error("Shift save failed", err);
-      setError(err?.message || "Failed to save shift");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    tenant_id: user?.tenant_id,
+    start_time: localInputToIso(form.start_time),
+    end_time: localInputToIso(form.end_time),
+    description: form.title,
   };
 
-  const handleDelete = async () => {
-    if (!selectedEvent) return;
-    if (!window.confirm("Are you sure you want to delete this shift?")) return;
-
-    try {
-      setLoading(true);
+  try {
+    if (selectedEvent) {
       await deleteShift.mutateAsync(selectedEvent.id);
-      onClose(true);
-    } catch (err) {
-      console.error("Delete failed", err);
-      setError(err?.message || "Failed to delete");
-    } finally {
-      setLoading(false);
+      await createShift.mutateAsync(payload);
+    } else {
+      await createShift.mutateAsync(payload);
     }
-  };
+    toast.success("Shift saved successfully!");
+    onClose(true);
+  } catch (err) {
+    console.error("Shift save failed", err);
+    toast.error("Failed to save shift");
+    setError(err?.message || "Failed to save shift");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const handleDelete = async () => {
+  if (!selectedEvent) return;
+  if (!window.confirm("Are you sure you want to delete this shift?")) return;
+
+  try {
+    setLoading(true);
+    await deleteShift.mutateAsync(selectedEvent.id);
+    toast.success("Shift deleted successfully.");
+    onClose(true);
+  } catch (err) {
+    console.error("Delete failed", err);
+    toast.error("Failed to delete shift");
+    setError(err?.message || "Failed to delete");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const isOpen = !!(selectedRange || selectedEvent);
 
@@ -146,7 +152,8 @@ const ShiftFormModal = ({ selectedRange, selectedEvent, onClose }) => {
           />
 
           <div className="modal-actions" style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
-            <button
+            {isManager && (
+              <button
               type="submit"
               disabled={loading}
               style={{
@@ -160,8 +167,10 @@ const ShiftFormModal = ({ selectedRange, selectedEvent, onClose }) => {
             >
               {selectedEvent ? "Update" : "Create"}
             </button>
+            )}
+            
 
-            {selectedEvent && (
+            {isManager && selectedEvent && (
               <button
                 type="button"
                 onClick={handleDelete}

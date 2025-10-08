@@ -210,6 +210,11 @@ def get_shifts_route():
 def create_shift_route():
     claims = get_jwt()
     tenant_id = claims.get("tenant_id")
+    role = claims.get("role")
+
+    # ✅ Only manager or admin can create shifts
+    if role not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized: only managers or admins can create shifts"}), 403
 
     data = request.get_json() or {}
     try:
@@ -240,6 +245,13 @@ def create_shift_route():
 @time_bp.route("/shifts/<int:shift_id>", methods=["DELETE"])
 @jwt_required()
 def delete_shift_route(shift_id):
+    claims = get_jwt()
+    role = claims.get("role")
+
+    # ✅ Only manager or admin can delete shifts
+    if role not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized: only managers or admins can delete shifts"}), 403
+
     try:
         result = service.delete_shift(shift_id)
         return jsonify(result), 200
@@ -247,16 +259,28 @@ def delete_shift_route(shift_id):
         return jsonify({"error": str(e)}), 404
 
 
+
 @time_bp.route("/shifts/<int:shift_id>/assign", methods=["POST"])
 @jwt_required()
 def assign_shift_users_route(shift_id):
+    claims = get_jwt()
+    role = claims.get("role")
+
+    # ✅ Only manager or admin can assign users to shifts
+    if role not in ["manager", "admin"]:
+        return jsonify({"error": "Unauthorized: only managers or admins can assign users to shifts"}), 403
+
     data = request.get_json() or {}
     user_ids = data.get("user_ids", [])
+
     try:
         result = service.assign_users(shift_id, user_ids)
         return jsonify(result), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+    except Exception as e:
+        return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
+
 
 
 @time_bp.route("/timesheets", methods=["GET"])

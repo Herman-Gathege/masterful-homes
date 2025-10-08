@@ -5,6 +5,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import { AuthContext } from "../../../context/AuthContext";
 import { useShifts } from "../../../services/timeService";
 import ShiftFormModal from "./ShiftFormModal";
+import  { toast } from "../../../utils/toast";
 
 const localizer = momentLocalizer(moment);
 
@@ -47,8 +48,15 @@ const ShiftCalendar = () => {
     setShowHelp(true);
   };
 
+  const canManageShifts = ["manager", "admin"].includes(user?.role?.toLowerCase());
+
   // Slot selection
   const handleSelectSlot = ({ start, end }) => {
+    if (!canManageShifts) {
+      toast.error("You don't have permission to create shifts");
+      return;
+    }
+
     if (!user) return;
     if (!end || start >= end) {
       const fallbackEnd = moment(start).add(8, "hours").toDate();
@@ -60,6 +68,11 @@ const ShiftCalendar = () => {
 
   // Event click
   const handleSelectEvent = (event) => {
+    if (!canManageShifts) {
+      toast.error("You don't have permission to edit shifts");
+      return;
+    }
+
     setSelectedEvent({
       id: event.id,
       title: event.title,
