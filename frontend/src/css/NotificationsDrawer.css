@@ -61,6 +61,7 @@
   cursor: pointer;
   font-weight: 500;
   transition: color 0.2s;
+  margin-right: 20px;
 }
 .drawer-header .mark-all:hover {
   color: #1d4ed8;

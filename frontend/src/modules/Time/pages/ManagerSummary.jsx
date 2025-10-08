@@ -126,7 +126,7 @@ const ManagerSummary = () => {
 
         <div className="chart-box">
           <h4>🕒 Distribution</h4>
-          <ResponsiveContainer width="100%" height={250}>
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
               <Pie
                 data={pieData}
