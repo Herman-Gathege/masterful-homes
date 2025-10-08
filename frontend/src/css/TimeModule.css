@@ -1,0 +1,317 @@
+/* ==========================
+   Time Module Layout
+========================== */
+.time-module-container {
+  padding: 1.5rem;
+  margin-left: 20px; /* offset for global sidebar */
+  background: #fafafa;
+  min-height: calc(100vh - 60px);
+}
+
+.time-header {
+  font-size: 1.6rem;
+  color: #053f5c;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+/* ==========================
+   Top Tab Bar
+========================== */
+.time-topbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f2f2f2;
+  border-radius: 8px;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.time-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #053f5c;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.time-tab-btn:hover {
+  background: rgba(5, 63, 92, 0.08);
+}
+
+.time-tab-btn.active {
+  background: #053f5c;
+  color: #fff;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+.time-tab-btn.active .icon {
+  color: #fff;
+}
+
+/* ==========================
+   Tab Content Area
+========================== */
+.time-content {
+  background: #fff;
+  padding: 1.2rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow-y: auto;
+  min-height: 70vh;
+}
+
+/* Scrollbar styling */
+.time-content::-webkit-scrollbar {
+  width: 8px;
+}
+.time-content::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+
+/* ==========================
+   Timesheet Layout
+========================== */
+.timesheet-wrapper {
+  background: #fff;
+  padding: 1.2rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================
+   Header & Controls
+========================== */
+.timesheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.timesheet-header h2 {
+  color: #053f5c;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.timesheet-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timesheet-controls button {
+  background: #053f5c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+}
+
+.timesheet-controls button:hover {
+  background: #085c86;
+}
+
+.timesheet-controls span {
+  color: #444;
+  font-size: 0.85rem;
+  margin-left: 10px;
+}
+
+/* ==========================
+   Table Styling
+========================== */
+.table-container {
+  overflow-x: auto;
+}
+
+.timesheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.timesheet-table th {
+  background: #f2f2f2;
+  color: #053f5c;
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  font-weight: 600;
+}
+
+.timesheet-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+}
+
+.timesheet-table tr:hover {
+  background: rgba(5, 63, 92, 0.05);
+}
+
+.timesheet-table td:last-child {
+  text-align: center;
+}
+
+/* ==========================
+   States
+========================== */
+.loading,
+.empty,
+.notice {
+  padding: 1.5rem;
+  text-align: center;
+  color: #666;
+}
+
+.timesheet-controls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.timesheet-controls input[type="date"] {
+  padding: 4px 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.timesheet-controls button {
+  background-color: #053f5c;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.timesheet-controls button:hover {
+  background-color: #062c41;
+}
+
+.active-range {
+  margin-top: 4px;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+
+/* ==========================
+   Manager Summary Dashboard
+========================== */
+.manager-summary {
+  background: #fff;
+  border-radius: 10px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.summary-filters {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.summary-filters input[type="date"] {
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.summary-filters button {
+  background: #053f5c;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.summary-filters button:hover {
+  background: #062c41;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.summary-card {
+  background: #f8fafc;
+  border: 1px solid #e5e9ec;
+  border-radius: 10px;
+  text-align: center;
+  padding: 1.2rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.summary-card:hover {
+  background: #eaf3f9;
+  transform: translateY(-2px);
+}
+
+.summary-card h3 {
+  color: #053f5c;
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.summary-card p {
+  color: #555;
+  margin-top: 0.4rem;
+}
+
+/* ==============================
+   Summary Chart Section
+============================== */
+.summary-charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.chart-box {
+  background: #fff;
+  border: 1px solid #e5e9ec;
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.chart-box h4 {
+  color: #053f5c;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}

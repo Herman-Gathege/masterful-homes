@@ -32,7 +32,7 @@ function AppContent() {
 
   useEffect(() => {
     setAuthStore(auth);
-  }, [auth.token, auth.refreshToken]);
+  }, [auth]);
 
   const handleLogout = () => {
     console.log("Logout clicked");

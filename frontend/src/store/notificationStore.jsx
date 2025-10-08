@@ -4,27 +4,53 @@ import {
   fetchNotifications,
   fetchUnreadCount,
   markNotificationAsRead,
-  markAllAsRead as markAllService,
+  markAllAsRead,
 } from "../services/notificationsService";
 
-const useNotificationStore = create((set) => ({
+const useNotificationStore = create((set, get) => ({
   notifications: [],
   unreadCount: 0,
   loading: false,
+  hasMore: true, // 👈 track pagination
+  offset: 0,
+  limit: 10,
 
-  // Load notifications
-  loadNotifications: async () => {
+  // ------------------
+  // Helpers
+  // ------------------
+  setLoading: (loading) => set({ loading }),
+  reset: () =>
+    set({ notifications: [], unreadCount: 0, hasMore: true, offset: 0 }),
+
+  // ------------------
+  // API Actions
+  // ------------------
+  loadNotifications: async (limit = get().limit, offset = 0, append = false) => {
+    if (get().loading) return; // 👈 prevent duplicate calls
     set({ loading: true });
+
     try {
-      const data = await fetchNotifications();
-      set({ notifications: data, loading: false });
+      const data = await fetchNotifications(limit, offset);
+      const current = get().notifications;
+
+      // If less data returned than limit, no more available
+      const hasMore = data.length === limit;
+
+      set({
+        notifications: append ? [...current, ...data] : data,
+        unreadCount: [...(append ? current : []), ...data].filter(
+          (n) => !n.is_read
+        ).length,
+        hasMore,
+        offset,
+        loading: false,
+      });
     } catch (err) {
       console.error("❌ Failed to load notifications", err);
       set({ loading: false });
     }
   },
 
-  // Refresh unread count only
   refreshUnread: async () => {
     try {
       const count = await fetchUnreadCount();
@@ -34,7 +60,6 @@ const useNotificationStore = create((set) => ({
     }
   },
 
-  // Mark single notification
   markAsRead: async (id) => {
     try {
       await markNotificationAsRead(id);
@@ -45,14 +70,13 @@ const useNotificationStore = create((set) => ({
         unreadCount: Math.max(state.unreadCount - 1, 0),
       }));
     } catch (err) {
-      console.error("❌ Failed to mark notification as read", err);
+      console.error(`❌ Failed to mark notification ${id} as read`, err);
     }
   },
 
-  // Mark all
   markAllAsRead: async () => {
     try {
-      await markAllService();
+      await markAllAsRead();
       set((state) => ({
         notifications: state.notifications.map((n) => ({
           ...n,

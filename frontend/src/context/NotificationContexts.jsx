@@ -16,11 +16,11 @@ export const NotificationProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    refreshUnread();
-    const interval = setInterval(refreshUnread, 30000); // refresh every 30s
-    return () => clearInterval(interval);
-  }, []);
+  // useEffect(() => {
+  //   refreshUnread();
+  //   const interval = setInterval(refreshUnread, 30000); // refresh every 30s
+  //   return () => clearInterval(interval);
+  // }, []);
 
   return (
     <NotificationContext.Provider value={{ unread, refreshUnread }}>

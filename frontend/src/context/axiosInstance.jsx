@@ -1,4 +1,4 @@
-// src/context/axiosInstance.jsx
+// frontend/src/context/axiosInstance.jsx
 import axios from "axios";
 
 let store = {
@@ -8,10 +8,12 @@ let store = {
 };
 
 export const setAuthStore = (authContext) => {
-  // keep references to the latest functions/values
-  store.token = authContext.token;
-  store.refreshAccessToken = authContext.refreshAccessToken;
-  store.logout = authContext.logout;
+  // Keep references to the latest functions and token
+  store = {
+    token: authContext.token,
+    refreshAccessToken: authContext.refreshAccessToken,
+    logout: authContext.logout,
+  };
 };
 
 const axiosInstance = axios.create({
@@ -19,19 +21,27 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Attach access token from in-memory store
+// ----------------------------
+// REQUEST INTERCEPTOR
+// ----------------------------
 axiosInstance.interceptors.request.use(
   (config) => {
-    if (store.token) {
+    const latestToken =
+      store.token || localStorage.getItem("token") || null;
+
+    if (latestToken) {
       config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${store.token}`;
+      config.headers.Authorization = `Bearer ${latestToken}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor -> try refresh on 401 once
+// ----------------------------
+// RESPONSE INTERCEPTOR (auto-refresh on 401)
+// ----------------------------
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -41,7 +51,10 @@ axiosInstance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const newAccessToken = await store.refreshAccessToken?.();
+        const newAccessToken =
+          (await store.refreshAccessToken?.()) ||
+          localStorage.getItem("token");
+
         if (newAccessToken) {
           store.token = newAccessToken;
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

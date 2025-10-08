@@ -1,3 +1,4 @@
+# backend/modules/notifications/service.py
 from core.models import db, Notification
 
 def get_notifications(user_id, limit=20, offset=0):
@@ -9,7 +10,7 @@ def get_notifications(user_id, limit=20, offset=0):
         .all()
     )
 
-def count_unread(user_id):
+def get_unread_count(user_id):
     return Notification.query.filter_by(user_id=user_id, is_read=False).count()
 
 def mark_as_read(user_id, notif_id):
