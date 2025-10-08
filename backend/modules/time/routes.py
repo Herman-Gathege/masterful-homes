@@ -99,10 +99,9 @@ def current_status_route():
 def get_timesheet_route(user_id):
     requester_id = int(get_jwt_identity())
     claims = get_jwt()
-    tenant_id = claims.get("tenant_id")
+    tenant_id = request.args.get("tenant_id") or claims.get("tenant_id")
     role = claims.get("role")
 
-    # Employees can only view their own timesheet
     if requester_id != user_id and role not in ["manager", "admin"]:
         return jsonify({"error": "Unauthorized"}), 403
 
@@ -114,6 +113,7 @@ def get_timesheet_route(user_id):
         return jsonify({"data": data}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
 
 
 # -----------------------------
@@ -162,10 +162,30 @@ def exceptions_route():
 @time_bp.route("/shifts", methods=["GET"])
 @jwt_required()
 def get_shifts_route():
+    from sqlalchemy.orm import joinedload
     claims = get_jwt()
     tenant_id = claims.get("tenant_id")
 
-    shifts = Shift.query.filter_by(tenant_id=tenant_id).all()
+    # optional filtering by date range (frontend can add ?start= & ?end= later)
+    start = request.args.get("start")
+    end = request.args.get("end")
+
+    q = Shift.query.options(joinedload(Shift.assignees)).filter_by(tenant_id=tenant_id)
+    if start:
+        try:
+            start_dt = datetime.fromisoformat(start.replace("Z", "+00:00"))
+            q = q.filter(Shift.start_time >= start_dt)
+        except Exception:
+            pass
+    if end:
+        try:
+            end_dt = datetime.fromisoformat(end.replace("Z", "+00:00"))
+            q = q.filter(Shift.end_time <= end_dt)
+        except Exception:
+            pass
+
+    shifts = q.order_by(Shift.start_time.desc()).all()
+
     return jsonify({
         "data": [
             {
@@ -176,10 +196,13 @@ def get_shifts_route():
                 "team": s.team,
                 "description": s.description,
                 "is_recurring": s.is_recurring,
-                "assignees": [u.id for u in s.assignees]
-            } for s in shifts
+                "assignees": [u.id for u in s.assignees],
+            }
+            for s in shifts
         ]
     }), 200
+
+
 
 
 @time_bp.route("/shifts", methods=["POST"])

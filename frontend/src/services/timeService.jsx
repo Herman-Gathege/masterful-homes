@@ -43,16 +43,16 @@ export const useTimesheet = (userId, tenantId, startDate, endDate) =>
     queryFn: async () => {
       const params = {};
       if (tenantId) params.tenant_id = tenantId;
-      // only add filters when present (prevents sending "null" strings)
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
       const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, { params });
       return data.data ?? [];
     },
-    // call as soon as we have user & tenant so backend can default date range
     enabled: !!userId && !!tenantId,
+    refetchOnWindowFocus: false,
   });
+
 
 // -----------------------------
 // Summary Report (Manager/Admin)

@@ -71,10 +71,17 @@ def register():
 
     tokens = generate_tokens(user)
     return jsonify({
-        "message": "User registered successfully",
-        "user": {"id": user.id, "email": user.email, "role": user.role},
+       "user": {
+                "id": user.id,
+                "email": user.email,
+                "role": user.role,
+                "tenant_id": user.tenant_id,
+                "full_name": user.full_name or ""
+            },
         **tokens
     }), 201
+
+
 
 
 # -----------------------------
@@ -96,9 +103,16 @@ def login():
     tokens = generate_tokens(user)
     return jsonify({
         "message": "Login successful",
-        "user": {"id": user.id, "email": user.email, "role": user.role},
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role,
+            "tenant_id": user.tenant_id,       # ✅ Add this
+            "full_name": user.full_name or ""  # ✅ Optional
+        },
         **tokens
     }), 200
+
 
 
 # -----------------------------
