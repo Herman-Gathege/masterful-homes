@@ -2,6 +2,7 @@
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
+import { setAuthStore } from "./axiosInstance";
 
 export const AuthContext = createContext();
 
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           const decoded = jwt_decode(savedToken);
           setUser({
-            id: decoded.sub, // user id comes from "sub"
+            id: decoded.sub,
             username: decoded.username || decoded.email,
             role: decoded.role,
             email: decoded.email,
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // login: centralize persisting tokens + user
+  // login
   const login = (accessToken, newRefreshToken, userObj) => {
     if (!accessToken || !newRefreshToken) return;
 
@@ -68,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
-  // Refresh access token using the refresh token (sent in Authorization header)
+  // Refresh access token
   const refreshAccessToken = async () => {
     if (!refreshToken) {
       logout();
@@ -114,6 +115,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const authenticated = !!token;
+
+  // ✅ Connect to axiosInstance whenever auth state changes
+  useEffect(() => {
+    setAuthStore({
+      token,
+      refreshAccessToken,
+      logout,
+    });
+  }, [token, refreshAccessToken, logout]);
 
   return (
     <AuthContext.Provider

@@ -1,20 +1,19 @@
 # backend/utils/auth_middleware.py
+
 from functools import wraps
 from flask import request, jsonify
 from utils.jwt_utils import decode_token
-from models import User
 from config import Config
+from legacy_models import LegacyUser
 
 PUBLIC_ROUTES = ["/api/login", "/api/refresh"]
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        # Allow unauthenticated access to login/refresh
         if request.path in PUBLIC_ROUTES:
             return f(*args, **kwargs)
-
-        if request.method == "OPTIONS":  # CORS preflight
+        if request.method == "OPTIONS":
             return '', 200
 
         auth_header = request.headers.get("Authorization")
@@ -27,19 +26,16 @@ def token_required(f):
         if not user_data:
             return jsonify({"message": "Access token is invalid or expired"}), 401
 
-        # Prevent refresh tokens from being used in Authorization header
-        exp_seconds = user_data.get("exp")
-        if not exp_seconds:
-            return jsonify({"message": "Invalid token structure"}), 401
+        # ✅ Support both PyJWT 'sub' and custom 'user_id'
+        user_id = user_data.get("user_id") or user_data.get("sub")
+        if not user_id:
+            return jsonify({"message": "Invalid token payload"}), 401
 
-        # Load user from DB
-        user = User.query.get(user_data["user_id"])
+        user = LegacyUser.query.get(user_id)
         if not user:
             return jsonify({"message": "User not found"}), 404
 
-        # Attach user to request context
         request.user = user
-
         return f(user, *args, **kwargs)
 
     return decorated

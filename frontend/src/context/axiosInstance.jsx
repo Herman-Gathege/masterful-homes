@@ -19,19 +19,24 @@ const axiosInstance = axios.create({
   withCredentials: true,
 });
 
-// Attach access token from in-memory store
+// ✅ Attach access token from in-memory store + debug logging
 axiosInstance.interceptors.request.use(
   (config) => {
     if (store.token) {
       config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${store.token}`;
+      console.log("✅ JWT attached:", store.token);
+    } else {
+      console.warn("⚠️ No token found in store");
     }
+
+    console.log("📡 Request →", config.baseURL + config.url);
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Response interceptor -> try refresh on 401 once
+// ✅ Response interceptor → try refresh on 401 once
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -45,10 +50,11 @@ axiosInstance.interceptors.response.use(
         if (newAccessToken) {
           store.token = newAccessToken;
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          console.log("🔄 Token refreshed successfully");
           return axiosInstance(originalRequest);
         }
       } catch (err) {
-        console.error("Auto refresh failed:", err);
+        console.error("❌ Auto refresh failed:", err);
         if (store.logout) store.logout();
         return Promise.reject(err);
       }

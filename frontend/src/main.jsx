@@ -1,13 +1,17 @@
-// frontend/src/main.jsx
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
 import { SidebarProvider } from "./context/SidebarContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
-  <SidebarProvider>
-    <StrictMode>
-      <App />
-    </StrictMode>
-  </SidebarProvider>
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <SidebarProvider>
+        <App />
+      </SidebarProvider>
+    </QueryClientProvider>
+  </StrictMode>
 );

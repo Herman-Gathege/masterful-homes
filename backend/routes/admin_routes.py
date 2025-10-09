@@ -7,11 +7,16 @@ from flask_bcrypt import Bcrypt
 admin_bp = Blueprint("admin", __name__)
 bcrypt = Bcrypt()
 
+# ✅ Helper to allow both admin + superadmin
+def is_admin_or_superadmin(user):
+    return user.role in ["admin", "superadmin"]
+
+
 # 👥 GET all users
 @admin_bp.route("/admin/users", methods=["GET"])
 @token_required
 def get_users(current_user):
-    if current_user.role != "admin":
+    if not is_admin_or_superadmin(current_user):
         return jsonify({"message": "Access forbidden"}), 403
 
     users = LegacyUser.query.all()
@@ -29,7 +34,7 @@ def get_users(current_user):
 @admin_bp.route("/admin/users", methods=["POST"])
 @token_required
 def create_user(current_user):
-    if current_user.role != "admin":
+    if not is_admin_or_superadmin(current_user):
         return jsonify({"message": "Access forbidden"}), 403
 
     data = request.get_json()
@@ -46,7 +51,7 @@ def create_user(current_user):
 
     hashed_password = bcrypt.generate_password_hash(password).decode("utf-8")
     new_user = LegacyUser(username=username, email=email,
-                    password_hash=hashed_password, role=role)
+                          password_hash=hashed_password, role=role)
 
     db.session.add(new_user)
     db.session.commit()
@@ -58,7 +63,7 @@ def create_user(current_user):
 @admin_bp.route("/admin/users/<int:user_id>", methods=["PUT"])
 @token_required
 def update_user(current_user, user_id):
-    if current_user.role != "admin":
+    if not is_admin_or_superadmin(current_user):
         return jsonify({"message": "Access forbidden"}), 403
 
     user = LegacyUser.query.get(user_id)
@@ -81,7 +86,7 @@ def update_user(current_user, user_id):
 @admin_bp.route("/admin/users/<int:user_id>", methods=["DELETE"])
 @token_required
 def delete_user(current_user, user_id):
-    if current_user.role != "admin":
+    if not is_admin_or_superadmin(current_user):
         return jsonify({"message": "Access forbidden"}), 403
 
     user = LegacyUser.query.get(user_id)

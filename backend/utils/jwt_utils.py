@@ -37,10 +37,18 @@ def generate_tokens(user_id, role, username):
 def decode_token(token, secret):
     """
     Return decoded payload dict or None if invalid/expired.
-    Use the given secret (we call with Config.JWT_SECRET).
+    Handles both 'user_id' (new) and 'sub' (legacy) tokens.
     """
     try:
-        return jwt.decode(token, secret, algorithms=["HS256"])
+        payload = jwt.decode(token, secret, algorithms=["HS256"])
+
+        # Normalize payload for internal consistency
+        if "user_id" not in payload:
+            # Old tokens use 'sub' as user ID
+            payload["user_id"] = payload.get("sub")
+
+        return payload
+
     except jwt.ExpiredSignatureError:
         return None
     except jwt.InvalidTokenError:

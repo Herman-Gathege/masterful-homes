@@ -1,21 +1,19 @@
 // src/components/UserTable.js
-import React, { useState, useEffect } from "react";
-import { fetchUsers, deleteUser, updateUser } from "../services/adminService";
+import React, { useState } from "react";
 import "../css/UserTable.css";
 
-function UserTable() {
-  const [users, setUsers] = useState([]);
+function UserTable({ users = [] }) {
   const [editingUserId, setEditingUserId] = useState(null);
   const [editedData, setEditedData] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 10;
   const [filter, setFilter] = useState({ id: "", username: "", email: "" });
 
-  // PAGINATION
+  // Pagination
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
 
-  // FILTERING
+  // Filtering
   const handleFilterChange = (e) => {
     setFilter({ ...filter, [e.target.name]: e.target.value });
   };
@@ -42,31 +40,6 @@ function UserTable() {
     }
   };
 
-  // Fetch all users on mount
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  const loadUsers = async () => {
-    try {
-      const data = await fetchUsers();
-      setUsers(data);
-    } catch (err) {
-      console.error("Failed to load users", err);
-    }
-  };
-
-  const handleDelete = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await deleteUser(userId);
-        loadUsers(); // Refresh user list
-      } catch (err) {
-        console.error("Delete failed", err);
-      }
-    }
-  };
-
   const startEditing = (user) => {
     setEditingUserId(user.id);
     setEditedData({
@@ -85,14 +58,15 @@ function UserTable() {
     setEditedData({ ...editedData, [e.target.name]: e.target.value });
   };
 
-  const saveChanges = async (userId) => {
-    try {
-      await updateUser(userId, editedData);
-      setEditingUserId(null);
-      loadUsers(); // Refresh user list
-    } catch (err) {
-      console.error("Update failed", err);
-    }
+  const saveChanges = (userId) => {
+    console.log("Save changes for user:", userId, editedData);
+    // TODO: call backend API here (updateUser)
+    setEditingUserId(null);
+  };
+
+  const handleDelete = (userId) => {
+    console.log("Delete user:", userId);
+    // TODO: call backend API here (deleteUser)
   };
 
   return (
@@ -191,6 +165,7 @@ function UserTable() {
           ))}
         </tbody>
       </table>
+
       <div style={{ marginTop: "10px" }}>
         <button onClick={prevPage} disabled={currentPage === 1}>
           Previous
