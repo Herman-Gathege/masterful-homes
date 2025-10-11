@@ -442,3 +442,14 @@ def resolve_exception(entry_id):
         "duration": entry.duration,
         "is_approved": entry.is_approved,
     }
+
+
+# -----------------------------
+# 📅 Shift Query Helper
+# -----------------------------
+def get_shifts_query(tenant_id=None):
+    """Return base Shift query filtered by tenant (if provided)."""
+    q = Shift.query
+    if tenant_id:
+        q = q.filter_by(tenant_id=tenant_id)
+    return q

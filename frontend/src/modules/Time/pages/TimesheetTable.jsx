@@ -1,4 +1,4 @@
-//frontend/src/modules/Time/pages/TimesheetTable.jsx
+// frontend/src/modules/Time/pages/TimesheetTable.jsx
 import React, { useContext, useState } from "react";
 import useTimeStore from "../../../store/timeStore";
 import { AuthContext } from "../../../context/AuthContext";
@@ -18,14 +18,20 @@ const TimesheetTable = () => {
     user?.role === "admin" ||
     user?.role === "superadmin";
 
+  // ✅ Normalize data safely (prevents .map() crash)
   const { data: entries = [], isLoading, refetch } = isManagerView
-    ? useAllTimesheets(user?.tenant_id, timesheetFilters.startDate, timesheetFilters.endDate)
-    : useTimesheet(user?.id, user?.tenant_id, timesheetFilters.startDate, timesheetFilters.endDate);
+  ? useAllTimesheets(user?.tenant_id, timesheetFilters.startDate, timesheetFilters.endDate)
+  : useTimesheet(user?.id, user?.tenant_id, timesheetFilters.startDate, timesheetFilters.endDate);
+
+
+
+  // const entries = Array.isArray(rawData) ? rawData : []; // ✅ Ensure always an array
 
   // 🔹 Predefined quick range buttons
   const changeRange = (range) => {
     const now = new Date();
     let start, end;
+
     if (range === "week") {
       const first = new Date(now);
       first.setDate(now.getDate() - now.getDay());
@@ -35,6 +41,7 @@ const TimesheetTable = () => {
       start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
       end = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10);
     }
+
     setStartDate(start);
     setEndDate(end);
     setTimesheetFilters({
@@ -46,7 +53,9 @@ const TimesheetTable = () => {
 
   // 🔹 Apply custom date range
   const applyCustomRange = () => {
-    if (!startDate || !endDate) return alert("Please select both start and end dates");
+    if (!startDate || !endDate)
+      return alert("Please select both start and end dates");
+
     setTimesheetFilters({
       startDate: `${startDate}T00:00:00Z`,
       endDate: `${endDate}T23:59:59Z`,
@@ -91,6 +100,7 @@ const TimesheetTable = () => {
         </div>
       </div>
 
+      {/* 🔹 Table states */}
       {isLoading ? (
         <div className="loading">⏳ Loading timesheet...</div>
       ) : entries.length === 0 ? (

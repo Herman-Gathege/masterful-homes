@@ -1,12 +1,11 @@
-// frontend/src/services/timeService.jsx
-import axiosInstance from '../context/axiosInstance';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import axiosInstance from "../context/axiosInstance";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
-const API_BASE = '/time';
+const API_BASE = "/time";
 
-// -----------------------------
-// Clock-In/Out
-// -----------------------------
+/* -----------------------------
+   Clock-In / Clock-Out
+----------------------------- */
 export const useClockIn = () =>
   useMutation({
     mutationFn: (data) => axiosInstance.post(`${API_BASE}/clock-in`, data),
@@ -17,78 +16,112 @@ export const useClockOut = () =>
     mutationFn: (data) => axiosInstance.post(`${API_BASE}/clock-out`, data),
   });
 
-// -----------------------------
-// Current Status
-// -----------------------------
+/* -----------------------------
+   Current Status
+----------------------------- */
 export const useCurrentStatus = (tenantId) =>
   useQuery({
-    queryKey: ['currentStatus', tenantId],
+    queryKey: ["currentStatus", tenantId],
     queryFn: async () => {
-      const params = {};
-      if (tenantId) params.tenant_id = tenantId;
-      const { data } = await axiosInstance.get(`${API_BASE}/current-status`, { params });
-      // backend returns { data: status }
-      return data.data ?? data;
+      const params = tenantId ? { tenant_id: tenantId } : {};
+      const { data } = await axiosInstance.get(`${API_BASE}/current-status`, {
+        params,
+      });
+      return data?.data ?? data ?? null;
     },
     enabled: !!tenantId,
     refetchInterval: 30000,
   });
 
-// -----------------------------
-// Timesheets
-// -----------------------------
+/* -----------------------------
+   Single User Timesheet
+----------------------------- */
 export const useTimesheet = (userId, tenantId, startDate, endDate) =>
   useQuery({
-    queryKey: ['timesheet', userId, tenantId, startDate, endDate],
+    queryKey: ["timesheet", userId, tenantId, startDate, endDate],
     queryFn: async () => {
       const params = {};
       if (tenantId) params.tenant_id = tenantId;
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
-      const { data } = await axiosInstance.get(`${API_BASE}/timesheets/${userId}`, { params });
-      return data.data ?? [];
+      const { data } = await axiosInstance.get(
+        `${API_BASE}/timesheets/${userId}`,
+        { params }
+      );
+      // backend returns { data: [...] }
+      return Array.isArray(data?.data) ? data.data : [];
     },
     enabled: !!userId && !!tenantId,
     refetchOnWindowFocus: false,
   });
 
+/* -----------------------------
+   All Timesheets (Manager/Admin)
+----------------------------- */
+export const useAllTimesheets = (tenantId, startDate, endDate) =>
+  useQuery({
+    queryKey: ["allTimesheets", tenantId, startDate, endDate],
+    queryFn: async () => {
+      const params = {};
+      if (tenantId) params.tenant_id = tenantId;
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
 
-// -----------------------------
-// Summary Report (Manager/Admin)
-// -----------------------------
+      const { data } = await axiosInstance.get(`${API_BASE}/timesheets`, {
+        params,
+      });
+      return Array.isArray(data?.data) ? data.data : [];
+    },
+    enabled: !!tenantId && !!startDate && !!endDate,
+    refetchOnWindowFocus: false,
+  });
+
+/* -----------------------------
+   Summary Report
+----------------------------- */
 export const useSummaryReport = (startDate, endDate) =>
   useQuery({
-    queryKey: ['summaryReport', startDate, endDate],
+    queryKey: ["summaryReport", startDate, endDate],
     queryFn: async () => {
       const params = {};
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
-      const { data } = await axiosInstance.get(`${API_BASE}/reports/summary`, { params });
-      return data.data ?? { summary: [], unapproved_count: 0 };
+
+      const { data } = await axiosInstance.get(`${API_BASE}/reports/summary`, {
+        params,
+      });
+      // Safe fallback: even if route missing, return structured defaults
+      return data?.data ?? { summary: [], unapproved_count: 0 };
     },
     enabled: !!startDate && !!endDate,
   });
 
-// -----------------------------
-// Shifts
-// -----------------------------
-export const useShifts = (tenantId) =>
+/* -----------------------------
+   Shifts
+----------------------------- */
+export const useShifts = (tenantId, startDate, endDate) =>
   useQuery({
-    queryKey: ['shifts', tenantId],
+    queryKey: ["shifts", tenantId, startDate, endDate],
     queryFn: async () => {
       const params = {};
       if (tenantId) params.tenant_id = tenantId;
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
+
       const res = await axiosInstance.get(`${API_BASE}/shifts`, { params });
-      const arr = (res.data && res.data.data) || [];
+      const arr = res?.data?.data ?? [];
       return arr.map((shift) => ({
         id: shift.id,
-        title: shift.description || 'Shift',
+        title: shift.description || "Shift",
         start: shift.start_time,
         end: shift.end_time,
       }));
     },
-    enabled: !!tenantId,
+    enabled: !!tenantId && !!startDate && !!endDate,
+    refetchOnWindowFocus: false,
+    staleTime: 1000 * 60 * 5, // cache for 5 mins
+    keepPreviousData: true, // prevents flicker on navigation
   });
 
 export const useCreateShift = () =>
@@ -101,72 +134,52 @@ export const useDeleteShift = () =>
     mutationFn: (id) => axiosInstance.delete(`${API_BASE}/shifts/${id}`),
   });
 
-
-// -----------------------------
-// All Timesheets (Manager/Admin)
-// -----------------------------
-export const useAllTimesheets = (tenantId, startDate, endDate) =>
-  useQuery({
-    queryKey: ['allTimesheets', tenantId, startDate, endDate],
-    queryFn: async () => {
-      const params = {};
-      if (tenantId) params.tenant_id = tenantId;
-      if (startDate) params.start_date = startDate;
-      if (endDate) params.end_date = endDate;
-
-      const { data } = await axiosInstance.get(`${API_BASE}/timesheets`, { params });
-      return data.data ?? [];
-    },
-    enabled: !!tenantId && !!startDate && !!endDate,
-    refetchOnWindowFocus: false,
-  });
-
-
-  // -----------------------------
-// Exceptions
-// -----------------------------
+/* -----------------------------
+   Exceptions
+----------------------------- */
 export const useExceptions = (tenantId) =>
   useQuery({
-    queryKey: ['exceptions', tenantId],
+    queryKey: ["exceptions", tenantId],
     queryFn: async () => {
-      const params = {};
-      if (tenantId) params.tenant_id = tenantId;
-      // backend route expected: GET /api/time/exceptions
-      const { data } = await axiosInstance.get(`${API_BASE}/exceptions`, { params });
-      return data.data ?? { missing_clockouts: [], overtime: [] };
+      const params = tenantId ? { tenant_id: tenantId } : {};
+      const { data } = await axiosInstance.get(`${API_BASE}/exceptions`, {
+        params,
+      });
+      return data?.data ?? { missing_clockouts: [], overtime: [] };
     },
     enabled: !!tenantId,
     refetchOnWindowFocus: false,
   });
 
-// optional client call to mark resolved (if you add route)
 export const resolveException = () =>
   useMutation({
     mutationFn: async ({ type, id }) => {
-      // Example: POST /api/time/exceptions/resolve  { type: "missing_clockout", id: 123 }
-      const { data } = await axiosInstance.post(`${API_BASE}/exceptions/resolve`, { type, id });
+      const { data } = await axiosInstance.post(
+        `${API_BASE}/exceptions/resolve`,
+        { type, id }
+      );
       return data;
     },
   });
 
-
-
-
-
-export const clockIn = (payload) => axios.post("/time/clock-in", payload);
-
-export const clockOut = (payload) => axios.post("/time/clock-out", payload);
-
-export const getCurrentStatus = () => axios.get("/time/current-status");
-
-export const getTimesheet = (userId, params={}) => axios.get(`/time/timesheets/${userId}`, { params });
-
-export const getExceptions = (params={}) => axios.get("/time/exceptions", { params });
-
-export const getShifts = (params={}) => axios.get("/time/shifts", { params });
-
-export const createShift = (payload) => axios.post("/time/shifts", payload);
-
-export const assignShift = (shiftId, payload) => axios.post(`/time/shifts/${shiftId}/assign`, payload);
-
-export const getSummaryReport = (params={}) => axios.get("/time/timesheets", { params });
+/* -----------------------------
+   Direct Axios Utilities
+----------------------------- */
+export const clockIn = (payload) =>
+  axiosInstance.post(`${API_BASE}/clock-in`, payload);
+export const clockOut = (payload) =>
+  axiosInstance.post(`${API_BASE}/clock-out`, payload);
+export const getCurrentStatus = () =>
+  axiosInstance.get(`${API_BASE}/current-status`);
+export const getTimesheet = (userId, params = {}) =>
+  axiosInstance.get(`${API_BASE}/timesheets/${userId}`, { params });
+export const getExceptions = (params = {}) =>
+  axiosInstance.get(`${API_BASE}/exceptions`, { params });
+export const getShifts = (params = {}) =>
+  axiosInstance.get(`${API_BASE}/shifts`, { params });
+export const createShift = (payload) =>
+  axiosInstance.post(`${API_BASE}/shifts`, payload);
+export const assignShift = (shiftId, payload) =>
+  axiosInstance.post(`${API_BASE}/shifts/${shiftId}/assign`, payload);
+export const getSummaryReport = (params = {}) =>
+  axiosInstance.get(`${API_BASE}/reports/summary`, { params });

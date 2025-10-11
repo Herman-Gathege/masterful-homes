@@ -1,114 +1,157 @@
-//frontend/src/modules/Time/pages/ShiftCalendar.jsx
-import React, { useState, useContext, useMemo, useEffect } from "react";
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import React, {
+  useState,
+  useContext,
+  useMemo,
+  useEffect,
+  Suspense,
+} from "react";
 import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
 import { AuthContext } from "../../../context/AuthContext";
 import { useShifts } from "../../../services/timeService";
+import { useQueryClient } from "@tanstack/react-query";
 import ShiftFormModal from "./ShiftFormModal";
-import  { toast } from "../../../utils/toast";
+import { toast } from "../../../utils/toast";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
+// Lazy-load heavy calendar library for faster initial load
+const Calendar = React.lazy(() =>
+  import("react-big-calendar").then((mod) => ({
+    default: mod.Calendar,
+  }))
+);
+const { momentLocalizer } = await import("react-big-calendar");
 const localizer = momentLocalizer(moment);
 
 const ShiftCalendar = () => {
   const { user } = useContext(AuthContext);
+  const queryClient = useQueryClient();
+
   const [view, setView] = useState("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedRange, setSelectedRange] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [showHelp, setShowHelp] = useState(false); // usage hint
-  const { data: events = [], isLoading, refetch } = useShifts(user?.tenant_id);
+  const [showHelp, setShowHelp] = useState(false);
+  const [visibleRange, setVisibleRange] = useState(() => ({
+    start: moment().startOf("month").toISOString(),
+    end: moment().endOf("month").toISOString(),
+  }));
 
-  // Build events for react-big-calendar
-  const calendarEvents = useMemo(
-    () =>
-      events.map((e) => ({
-        id: e.id,
-        title: e.title || e.description || "Shift",
-        start: new Date(e.start),
-        end: new Date(e.end),
-        raw: e,
-      })),
-    [events]
+  // ✅ Fetch shifts only for visible range
+  const { data: events = [], isLoading, refetch } = useShifts(
+    user?.tenant_id,
+    visibleRange.start,
+    visibleRange.end
   );
 
-  // Show hint if never seen
+  /* ---------------------------
+     Compute visible range (debounced)
+  ---------------------------- */
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      const start = moment(currentDate).startOf(view).toISOString();
+      const end = moment(currentDate).endOf(view).toISOString();
+      setVisibleRange({ start, end });
+    }, 200);
+    return () => clearTimeout(timeout);
+  }, [view, currentDate]);
+
+  /* ---------------------------
+     Prefetch next/previous views
+  ---------------------------- */
+  const prefetchShifts = (direction) => {
+    if (!user?.tenant_id) return;
+    const nextStart = moment(currentDate)
+      [direction === "next" ? "add" : "subtract"](1, view)
+      .startOf(view)
+      .toISOString();
+    const nextEnd = moment(currentDate)
+      [direction === "next" ? "add" : "subtract"](1, view)
+      .endOf(view)
+      .toISOString();
+
+    queryClient.prefetchQuery(["shifts", user.tenant_id, nextStart, nextEnd], {
+      queryFn: async () => {
+        const params = {
+          tenant_id: user.tenant_id,
+          start_date: nextStart,
+          end_date: nextEnd,
+        };
+        const res = await fetch(`/api/time/shifts?${new URLSearchParams(params)}`);
+        const json = await res.json();
+        return json.data ?? [];
+      },
+    });
+  };
+
+  /* ---------------------------
+     Memoized calendar events
+  ---------------------------- */
+  const calendarEvents = useMemo(() => {
+    if (!Array.isArray(events)) return [];
+    return events.map((e) => ({
+      id: e.id,
+      title: e.title || e.description || "Shift",
+      start: new Date(e.start),
+      end: new Date(e.end),
+    }));
+  }, [events]);
+
+  /* ---------------------------
+     Help tooltip logic
+  ---------------------------- */
   useEffect(() => {
     const seen = localStorage.getItem("seenShiftHelp");
     setShowHelp(!seen);
   }, []);
 
-  // Dismiss hint
   const dismissHelp = () => {
     localStorage.setItem("seenShiftHelp", "true");
     setShowHelp(false);
   };
 
-  // Reopen hint manually
-  const reopenHelp = () => {
-    setShowHelp(true);
-  };
+  /* ---------------------------
+     Permissions & handlers
+  ---------------------------- */
+  const canManageShifts = ["manager", "admin"].includes(
+    user?.role?.toLowerCase()
+  );
 
-  const canManageShifts = ["manager", "admin"].includes(user?.role?.toLowerCase());
-
-  // Slot selection
   const handleSelectSlot = ({ start, end }) => {
-    if (!canManageShifts) {
-      toast.error("You don't have permission to create shifts");
-      return;
-    }
-
+    if (!canManageShifts)
+      return toast.error("You don't have permission to create shifts");
     if (!user) return;
-    if (!end || start >= end) {
-      const fallbackEnd = moment(start).add(8, "hours").toDate();
-      setSelectedRange({ start, end: fallbackEnd });
-    } else {
-      setSelectedRange({ start, end });
-    }
+    if (!end || start >= end) end = moment(start).add(8, "hours").toDate();
+    setSelectedRange({ start, end });
   };
 
-  // Event click
   const handleSelectEvent = (event) => {
-    if (!canManageShifts) {
-      toast.error("You don't have permission to edit shifts");
-      return;
-    }
-
-    setSelectedEvent({
-      id: event.id,
-      title: event.title,
-      start: event.start,
-      end: event.end,
-    });
+    if (!canManageShifts)
+      return toast.error("You don't have permission to edit shifts");
+    setSelectedEvent(event);
   };
 
-  // Close modal and optionally refresh
   const handleCloseModal = (didUpdate = false) => {
     setSelectedRange(null);
     setSelectedEvent(null);
     if (didUpdate) refetch();
   };
 
-  // Navigation helpers
-  const handleNavigate = (newDate) => setCurrentDate(newDate);
-  const goToToday = () => setCurrentDate(new Date());
-  const goToPrev = () => {
-    const diff = view === "month" ? "month" : view === "week" ? "week" : "day";
-    setCurrentDate(moment(currentDate).subtract(1, diff).toDate());
-  };
-  const goToNext = () => {
-    const diff = view === "month" ? "month" : view === "week" ? "week" : "day";
-    setCurrentDate(moment(currentDate).add(1, diff).toDate());
+  const handleNavigate = (date, direction) => {
+    if (direction) prefetchShifts(direction);
+    setCurrentDate(date);
   };
 
+  /* ---------------------------
+     UI
+  ---------------------------- */
   if (isLoading) return <div>⏳ Loading shifts...</div>;
 
   return (
     <div className="shift-calendar" style={{ position: "relative" }}>
-      {/* 💡 Reopen Hint Button */}
+      {/* 💡 Hint Button */}
       {!showHelp && (
         <button
-          onClick={reopenHelp}
+          onClick={() => setShowHelp(true)}
           style={{
             position: "absolute",
             top: 3,
@@ -123,11 +166,10 @@ const ShiftCalendar = () => {
           }}
         >
           💡 Hint
-          
         </button>
       )}
 
-      {/* ===== Usage hint (dismissible) ===== */}
+      {/* 🧭 Help Tooltip */}
       {showHelp && (
         <div
           style={{
@@ -142,10 +184,9 @@ const ShiftCalendar = () => {
         >
           <strong>💡 How to use:</strong>
           <ul style={{ margin: "0.5rem 0 0.5rem 1rem" }}>
-            <li>Click and drag on the calendar to <b>create a shift</b>.</li>
+            <li>Click and drag to <b>create a shift</b>.</li>
             <li>Click an existing shift to <b>edit or delete</b> it.</li>
-            <li>Use the <b>Day / Week / Month</b> buttons to change views.</li>
-            <li>Navigate with the ⬅️ / 📅 Today / ➡️ buttons.</li>
+            <li>Use <b>Day / Week / Month</b> views or the navigation arrows.</li>
           </ul>
           <button
             onClick={dismissHelp}
@@ -159,43 +200,48 @@ const ShiftCalendar = () => {
               fontSize: "16px",
               cursor: "pointer",
             }}
-            aria-label="Dismiss help"
           >
             ✖
           </button>
         </div>
       )}
 
-      {/* Top Controls */}
+      {/* 🔹 Calendar Controls */}
       <div
         className="calendar-controls"
         style={{
           display: "flex",
-          alignItems: "center",
           justifyContent: "space-between",
           marginBottom: 10,
         }}
       >
-        <div className="calendar-nav" style={{ display: "flex", gap: 8 }}>
-          <button onClick={goToPrev}>⬅️</button>
-          <button onClick={goToToday}>📅 Today</button>
-          <button onClick={goToNext}>➡️</button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            onClick={() => {
+              prefetchShifts("prev");
+              setCurrentDate(moment(currentDate).subtract(1, view).toDate());
+            }}
+          >
+            ⬅️
+          </button>
+          <button onClick={() => setCurrentDate(new Date())}>📅 Today</button>
+          <button
+            onClick={() => {
+              prefetchShifts("next");
+              setCurrentDate(moment(currentDate).add(1, view).toDate());
+            }}
+          >
+            ➡️
+          </button>
         </div>
 
-        <div
-          className="calendar-title"
-          style={{ fontWeight: 600, color: "#053f5c" }}
-        >
+        <div style={{ fontWeight: 600, color: "#053f5c" }}>
           {moment(currentDate).format(
-            view === "month"
-              ? "MMMM YYYY"
-              : view === "week"
-              ? "[Week of] MMM D, YYYY"
-              : "MMMM D, YYYY"
+            view === "month" ? "MMMM YYYY" : "MMM D, YYYY"
           )}
         </div>
 
-        <div className="calendar-view" style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8 }}>
           {["day", "week", "month"].map((v) => (
             <button
               key={v}
@@ -215,29 +261,30 @@ const ShiftCalendar = () => {
         </div>
       </div>
 
-      {/* Calendar */}
-      <Calendar
-        localizer={localizer}
-        events={calendarEvents}
-        startAccessor="start"
-        endAccessor="end"
-        style={{
-          height: 600,
-          background: "#fff",
-          borderRadius: 8,
-          padding: "1rem",
-        }}
-        selectable
-        date={currentDate}
-        onNavigate={handleNavigate}
-        defaultView={view}
-        view={view}
-        onView={(v) => setView(v)}
-        onSelectSlot={handleSelectSlot}
-        onSelectEvent={handleSelectEvent}
-      />
+      {/* 📅 Lazy Calendar */}
+      <Suspense fallback={<div>⏳ Loading calendar...</div>}>
+        <Calendar
+          localizer={localizer}
+          events={calendarEvents}
+          startAccessor="start"
+          endAccessor="end"
+          date={currentDate}
+          view={view}
+          onView={setView}
+          onNavigate={handleNavigate}
+          selectable
+          onSelectSlot={handleSelectSlot}
+          onSelectEvent={handleSelectEvent}
+          style={{
+            height: 600,
+            background: "#fff",
+            borderRadius: 8,
+            padding: "1rem",
+          }}
+        />
+      </Suspense>
 
-      {/* Modal for add/edit */}
+      {/* Modal */}
       {(selectedRange || selectedEvent) && (
         <ShiftFormModal
           selectedRange={selectedRange}
@@ -249,4 +296,4 @@ const ShiftCalendar = () => {
   );
 };
 
-export default ShiftCalendar;
+export default React.memo(ShiftCalendar);

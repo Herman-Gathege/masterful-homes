@@ -507,18 +507,74 @@ def assign_shift_users_route(shift_id):
     except Exception as e:
         return jsonify({"error": f"Unexpected error: {str(e)}"}), 500
 
+# ✅ MANAGER: Get all timesheets (detailed per user)
 @time_bp.route("/timesheets", methods=["GET"])
 @jwt_required()
 def get_all_timesheets_route():
     claims = get_jwt()
     tenant_id = claims.get("tenant_id")
     role = claims.get("role")
+
     if role not in ["manager", "admin", "superadmin"]:
-        return jsonify({"error":"Unauthorized"}), 403
+        return jsonify({"error": "Unauthorized"}), 403
+
     start_date = request.args.get("start_date")
     end_date = request.args.get("end_date")
+
+    users = service.User.query.filter_by(tenant_id=tenant_id).all()
+
+    all_entries = []
+    for u in users:
+        # Skip managers/admins if you want to show only employee/tech time
+        # if u.role.upper() in ["MANAGER", "ADMIN", "SUPERADMIN"]:
+        #     continue
+
+        entries = service.get_timesheet(u.id, tenant_id, start_date, end_date)
+        all_entries.extend(entries)
+
+    return jsonify({"data": all_entries}), 200
+
+
+
+
+@time_bp.route("/reports/summary", methods=["GET"])
+@jwt_required()
+def get_summary_report_route():
+    claims = get_jwt()
+    tenant_id = claims.get("tenant_id")
+    role = claims.get("role")
+
+    if role not in ["manager", "admin", "superadmin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+
     try:
         report = service.get_summary_report(tenant_id, start_date, end_date)
         return jsonify({"data": report}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
+
+# ✅ Resolve an exception
+@time_bp.route("/exceptions/resolve", methods=["POST"])
+@jwt_required()
+def resolve_exception_route():
+    claims = get_jwt()
+    role = claims.get("role")
+
+    if role not in ["manager", "admin", "superadmin"]:
+        return jsonify({"error": "Unauthorized"}), 403
+
+    data = request.get_json() or {}
+    entry_id = data.get("id")
+
+    if not entry_id:
+        return jsonify({"error": "Missing entry ID"}), 400
+
+    try:
+        result = service.resolve_exception(entry_id)
+        return jsonify({"message": "Exception resolved", "data": result}), 200
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
