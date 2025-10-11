@@ -1,5 +1,5 @@
 // frontend/src/modules/HR/services/hrService.js
-import axios from "../../../context/axiosInstance";
+import axios from "../context/axiosInstance";
 
 export const fetchUsers = ({ limit=25, offset=0, role, department, team, search, tenant_id }={}) =>
   axios.get("/hr/users", { params: { limit, offset, role, department, team, search, tenant_id } });

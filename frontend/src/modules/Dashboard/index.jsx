@@ -1,8 +1,8 @@
 // src/modules/Dashboard/index.js
 import React from "react";
-import Overview from "./pages/Overview";
+import DashboardHome from "./pages/DashboardHome";
 function Dashboard() {
-  return <Overview />
+  return <DashboardHome />
 }
 
 export default Dashboard;

@@ -1,10 +1,10 @@
 # backend/main.py
-from flask import Flask
+from flask import Flask , request
 from flask_cors import CORS
 from config import Config
 from extensions import db, bcrypt, jwt, migrate   # ✅ import from extensions
 from flask_jwt_extended.exceptions import JWTExtendedException
-from flask import jsonify
+from flask import jsonify 
 
 def create_app(test_config=None):
     app = Flask(__name__)
@@ -25,11 +25,20 @@ def create_app(test_config=None):
     with app.app_context():
         import core.models
 
-    CORS(app, resources={r"/api/*": {"origins": [
+    # Configure CORS
+    CORS(
+    app,
+    origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://masterful-homes.vercel.app"
-    ]}}, supports_credentials=True)
+        "https://masterful-homes.vercel.app",
+    ],
+    supports_credentials=True,
+    allow_headers=["Content-Type", "Authorization"],
+    methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+)
+
+
 
     
 
@@ -42,6 +51,7 @@ def create_app(test_config=None):
     from modules.auth.routes import auth_bp
     from modules.notifications import notifications_bp
     from modules.time import time_bp
+    from modules.dashboard.routes import get_config
 
 
 
@@ -55,6 +65,12 @@ def create_app(test_config=None):
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
 
     
+
+
+    @app.route("/api/config", methods=["GET"])
+    def config_alias():
+        return get_config()
+
 
     @app.errorhandler(JWTExtendedException)
     def handle_jwt_errors(e):

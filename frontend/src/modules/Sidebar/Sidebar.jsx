@@ -15,6 +15,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { SidebarContext } from "../../context/SidebarContext";
 import useNotificationStore from "../../store/notificationStore"; // ✅ import store
 import "./Sidebar.css";
+import { MODULES_CONFIG } from "../../config/modulesConfig";
 
 const Sidebar = ({ tenantId = "tenant_abc" }) => {
   const [modules, setModules] = useState([]);
@@ -22,6 +23,8 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
   const [loading, setLoading] = useState(true);
 
   const { logout } = useContext(AuthContext);
+  const { role } = useContext(AuthContext);
+
   const { collapsed, setCollapsed } = useContext(SidebarContext);
   const navigate = useNavigate();
 
@@ -111,37 +114,39 @@ const Sidebar = ({ tenantId = "tenant_abc" }) => {
 
       {/* Menu */}
       <ul>
-        {modules.map((mod) => {
-          const item = moduleMap[mod];
-          if (!item) return null;
-          return (
-            <li key={mod}>
-              <NavLink
-                to={item.path}
-                end={item.end}
-                className={({ isActive }) => (isActive ? "active" : "")}
-              >
-                <span className="icon" style={{ position: "relative" }}>
-                  {item.icon}
-                  {/* Small dot when collapsed */}
-                  {collapsed && mod === "notifications" && unreadCount > 0 && (
-                    <span className="sidebar-dot"></span>
+        {modules
+          .filter((mod) => {
+            const config = MODULES_CONFIG[mod];
+            return config && (!config.roles || config.roles.includes(role));
+          })
+          .map((mod) => {
+            const item = moduleMap[mod];
+            if (!item) return null;
+            return (
+              <li key={mod}>
+                <NavLink
+                  to={item.path}
+                  end={item.end}
+                  className={({ isActive }) => (isActive ? "active" : "")}
+                >
+                  <span className="icon" style={{ position: "relative" }}>
+                    {item.icon}
+                    {collapsed &&
+                      mod === "notifications" &&
+                      unreadCount > 0 && <span className="sidebar-dot"></span>}
+                  </span>
+                  {!collapsed && (
+                    <>
+                      {item.label}
+                      {mod === "notifications" && unreadCount > 0 && (
+                        <span className="sidebar-badge">{unreadCount}</span>
+                      )}
+                    </>
                   )}
-                </span>
-
-                {/* Numeric badge when expanded */}
-                {!collapsed && (
-                  <>
-                    {item.label}
-                    {mod === "notifications" && unreadCount > 0 && (
-                      <span className="sidebar-badge">{unreadCount}</span>
-                    )}
-                  </>
-                )}
-              </NavLink>
-            </li>
-          );
-        })}
+                </NavLink>
+              </li>
+            );
+          })}
 
         {/* Logout button always at bottom */}
         <li className="logout-item">
