@@ -48,12 +48,10 @@ def create_app(test_config=None):
 
     # Register new module blueprints
     app.register_blueprint(auth_bp, url_prefix="/api/auth")    
-    app.register_blueprint(hr_bp, url_prefix="/api")
-    # app.register_blueprint(time_bp, url_prefix="/api")
+    app.register_blueprint(hr_bp, url_prefix="/api/hr")
     app.register_blueprint(time_bp, url_prefix='/api/time')
-    app.register_blueprint(tasks_bp, url_prefix="/api")
-    app.register_blueprint(dashboard_bp, url_prefix="/api")
-    # app.register_blueprint(notifications_bp)
+    app.register_blueprint(tasks_bp, url_prefix="/api/tasks")
+    app.register_blueprint(dashboard_bp, url_prefix="/api/dashboard")
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
 
     

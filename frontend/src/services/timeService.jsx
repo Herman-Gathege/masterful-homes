@@ -148,3 +148,25 @@ export const resolveException = () =>
       return data;
     },
   });
+
+
+
+
+
+export const clockIn = (payload) => axios.post("/time/clock-in", payload);
+
+export const clockOut = (payload) => axios.post("/time/clock-out", payload);
+
+export const getCurrentStatus = () => axios.get("/time/current-status");
+
+export const getTimesheet = (userId, params={}) => axios.get(`/time/timesheets/${userId}`, { params });
+
+export const getExceptions = (params={}) => axios.get("/time/exceptions", { params });
+
+export const getShifts = (params={}) => axios.get("/time/shifts", { params });
+
+export const createShift = (payload) => axios.post("/time/shifts", payload);
+
+export const assignShift = (shiftId, payload) => axios.post(`/time/shifts/${shiftId}/assign`, payload);
+
+export const getSummaryReport = (params={}) => axios.get("/time/timesheets", { params });

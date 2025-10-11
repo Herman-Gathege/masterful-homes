@@ -1,3 +1,4 @@
+//frontend/src/modules/Time/pages/ExceptionPanel.jsx
 import React, { useContext, useMemo } from "react";
 import useTimeStore from "../../../store/timeStore";
 import { AuthContext } from "../../../context/AuthContext";

@@ -12,5 +12,6 @@ dependencies = [
     "flask-jwt-extended>=4.7.1",
     "flask-migrate>=4.1.0",
     "gunicorn>=23.0.0",
+    "jq>=1.10.0",
     "pytest>=8.4.2",
 ]
