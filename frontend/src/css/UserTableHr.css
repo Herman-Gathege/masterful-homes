@@ -1,0 +1,76 @@
+/* ==========================
+   HR User Table Styling
+========================== */
+.table-container {
+  background: #fff;
+  padding: 1.2rem 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+/* ==========================
+   Table Core
+========================== */
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.user-table th {
+  background: #f2f2f2;
+  color: #053f5c;
+  text-align: left;
+  padding: 10px;
+  border-bottom: 2px solid #ddd;
+  font-weight: 600;
+}
+
+.user-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.user-table tr:hover {
+  background: rgba(5, 63, 92, 0.05);
+}
+
+/* ==========================
+   State Labels
+========================== */
+.empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #eee;
+  font-size: 0.95rem;
+}
+
+/* ==========================
+   Scrollbar Styling
+========================== */
+.table-container::-webkit-scrollbar {
+  height: 8px;
+}
+.table-container::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 6px;
+}
+
+/* ==========================
+   Responsive Tweaks
+========================== */
+@media (max-width: 768px) {
+  .user-table th,
+  .user-table td {
+    padding: 8px 6px;
+    font-size: 0.85rem;
+  }
+}

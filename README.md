@@ -1,71 +1,130 @@
-# Masterful Homes
+# Dashwise
 
-Masterful Homes is a **full-stack smart living platform** that combines **renovations + automation** into a seamless digital experience.  
-The platform is designed to help homeowners control lighting, climate, security, entertainment, and energy consumption with ease — while offering tailored dashboards for different roles (Admin, Manager, Technician, Finance).
-
----
-
-## 🚀 Features
-
-- **Responsive Website** with React (mobile-friendly, includes hamburger menu).
-- **Authentication & Role-based Dashboards**:
-  - Admin Panel
-  - Manager Hub
-  - Tech Center
-  - Finance Portal
-- **Smart Living Services** section with icons and descriptions.
-- **About Us** & **Our Story** pages aligned with the brand vision.
-- **Contact Us** form for communication.
-- **Backend API** with Flask (planned/implemented separately).
-- **Scalable Project Structure** for frontend and backend separation.
+Dashwise is a **full-stack smart living platform** that combines **teams + management** into a seamless digital experience.  
+The platform is designed to help businesses control activities by employees/teams — while offering a unilateral dashboard for different roles (Admin, Manager, Technician, Finance and employees).
 
 ---
 
-## 🛠️ Tech Stack
+# 🚀 Key Features
+🧠 Core Platform
 
-### Frontend
-- **React.js** (Vite build setup)
-- **React Router** for navigation
-- **React Icons** for UI enhancement
-- **Context API** for authentication state management
-- **Custom CSS** for styling
+Modular design (each department is its own module).
 
-### Backend
-- **Flask (Python)** for REST API
-- **PostgreSQL** (planned database) currently on sqlite
-- **SQLAlchemy** ORM
-- **JWT or Session-based Authentication** (planned/partially implemented)
+Tenant-aware multi-role system (Admin, Manager, Employee, Technician).
 
----
+JWT-based authentication with automatic token refresh.
 
-## 📂 Project Structure
+Role-based dashboard rendering and data access.
 
+# 👥 HR Module (Sprint 2)
+
+Paginated User Directory with search and filters (role, department, team).
+
+Invite User flow (creates inactive user with invite token).
+
+Bulk Import (CSV or JSON upload with summary feedback).
+
+Full RBAC enforcement on backend routes.
+
+Manager-scoped visibility when authenticated with manager JWT.
+
+# ⏱ Time Module (Sprint 3)
+
+Shift Calendar — view and create shifts per tenant.
+
+Timesheet Tracking with role-aware filtering.
+
+Manager Summary Dashboard with analytics and charts.
+
+Smooth UI transitions and optimized React Query caching.
+
+# ⚙️ Backend Features
+
+Flask blueprints per module: auth, hr, time, notifications, etc.
+
+PostgreSQL / NeonDB support (with fallback to SQLite for dev).
+
+Modular service + route structure (backend/modules/<module>).
+
+Consistent JSON API contract and pagination format.
+
+# 🛠️ Tech Stack
+
+# Frontend
+
+React 19 + Vite 7
+
+React Router v7 — modular routing
+
+TanStack React Query v5 — data caching and revalidation
+
+Zustand — lightweight global state store
+
+Bootstrap 5 and Custom CSS — consistent design
+
+Chart.js + Recharts — analytics
+
+Lucide-React icons & Framer Motion animations
+
+# Backend
+
+Flask 3 (blueprint architecture)
+
+SQLAlchemy + Flask-Migrate ORM
+
+Flask-JWT-Extended for authentication
+
+PostgreSQL (Neon DB) in production / SQLite in local dev
+
+Render.com ready for deployment
+
+# 📂 Project Structure
 Masterful-Homes/
 │
-├── frontend/ # React app
-│ ├── src/
-│ │ ├── assets/ # Images and static assets
-│ │ ├── components/ # Navbar, Footer, etc.
-│ │ ├── context/ # AuthContext
-│ │ ├── services/ # services functions
-│ │ ├── pages/ # AboutUs, Services, Contact, Dashboards/
-│ │ ├── App.jsx # Main app router
-│ │ └── main.jsx # Entry point
-│ └── package.json
+├── frontend/                     # React (Vite)
+│   ├── src/
+│   │   ├── assets/               # Images and static assets
+│   │   ├── components/           # Navbar, Sidebar, Footer, etc.
+│   │   ├── context/              # AuthContext + axios setup
+│   │   ├── modules/
+│   │   │   ├── HR/               # Sprint 2 — HR module
+│   │   │   │   ├── pages/
+│   │   │   │   │   └── HRDirectory.jsx
+│   │   │   │   └── components/
+│   │   │   │       ├── UserTable.jsx
+│   │   │   │       ├── InviteModal.jsx
+│   │   │   │       └── BulkImport.jsx
+│   │   │   ├── Time/             # Sprint 3 — Time module
+│   │   │   │   ├── pages/
+│   │   │   │   │   └── ShiftCalendar.jsx
+│   │   │   │   └── components/
+│   │   │   │       └── ShiftFormModal.jsx
+│   │   ├── services/             # axios service layers (hrService, timeService)
+│   │   ├── utils/                # toast notifications, helpers
+│   │   ├── App.jsx               # App router
+│   │   └── main.jsx              # Entry point
+│   └── package.json
 │
-├── backend/ # Flask app
-│ ├── app.py # Main entry point
-│ ├── models.py # Database models
-│ ├── config.py # Configurations
-│ ├── routes/ # API routes
-│ ├── utils/ # Utility functions
-│ ├── seed.py # Sample data seeding
-│ └── requirements.txt # Python dependencies
+├── backend/
+│   ├── app.py                    # App factory + blueprint registration
+│   ├── core/                     # Models + shared logic
+│   ├── modules/
+│   │   ├── auth/                 # JWT auth + refresh
+│   │   ├── hr/                   # Sprint 2 backend
+│   │   │   ├── routes.py
+│   │   │   ├── service.py
+│   │   │   └── __init__.py
+│   │   ├── time/                 # Sprint 3 backend
+│   │   │   ├── routes.py
+│   │   │   ├── service.py
+│   │   │   └── __init__.py
+│   ├── utils/                    # helpers (jwt_helpers, decorators)
+│   ├── seed.py                   # Seeding test data
+│   ├── config.py
+│   ├── extensions.py
+│   └── requirements.txt
 │
-└── README.md # Project documentation
-
-yaml
-Copy code
+└── README.md
 
 ---
 
@@ -86,10 +145,9 @@ Backend Setup
 bash
 Copy code
 cd backend
-uv venv
-source .venv/bin/activate   # or uv run
-pip install -r requirements.txt
-flask run
+uv init
+or install uv first
+start server with uv run ./main.py
 
 🔑 Environment Variables
 Create a .env file in the backend/ with:

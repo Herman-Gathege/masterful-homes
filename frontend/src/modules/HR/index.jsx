@@ -1,9 +1,9 @@
 // frontend/src/modules/HR/index.js
 import React from "react";
-import UserDirectory from "./pages/UserDirectory";
+import HRDirectory from "./pages/HRDirectory";
 
 function HR() {
-  return <UserDirectory />;
+  return <HRDirectory />;
 }
 
 export default HR;
